@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,16 +28,52 @@ public class UIManager : SingletonBase<UIManager>
 
     [Tooltip("基础字号（根据屏幕高度动态调整）")]
     [SerializeField] private int baseFontSize = 24;
-    #endregion
+    [Header("对话系统")]
+    [SerializeField] private CanvasGroup DialogScreen;
+    [SerializeField] private DialogManager dialogManager;
 
-    #region 初始化
-    /// <summary>
-    /// 初始化UI系统并配置全局字体
-    /// </summary>
+    private Stack<CanvasGroup> _screenStack = new();
+
     protected override void Initialize()
     {
         ApplyGlobalFontSettings();
         SubscribeToEvents();
+        InitScreenStack();
+    }
+
+    private void InitScreenStack()
+    {
+        _screenStack.Push(startScreen);
+    }
+
+
+    /// <summary>
+    /// 处理对话开始事件
+    /// </summary>
+    private void HandleDialogStart(List<DialogData> Dialogs)
+    {
+        // 保存当前界面并切换到对话界面
+        StartCoroutine(TransitionToDialog(Dialogs));
+    }
+
+    private IEnumerator TransitionToDialog(List<DialogData> Dialogs)
+    {
+        yield return TransitionScreens(_screenStack.Peek(), DialogScreen);
+        dialogManager.StartDialog(Dialogs);
+    }
+
+    /// <summary>
+    /// 处理对话结束事件
+    /// </summary>
+    private void HandleDialogEnd()
+    {
+        // 返回上一个界面
+        StartCoroutine(TransitionFromDialog());
+    }
+
+    private IEnumerator TransitionFromDialog()
+    {
+        yield return TransitionScreens(DialogScreen, _screenStack.Peek());
     }
 
     /// <summary>
@@ -68,7 +105,10 @@ public class UIManager : SingletonBase<UIManager>
     private void SubscribeToEvents()
     {
         GameEvents.OnLevelUnlocked.AddListener(UpdateLevelButtonState);
+        GameEvents.OnDialogStart.AddListener(HandleDialogStart);
+        GameEvents.OnDialogEnd.AddListener(HandleDialogEnd);
     }
+
 
     /// <summary>
     /// 当关卡解锁时更新对应按钮状态

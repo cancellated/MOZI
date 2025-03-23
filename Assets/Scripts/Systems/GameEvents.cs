@@ -1,13 +1,21 @@
 ﻿using UnityEngine.Events;
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// 游戏事件类，用于定义和管理游戏中的各种事件。
 /// 此类为静态类，提供了一系列静态的UnityEvent和事件触发接口。
 /// </summary>
+/// <summary>
+/// 对话系统事件定义
+/// </summary>
 public static class GameEvents
 {
+    // 新增对话事件
+    public static readonly UnityEvent<List<DialogData>> OnDialogStart = new();
+    public static readonly UnityEvent OnDialogEnd = new();
+
     // ====== 事件定义 ======
         /// <summary>
     /// 当首次启动完毕时触发的事件。

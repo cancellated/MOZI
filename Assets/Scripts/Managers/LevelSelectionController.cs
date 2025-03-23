@@ -28,7 +28,7 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
     #endregion
 
     #region 运行时数据
-    private Dictionary<int, Button> _levelButtons = new Dictionary<int, Button>();
+    private Dictionary<int, Button> _levelButtons = new();
     #endregion
 
     #region 初始化
