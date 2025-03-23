@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.IO;
 
 /// <summary>
 /// 游戏中枢管理系统，负责：
@@ -12,9 +13,9 @@ public class GameManager : SingletonBase<GameManager>
     [Header("关卡配置")]
     [Tooltip("按顺序存储关卡场景名称，索引对应关卡ID-1")]
     [SerializeField]
-    private List<string> levelScenes = new List<string>
+    private List<string> levelScenes = new()
     {
-        "Level_1", "Level_2", "Level_Boss"
+        "Level_1", "Level_2", "Level_3"
     };
 
     [Header("玩家进度")]
@@ -23,12 +24,18 @@ public class GameManager : SingletonBase<GameManager>
 
     #region 核心接口
     /// <summary>
-    /// 首次进入游戏
+    /// 是否首次启动游戏
+    /// </summary>
+    public bool IsFirstLaunch() => _progress.isFirstLaunch;
+
+    /// <summary>
+    /// 首次进入游戏（播放完成后调用）
     /// </summary>
     public void CompleteFirstLaunch()
     {
         _progress.isFirstLaunch = false;
         SaveProgress();
+        GameEvents.TriggerFirstLaunchCompleted(); // 新增事件通知
     }
 
     /// <summary>
@@ -86,31 +93,53 @@ public class GameManager : SingletonBase<GameManager>
     }
 
     /// <summary>
-    /// 将当前进度序列化存储到PlayerPrefs
+    /// 将当前进度序列化存储到文件系统
     /// </summary>
     public void SaveProgress()
     {
         string json = JsonUtility.ToJson(_progress);
-        PlayerPrefs.SetString("GameProgress", json);
-        PlayerPrefs.Save();
+        string saveDir = Path.Combine(Application.persistentDataPath, "savedata");
+        Directory.CreateDirectory(saveDir); // 确保目录存在
+        string savePath = Path.Combine(saveDir, "savegame.dat");
+        File.WriteAllText(savePath, json);
     }
 
     /// <summary>
-    /// 从PlayerPrefs加载存档数据
+    /// 从文件系统加载存档数据
     /// </summary>
     private void LoadProgress()
     {
-        if (PlayerPrefs.HasKey("GameProgress"))
+        string savePath = Path.Combine(
+            Application.persistentDataPath, 
+            "savedata", 
+            "savegame.dat"
+        );
+
+        if (File.Exists(savePath))
         {
-            _progress = JsonUtility.FromJson<GameProgress>(
-                PlayerPrefs.GetString("GameProgress")
-            );
+            string json = File.ReadAllText(savePath);
+            _progress = JsonUtility.FromJson<GameProgress>(json);
         }
     }
     #endregion
 
     #region 场景接口
+    [Tooltip("主菜单场景名称")]
+    [SerializeField] private string _startscene = "Start Scene";
+    
+    [Tooltip("选关场景名称")]
+    [SerializeField] private string _levelSelectScene = "Level Select Scene";
 
+    /// <summary>
+    /// 获取主菜单场景名称
+    /// </summary>
+    public string StartScene => _startscene;
+
+    /// <summary>
+    /// 获取选关场景名称
+    /// </summary>
+    public string LevelSelectScene => _levelSelectScene;
+ 
     /// <summary>
     /// 根据关卡ID获取对应的场景名称
     /// </summary>
@@ -136,9 +165,9 @@ public class GameManager : SingletonBase<GameManager>
         public int currentLevel = 1;
 
         [Tooltip("关卡解锁状态字典，Key为关卡ID")]
-        public Dictionary<int, bool> unlockedLevels = new Dictionary<int, bool>();
+        public Dictionary<int, bool> unlockedLevels = new();
 
         [Tooltip("剧情观看状态字典，Key为关卡ID")]
-        public Dictionary<int, bool> viewedStory = new Dictionary<int, bool>();
+        public Dictionary<int, bool> viewedStory = new();
     }
 }
