@@ -44,7 +44,7 @@ public class UIManager : SingletonBase<UIManager>
     /// </summary>
     private void ApplyGlobalFontSettings()
     {
-        foreach (Text text in FindObjectsOfType<Text>())
+        foreach (Text text in FindObjectsByType<Text>(FindObjectsSortMode.None))
         {
             text.font = defaultFont;
             text.fontSize = CalculateDynamicFontSize();

@@ -8,7 +8,7 @@
 public abstract class SingletonBase<T> : MonoBehaviour where T : SingletonBase<T>
 {
     private static T _instance;
-    private static readonly object _lock = new object();
+    private static readonly object _lock = new();
     private bool _isInitialized;
 
     /// <summary>
@@ -20,13 +20,13 @@ public abstract class SingletonBase<T> : MonoBehaviour where T : SingletonBase<T
         {
             lock (_lock)
             {
-                // 实例不存在时自动创建
                 if (_instance == null)
                 {
-                    _instance = FindObjectOfType<T>();
+                    // 更新为新的查找方法
+                    _instance = FindFirstObjectByType<T>();
                     if (_instance == null)
                     {
-                        GameObject singleton = new GameObject(typeof(T).Name);
+                        GameObject singleton = new();
                         _instance = singleton.AddComponent<T>();
                     }
                 }
