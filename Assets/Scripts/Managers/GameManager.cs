@@ -22,6 +22,14 @@ public class GameManager : SingletonBase<GameManager>
     [SerializeField] private GameProgress _progress = new();
 
     #region 核心接口
+    /// <summary>
+    /// 首次进入游戏
+    /// </summary>
+    public void CompleteFirstLaunch()
+    {
+        _progress.isFirstLaunch = false;
+        SaveProgress();
+    }
 
     /// <summary>
     /// 获取总关卡数
@@ -122,6 +130,8 @@ public class GameManager : SingletonBase<GameManager>
     [System.Serializable]
     public class GameProgress
     {
+        [Tooltip("是否首次启动游戏")]
+        public bool isFirstLaunch = true;
         [Tooltip("当前所在关卡ID")]
         public int currentLevel = 1;
 
