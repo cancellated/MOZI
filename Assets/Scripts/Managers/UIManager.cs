@@ -63,20 +63,6 @@ public class UIManager : SingletonBase<UIManager>
     }
 
     /// <summary>
-    /// 处理对话结束事件
-    /// </summary>
-    private void HandleDialogEnd()
-    {
-        // 返回上一个界面
-        StartCoroutine(TransitionFromDialog());
-    }
-
-    private IEnumerator TransitionFromDialog()
-    {
-        yield return TransitionScreens(DialogScreen, _screenStack.Peek());
-    }
-
-    /// <summary>
     /// 为所有文本组件应用全局字体设置
     /// </summary>
     private void ApplyGlobalFontSettings()
@@ -102,11 +88,11 @@ public class UIManager : SingletonBase<UIManager>
     /// <summary>
     /// 订阅必要的全局事件
     /// </summary>
+    // 在 SubscribeToEvents 方法中移除 OnDialogEnd 监听
     private void SubscribeToEvents()
     {
         GameEvents.OnLevelUnlocked.AddListener(UpdateLevelButtonState);
         GameEvents.OnDialogStart.AddListener(HandleDialogStart);
-        GameEvents.OnDialogEnd.AddListener(HandleDialogEnd);
     }
 
 

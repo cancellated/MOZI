@@ -35,33 +35,31 @@ public class DialogConfigManager : SingletonBase<DialogConfigManager>
     /// </summary>
     public void LoadDialogues(TextAsset csvFile)
     {
-        using (var reader = new StringReader(csvFile.text))
+        using var reader = new StringReader(csvFile.text);
+        // 第一行（中文表头）仅用于文档说明，不参与逻辑
+        var chineseHeader = reader.ReadLine();
+
+        // 第二行（英文变量名）作为实际表头
+        var englishHeader = reader.ReadLine().Trim();
+        var headers = englishHeader.Split(',');
+
+        var headerMap = new Dictionary<string, int>();
+        for (int i = 0; i < headers.Length; i++)
         {
-            // 第一行（中文表头）仅用于文档说明，不参与逻辑
-            var chineseHeader = reader.ReadLine();
-            
-            // 第二行（英文变量名）作为实际表头
-            var englishHeader = reader.ReadLine().Trim();
-            var headers = englishHeader.Split(',');
-            
-            var headerMap = new Dictionary<string, int>();
-            for (int i = 0; i < headers.Length; i++)
-            {
-                headerMap[headers[i].Trim()] = i; // 双重Trim确保去除空格
-            }
+            headerMap[headers[i].Trim()] = i; // 双重Trim确保去除空格
+        }
 
-            // 调试输出表头映射
-            Debug.Log($"成功解析表头：{string.Join("; ", headers)}");
+        // 调试输出表头映射
+        Debug.Log($"成功解析表头：{string.Join("; ", headers)}");
 
-            while (reader.Peek() != -1)
-            {
-                var line = reader.ReadLine().Trim();
-                if (string.IsNullOrEmpty(line)) continue;
-                
-                var fields = line.Split(',');
-                var data = new DialogData(fields, headerMap);
-                _dialogDict[data.DialogID] = data;
-            }
+        while (reader.Peek() != -1)
+        {
+            var line = reader.ReadLine().Trim();
+            if (string.IsNullOrEmpty(line)) continue;
+
+            var fields = line.Split(',');
+            var data = new DialogData(fields, headerMap);
+            _dialogDict[data.DialogID] = data;
         }
     }
 

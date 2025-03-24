@@ -123,6 +123,77 @@ public class GameManager : SingletonBase<GameManager>
     }
     #endregion
 
+
+    #region 关卡进入逻辑
+/// <summary>
+/// 处理关卡进入逻辑（自动判断是否需要播放剧情）
+/// </summary>
+public void HandleLevelSelection(int levelId, bool forceSkipStory = false)
+{
+    if (!_progress.viewedStory.ContainsKey(levelId))
+    {
+        _progress.viewedStory[levelId] = false;
+    }
+
+    bool hasViewed = _progress.viewedStory[levelId] || forceSkipStory;
+    
+    if (!hasViewed)
+    {
+        GameEvents.TriggerPreLevelStory(levelId); // ✅ 使用新定义的事件
+        LoadStoryScene(levelId);
+    }
+    else
+    {
+        LoadGameplayScene(levelId);
+    }
+}
+
+
+
+private void LoadStoryScene(int levelId)
+{
+    string storyScene = GetLevelScene(levelId, GameEvents.SceneContextType.StoryTrigger);
+    SceneLoader.Instance.LoadSceneDirect(storyScene);
+}
+
+private void LoadGameplayScene(int levelId)
+{
+    string levelScene = GetLevelScene(levelId, GameEvents.SceneContextType.LevelEntry);
+    SceneLoader.Instance.LoadSceneDirect(levelScene);
+}
+#endregion
+    #region 关卡完成逻辑
+/// <summary>
+/// 处理关卡完成逻辑
+/// </summary>
+public void CompleteLevel(int levelId)
+{
+    bool hasViewed = _progress.viewedStory.ContainsKey(levelId) && _progress.viewedStory[levelId];
+    
+    if (!hasViewed)
+    {
+        GameEvents.TriggerLevelComplete(levelId, false); // ✅ 正确调用
+        _progress.viewedStory[levelId] = true;
+        SaveProgress();
+    }
+    else
+    {
+        GameEvents.TriggerLevelComplete(levelId, true); // ✅ 传递正确参数
+        SceneLoader.Instance.LoadSceneDirect(LevelSelectScene);
+    }
+}
+
+/// <summary>
+/// 标记某个关卡的剧情为已观看状态
+/// </summary>
+public void MarkStoryViewed(int levelId)
+{
+    _progress.viewedStory[levelId] = true;
+    SaveProgress();
+}
+#endregion
+
+
     #region 场景接口
     [Tooltip("主菜单场景名称")]
     [SerializeField] private string _startscene = "Start Scene";
@@ -144,12 +215,30 @@ public class GameManager : SingletonBase<GameManager>
     /// 根据关卡ID获取对应的场景名称
     /// </summary>
     /// <exception cref="System.ArgumentOutOfRangeException">当ID超出范围时抛出</exception>
-    public string GetLevelScene(int levelId)
+    [System.Serializable]
+    public class SceneMapping
     {
-        if (levelId < 1 || levelId > levelScenes.Count)
-            throw new System.ArgumentOutOfRangeException(nameof(levelId));
-
-        return levelScenes[levelId - 1];
+        [Tooltip("场景ID（与关卡ID一致）")]
+        public int levelId;
+        
+        [Tooltip("场景类型上下文")]
+        public GameEvents.SceneContextType contextType;
+        
+        [Tooltip("Unity场景名称")]
+        public string sceneName;
+    }
+    
+    [Header("场景配置")]
+    [Tooltip("场景映射关系配置")]
+    [SerializeField] 
+    private List<SceneMapping> sceneMappings = new()
+    {
+        new SceneMapping{ levelId=1, contextType=GameEvents.SceneContextType.LevelEntry, sceneName="Level_1" }
+    };
+    public string GetLevelScene(int levelId, GameEvents.SceneContextType context)
+    {
+        var mapping = sceneMappings.Find(m => m.levelId == levelId && m.contextType == context);
+        return mapping?.sceneName ?? levelScenes[levelId - 1]; // 保持向后兼容
     }
     #endregion
 
