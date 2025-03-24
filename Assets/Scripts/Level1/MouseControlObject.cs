@@ -181,9 +181,9 @@ public class MouseControlObject : MonoBehaviour
             Mathf.Abs(transform.position.z - targetTransform.position.z) <= positionTolerance.z;
 
         Quaternion targetRotation = targetTransform.rotation;
-        float currentRotationZ = transform.eulerAngles.z;
-        float targetRotationZ = targetRotation.eulerAngles.z;
-        bool rotationMatch = Mathf.Abs(currentRotationZ - targetRotationZ) <= rotationTolerance;
+        float currentRotationX = transform.eulerAngles.x;
+        float targetRotationX = targetRotation.eulerAngles.x;
+        bool rotationMatch = Mathf.Abs(currentRotationX - targetRotationX) <= rotationTolerance;
 
         if (positionMatch && rotationMatch)
         {

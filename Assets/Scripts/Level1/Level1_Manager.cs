@@ -70,7 +70,8 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             if (obj.isDragging && !obj.isLocked)
             {
                 Vector3 currentMousePosition = Input.mousePosition;
-                Vector3 mouseDelta = obj.lastMousePosition - currentMousePosition;
+                //Vector3 mouseDelta = obj.lastMousePosition - currentMousePosition;
+                Vector3 mouseDelta =currentMousePosition - obj.lastMousePosition;
                 obj.HandleObjectTransformation(mouseDelta);
                 obj.lastMousePosition = currentMousePosition;
             }
