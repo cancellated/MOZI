@@ -79,18 +79,35 @@ public class SceneLoader : SingletonBase<SceneLoader>
 
     #region 核心加载功能
     /// <summary>
-    /// 加载指定关卡ID对应的场景
+    /// 加载指定关卡ID对应的场景（使用默认关卡入口上下文）
     /// </summary>
-    /// <param name="levelId">从1开始的关卡ID</param>
     public void LoadLevel(int levelId)
     {
-        string sceneName = GameManager.Instance.GetLevelScene(levelId);
+        // 使用默认关卡入口上下文
+        string sceneName = GameManager.Instance.GetLevelScene(
+            levelId, 
+            GameEvents.SceneContextType.LevelEntry // 新增上下文参数
+        );
+        
         if (ValidateSceneName(sceneName))
         {
             StartCoroutine(LoadLevelRoutine(sceneName));
         }
     }
-
+    /// <summary>
+    /// 直接加载指定名称的场景（适用于非关卡场景或特殊需求）
+    /// 使用规范：
+    /// 1. 仅用于加载系统场景（主菜单/选关界面）
+    /// 2. 避免在常规关卡流程中使用
+    /// </summary>
+    public void LoadSceneDirect(string sceneName)
+    {
+        if (ValidateSceneName(sceneName))
+        {
+            StartCoroutine(LoadLevelRoutine(sceneName));
+        }
+    }
+    
     /// <summary>
     /// 异步加载场景的完整流程协程
     /// </summary>
@@ -132,6 +149,8 @@ public class SceneLoader : SingletonBase<SceneLoader>
         // 阶段5：播放淡入动画
         yield return StartCoroutine(FadeIn());
     }
+
+
     #endregion
 
     #region 辅助方法
