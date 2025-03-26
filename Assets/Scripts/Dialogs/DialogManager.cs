@@ -4,15 +4,16 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 
 /// <summary>
-/// 对话系统核心控制器，负责：
+/// 对话系统核心控制器，功能包括：
 /// 1. 管理对话序列的播放流程
 /// 2. 实现逐字显示的文字效果
 /// 3. 处理用户输入的中断逻辑
+/// 4. 与全局事件系统集成
 /// </summary>
 public class DialogManager : SingletonBase<DialogManager>
 {
     [Header("UI Components")]
-    [Tooltip("对话弹窗的CanvasGroup组件，用于控制整体显隐")]
+    [Tooltip("对话弹窗的CanvasGroup组件")]
     [SerializeField] private CanvasGroup dialogPopup;
     [Tooltip("显示对话内容的Text组件")]
     [SerializeField] private Text dialogText;
@@ -24,29 +25,56 @@ public class DialogManager : SingletonBase<DialogManager>
     private bool _isSkipping;
 
     /// <summary>
-    /// 初始化对话系统，隐藏对话界面
+    /// 单例初始化方法
     /// </summary>
     protected override void Initialize()
     {
         dialogPopup.alpha = 0;
+        GameEvents.OnDialogStart.AddListener(HandleDialogStart);
+        GameEvents.OnDialogEnd.AddListener(HandleDialogEnd);
     }
 
     /// <summary>
-    /// 开始播放对话序列（外部调用入口）
+    /// 事件处理：开始对话
     /// </summary>
-    /// <param name="dialogs">对话数据列表，包含角色名和对话内容</param>
-    public void StartDialog(List<DialogData> dialogs)
+    private void HandleDialogStart(List<DialogData> dialogs)
     {
         _currentDialogs = new Queue<DialogData>(dialogs);
         StartCoroutine(PlayDialogs());
     }
 
     /// <summary>
-    /// 对话播放主协程，控制整体流程：
-    /// 1. 显示对话框
-    /// 2. 逐个播放对话
-    /// 3. 完成后隐藏对话框
+    /// 事件处理：结束对话
     /// </summary>
+    /// <param name="context">场景上下文类型</param>
+    /// <remarks>
+    /// 根据不同的场景上下文执行对应的场景跳转逻辑
+    /// </remarks>
+    private void HandleDialogEnd(GameEvents.SceneContextType context)
+    {
+        string targetScene = context switch
+        {
+            GameEvents.SceneContextType.LevelSelection => GameManager.Instance.LevelSelectScene,
+            GameEvents.SceneContextType.StoryTrigger => SceneLoader.GetCurrentSceneName(),
+            _ => GameManager.Instance.StartScene
+        };
+
+        if (context != GameEvents.SceneContextType.StoryTrigger)
+        {
+            SceneLoader.Instance.LoadSceneDirect(targetScene);
+        }
+    }
+
+    /// <summary>
+    /// 对话播放主协程
+    /// </summary>
+    /// <remarks>
+    /// 执行流程：
+    /// 1. 显示对话框
+    /// 2. 逐个播放对话条目
+    /// 3. 监听用户输入推进流程
+    /// 4. 完成后隐藏对话框
+    /// </remarks>
     private IEnumerator PlayDialogs()
     {
         dialogPopup.alpha = 1;
@@ -56,7 +84,6 @@ public class DialogManager : SingletonBase<DialogManager>
             var data = _currentDialogs.Dequeue();
             ShowText(data.Content, data.Character);
             
-            // 修改输入检测：空格/回车/鼠标左键都可以触发
             yield return new WaitUntil(() => 
                 Input.GetKeyDown(KeyCode.Space) || 
                 Input.GetKeyDown(KeyCode.Return) || 
@@ -64,22 +91,31 @@ public class DialogManager : SingletonBase<DialogManager>
         }
         
         dialogPopup.alpha = 0;
+        GameEvents.OnDialogEnd.Invoke(GameEvents.SceneContextType.StoryTrigger);
     }
 
     /// <summary>
-    /// 外部调用接口：立即跳过当前正在播放的对话
+    /// 立即跳过当前对话
     /// </summary>
+    /// <remarks>
+    /// 支持多种触发方式：
+    /// 1. 通过UI按钮调用
+    /// 2. 通过键盘快捷键（空格/回车）
+    /// 3. 通过鼠标左键点击
+    /// </remarks>
     public void SkipCurrentDialog()
     {
         _isSkipping = true;
         
-        // 添加额外触发方式：当通过其他方式（如UI按钮）调用时，也响应按键
         if(Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.Return) || Input.GetMouseButton(0))
         {
             _isSkipping = true;
         }
     }
 
+    /// <summary>
+    /// 文本逐字显示协程
+    /// </summary>
     private IEnumerator TypeText(string content, string character)
     {
         characterName.text = character;
@@ -90,7 +126,6 @@ public class DialogManager : SingletonBase<DialogManager>
         {
             if (_isSkipping) 
             {
-                // 立即显示完整文本并退出协程
                 dialogText.text = content;
                 break;
             }
@@ -99,10 +134,12 @@ public class DialogManager : SingletonBase<DialogManager>
             yield return new WaitForSeconds(0.05f);
         }
 
-        // 动画完成后清空执行中的协程引用
         _typingCoroutine = null;
     }
 
+    /// <summary>
+    /// 启动文本显示流程
+    /// </summary>
     private void ShowText(string content, string character)
     {
         if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);

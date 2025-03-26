@@ -170,15 +170,17 @@ public void CompleteLevel(int levelId)
 {
     bool hasViewed = _progress.viewedStory.ContainsKey(levelId) && _progress.viewedStory[levelId];
     
+    // 统一使用事件驱动方式
+    GameEvents.TriggerLevelComplete(levelId, hasViewed);
+    
     if (!hasViewed)
     {
-        GameEvents.TriggerLevelComplete(levelId, false); // ✅ 正确调用
         _progress.viewedStory[levelId] = true;
         SaveProgress();
+        GameEvents.OnDialogEnd.Invoke(GameEvents.SceneContextType.StoryTrigger);
     }
     else
     {
-        GameEvents.TriggerLevelComplete(levelId, true); // ✅ 传递正确参数
         SceneLoader.Instance.LoadSceneDirect(LevelSelectScene);
     }
 }
@@ -228,6 +230,7 @@ public void MarkStoryViewed(int levelId)
         public string sceneName;
     }
     
+    
     [Header("场景配置")]
     [Tooltip("场景映射关系配置")]
     [SerializeField] 
@@ -260,3 +263,4 @@ public void MarkStoryViewed(int levelId)
         public Dictionary<int, bool> viewedStory = new();
     }
 }
+

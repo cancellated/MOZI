@@ -59,7 +59,8 @@ public class UIManager : SingletonBase<UIManager>
     private IEnumerator TransitionToDialog(List<DialogData> Dialogs)
     {
         yield return TransitionScreens(_screenStack.Peek(), DialogScreen);
-        dialogManager.StartDialog(Dialogs);
+        // 替换旧的直接调用方式为事件驱动
+        GameEvents.OnDialogStart.Invoke(Dialogs);
     }
 
     /// <summary>
@@ -92,7 +93,6 @@ public class UIManager : SingletonBase<UIManager>
     private void SubscribeToEvents()
     {
         GameEvents.OnLevelUnlocked.AddListener(UpdateLevelButtonState);
-        GameEvents.OnDialogStart.AddListener(HandleDialogStart);
     }
 
 

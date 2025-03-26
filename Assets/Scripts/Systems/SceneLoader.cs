@@ -27,14 +27,7 @@ public class SceneLoader : SingletonBase<SceneLoader>
     [SerializeField] private float fadeOutDuration = 0.5f;
     #endregion
 
-
     #region 初始化与销毁
-    /// <summary>
-    /// 单例初始化方法，执行以下操作：
-    /// 1. 组件初始化
-    /// 2. 注册场景加载回调
-    /// 3. 验证必要组件引用
-    /// </summary>
     protected override void Initialize()
     {
         InitializeComponents();
@@ -43,9 +36,6 @@ public class SceneLoader : SingletonBase<SceneLoader>
         ValidateComponents();
     }
 
-    /// <summary>
-    /// 组件初始化方法，配置进度条基础参数
-    /// </summary>
     private void InitializeComponents()
     {
         progressBar.type = Image.Type.Filled;
@@ -53,9 +43,6 @@ public class SceneLoader : SingletonBase<SceneLoader>
         progressBar.fillAmount = 0;
     }
 
-    /// <summary>
-    /// 组件引用验证方法，确保关键组件已正确配置
-    /// </summary>
     private void ValidateComponents()
     {
         if (loadingScreen == null)
@@ -64,29 +51,40 @@ public class SceneLoader : SingletonBase<SceneLoader>
         if (progressBar == null)
             Debug.LogError("进度条组件引用缺失！", this);
     }
+    #endregion
 
-    /// <summary>
-    /// 场景加载完成回调，执行资源清理操作
-    /// </summary>
-    /// <param name="scene">加载完成的场景</param>
-    /// <param name="mode">场景加载模式</param>
+    #region 场景工具方法
+    public static string GetCurrentSceneName()
+    {
+        return SceneManager.GetActiveScene().name;
+    }
+    #endregion
+
+    #region 场景加载回调
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         Resources.UnloadUnusedAssets();
         System.GC.Collect();
+        var context = GetCurrentSceneContext(scene.name);
+        GameEvents.OnSceneContextChanged.Invoke(context);
+    }
+
+    private GameEvents.SceneContextType GetCurrentSceneContext(string sceneName)
+    {
+        return sceneName switch
+        {
+            "MainMenu" => GameEvents.SceneContextType.LevelSelection,
+            _ => GameEvents.SceneContextType.LevelEntry
+        };
     }
     #endregion
 
     #region 核心加载功能
-    /// <summary>
-    /// 加载指定关卡ID对应的场景（使用默认关卡入口上下文）
-    /// </summary>
     public void LoadLevel(int levelId)
     {
-        // 使用默认关卡入口上下文
         string sceneName = GameManager.Instance.GetLevelScene(
             levelId, 
-            GameEvents.SceneContextType.LevelEntry // 新增上下文参数
+            GameEvents.SceneContextType.LevelEntry
         );
         
         if (ValidateSceneName(sceneName))
@@ -94,12 +92,7 @@ public class SceneLoader : SingletonBase<SceneLoader>
             StartCoroutine(LoadLevelRoutine(sceneName));
         }
     }
-    /// <summary>
-    /// 直接加载指定名称的场景（适用于非关卡场景或特殊需求）
-    /// 使用规范：
-    /// 1. 仅用于加载系统场景（主菜单/选关界面）
-    /// 2. 避免在常规关卡流程中使用
-    /// </summary>
+
     public void LoadSceneDirect(string sceneName)
     {
         if (ValidateSceneName(sceneName))
@@ -108,57 +101,37 @@ public class SceneLoader : SingletonBase<SceneLoader>
         }
     }
     
-    /// <summary>
-    /// 异步加载场景的完整流程协程
-    /// </summary>
-    /// <param name="sceneName">目标场景名称</param>
-    /// <returns>加载过程迭代器</returns>
     private IEnumerator LoadLevelRoutine(string sceneName)
     {
-        // 阶段1：播放淡出动画
         yield return StartCoroutine(FadeOut());
-
-        // 阶段2：显示加载界面
         ToggleLoadingScreen(true);
 
-        // 阶段3：开始异步加载
         AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
         operation.allowSceneActivation = false;
 
         float timer = 0f;
         while (!operation.isDone)
         {
-            // 计算加载进度（0-90%范围）
             float progress = Mathf.Clamp01(operation.progress / 0.9f);
             UpdateProgressUI(progress);
 
-            // 满足最小加载时间要求后激活场景
-            if (operation.progress >= 0.9f && timer >= minLoadTime)
-            {
-                break;
-            }
+            if (operation.progress >= 0.9f && timer >= minLoadTime) break;
 
             timer += Time.deltaTime;
             yield return null;
         }
 
-        // 阶段4：完成加载
         operation.allowSceneActivation = true;
+        var context = GetCurrentSceneContext(sceneName);
+        // 参数顺序修正为（上下文类型，章节ID）
+        DialogConfigManager.Instance.LoadSceneDialogs(context, GetChapterId(sceneName));
+        
         ToggleLoadingScreen(false);
-
-        // 阶段5：播放淡入动画
         yield return StartCoroutine(FadeIn());
     }
-
-
     #endregion
 
     #region 辅助方法
-    /// <summary>
-    /// 验证场景名称是否有效
-    /// </summary>
-    /// <param name="sceneName">待验证场景名称</param>
-    /// <returns>是否有效</returns>
     private bool ValidateSceneName(string sceneName)
     {
         if (!Application.CanStreamedLevelBeLoaded(sceneName))
@@ -169,20 +142,12 @@ public class SceneLoader : SingletonBase<SceneLoader>
         return true;
     }
 
-    /// <summary>
-    /// 控制加载界面的显示状态
-    /// </summary>
-    /// <param name="show">是否显示加载界面</param>
     private void ToggleLoadingScreen(bool show)
     {
         loadingScreen.alpha = show ? 1 : 0;
         loadingScreen.blocksRaycasts = show;
     }
 
-    /// <summary>
-    /// 更新加载进度显示
-    /// </summary>
-    /// <param name="progress">当前加载进度（0-1）</param>
     private void UpdateProgressUI(float progress)
     {
         progressBar.fillAmount = progress;
@@ -190,26 +155,63 @@ public class SceneLoader : SingletonBase<SceneLoader>
     #endregion
 
     #region 动画控制
-    /// <summary>
-    /// 场景切换前的淡出动画协程
-    /// （需接入具体动画系统实现）
-    /// </summary>
-    /// <returns>动画过程迭代器</returns>
     private IEnumerator FadeOut()
     {
-        // 实际项目中应接入具体动画系统
+        GameEvents.OnSceneTransitionRequest.Invoke(
+            GetCurrentTransitionType(GameEvents.SceneTransitionType.LevelToMenu));
         yield return new WaitForSeconds(fadeOutDuration);
     }
 
-    /// <summary>
-    /// 进入新场景后的淡入动画协程
-    /// （需接入具体动画系统实现）
-    /// </summary>
-    /// <returns>动画过程迭代器</returns>
     private IEnumerator FadeIn()
     {
-        // 实际项目中应接入具体动画系统
         yield return new WaitForSeconds(fadeOutDuration);
     }
+
+    private GameEvents.SceneTransitionType GetCurrentTransitionType(
+        GameEvents.SceneTransitionType defaultType)
+    {
+        // 根据当前场景上下文返回实际过渡类型
+        var currentContext = GetCurrentSceneContext(GetCurrentSceneName());
+        return currentContext switch
+        {
+            GameEvents.SceneContextType.StoryTrigger => GameEvents.SceneTransitionType.StoryToLevel,
+            _ => defaultType
+        };
+    }
     #endregion
+
+    #region 场景卸载功能
+    public void ExitToMainMenu()
+    {
+        StartCoroutine(ExitSceneRoutine(GameManager.Instance.StartScene));
+    }
+
+    private IEnumerator ExitSceneRoutine(string targetScene)
+    {
+        GameEvents.OnSceneTransitionRequest.Invoke(
+            GameEvents.SceneTransitionType.LevelToMenu);
+        
+        yield return StartCoroutine(FadeOut());
+        
+        AsyncOperation unloadOperation = SceneManager.UnloadSceneAsync(
+            SceneManager.GetActiveScene());
+        while (!unloadOperation.isDone) yield return null;
+
+        yield return StartCoroutine(LoadLevelRoutine(targetScene));
+    }
+    #endregion
+
+    /// <summary>
+    /// 安全解析场景名称中的章节ID（使用TryParse避免格式异常）
+    /// </summary>
+    private int GetChapterId(string sceneName)
+    {
+        const string prefix = "Level";
+        if (sceneName.StartsWith(prefix) && 
+            int.TryParse(sceneName.Substring(prefix.Length), out int chapterId))
+        {
+            return chapterId;
+        }
+        return 0; // 返回0表示无效章节
+    }
 }
