@@ -26,7 +26,7 @@ public class MouseControlObject : MonoBehaviour
     public float scaleSymmetryRatio = 1f; // 缩放对称比值，1为严格对称，其他值为相似
 
     // 对称中心点
-    public Vector3 symmetryCenter = Vector3.zero;
+    public Transform symmetryCenter;
     // 对称物体的引用
     public GameObject symmetricObject;
 
@@ -41,7 +41,7 @@ public class MouseControlObject : MonoBehaviour
 
     }
 
-
+    #region 控制逻辑
     /// <summary>
     /// 处理物体的变换操作
     /// </summary>
@@ -133,7 +133,7 @@ public class MouseControlObject : MonoBehaviour
         if (symmetricObject != null)
         {
             // 计算相对于对称中心的偏移量
-            Vector3 offset = transform.position - symmetryCenter;
+            Vector3 offset = transform.position - symmetryCenter.position;
             Vector3 symmetricOffset = new Vector3();
             //x、y值遵循移动比值
             symmetricOffset.x = offset.x * moveSymmetryRatio;
@@ -142,7 +142,7 @@ public class MouseControlObject : MonoBehaviour
             symmetricOffset.z = offset.z * scaleSymmetryRatio;
 
             // 计算对称物体的位置
-            Vector3 symmetricPosition = symmetryCenter - symmetricOffset;
+            Vector3 symmetricPosition = symmetryCenter.position - symmetricOffset;
             symmetricObject.transform.position = symmetricPosition;
         }
     }
@@ -165,8 +165,9 @@ public class MouseControlObject : MonoBehaviour
             transform.position = newPosition;
         }
     }
+    #endregion
 
-    
+    #region 检测与通过逻辑
     /// <summary>
     /// 检测物体是否到达目标位置和旋转角度
     /// </summary>
@@ -229,4 +230,5 @@ public class MouseControlObject : MonoBehaviour
         LockObject();
         isMovingToTarget = false;
     }
+    #endregion
 }
