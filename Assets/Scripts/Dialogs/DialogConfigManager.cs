@@ -72,7 +72,7 @@ public class DialogConfigManager : SingletonBase<DialogConfigManager>
     /// </summary>
     private void LoadDefaultDialogues()
     {
-        var defaultConfig = Resources.Load<TextAsset>("Dialogue/default");
+        var defaultConfig = Resources.Load<TextAsset>("Config/Dialogs/第一关 关卡前");
         if(defaultConfig != null)
         {
             LoadDialogues(defaultConfig);
