@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -5,13 +6,21 @@ using UnityEngine;
 
 public class Level1_Manager : SingletonBase<Level1_Manager>
 {
-    public MouseControlObject[] MouseControlObjects; // ï¿½ï¿½ï¿½Ð¿É¿ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½
-    public Transform camera;
-    public float checkRadius = 0.5f; // ï¿½ï¿½ï¿½ï¿½â·¶Î§ï¿½ë¾¶
-    private bool isLevelComplete = false; // ï¿½Ç·ï¿½Í¨ï¿½ï¿½
+    [Header("ËùÓÐ¿É¿ØÖÆµÄÎïÌå")]
+    [Tooltip("³¡¾°ÖÐµÄÎïÌå")]
+    [SerializeField] public MouseControlObject[] MouseControlObjects; // ËùÓÐ¿É¿ØÖÆµÄÎïÌå
 
-    private Dictionary<MouseControlObject, bool> objectStatus = new Dictionary<MouseControlObject, bool>(); // ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½Öµï¿½
-    private Vector3 lastMousePosition; // ï¿½ï¿½Ò»Ö¡ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+    [Header("ÐèÒªÍÆ½øµÄÉãÏñ»ú")]
+    [Tooltip("ÐèÒªÍÆ½øµÄÉãÏñ»ú")]
+    public Transform camera;
+
+    [Header("Íê³ÉÍ¼")]
+    [Tooltip("Íê³ÉÊ±½¥ÏÔµÄÍ¼Æ¬²ÄÖÊ")]
+    public Material fadeInMaterial;
+    private bool isLevelComplete = false; // ÊÇ·ñÍ¨¹Ø
+
+    private Dictionary<MouseControlObject, bool> objectStatus = new Dictionary<MouseControlObject, bool>(); // ÎïÌå×´Ì¬×Öµä
+    private Vector3 lastMousePosition; // ÉÏÒ»Ö¡Êó±êÎ»ÖÃ
 
     protected override void Initialize()
     {
@@ -34,11 +43,11 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
     }
 
     /// <summary>
-    /// ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½
+    /// ´¦ÀíÓÃ»§ÊäÈë
     /// </summary>
     private void HandleInput()
     {
-        // ï¿½ï¿½ï¿½ï¿½ï¿½ê°´ï¿½ï¿½ï¿½Â¼ï¿½
+        // ¼ì²âÊó±ê°´ÏÂÊÂ¼þ
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -55,7 +64,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             }
         }
 
-        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½Â¼ï¿½
+        // ¼ì²âÊó±êÊÍ·ÅÊÂ¼þ
         if (Input.GetMouseButtonUp(0))
         {
             foreach (MouseControlObject obj in MouseControlObjects)
@@ -66,25 +75,25 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             }
         }
 
-        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¶ï¿½ï¿½ï¿½ï¿½å£¬ï¿½ï¿½ï¿½ï¿½ï¿½ä»»
+        // Èç¹ûÕýÔÚÍÏ¶¯ÎïÌå£¬´¦Àí±ä»»
         foreach (MouseControlObject obj in MouseControlObjects)
         {
             if (obj.isDragging && !obj.isLocked)
             {
                 Vector3 currentMousePosition = Input.mousePosition;
                 //Vector3 mouseDelta = obj.lastMousePosition - currentMousePosition;
-                Vector3 mouseDelta =currentMousePosition - obj.lastMousePosition;
+                Vector3 mouseDelta = currentMousePosition - obj.lastMousePosition;
                 obj.HandleObjectTransformation(mouseDelta);
                 obj.lastMousePosition = currentMousePosition;
             }
         }
 
-        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È£ï¿½
+        // ´¦ÀíÊó±ê¹öÂÖÊÂ¼þ£¨µ÷ÕûÉî¶È£©
         HandleMouseScrollWheel();
     }
 
     /// <summary>
-    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È£ï¿½
+    /// ´¦ÀíÊó±ê¹öÂÖÊÂ¼þ£¨µ÷ÕûÉî¶È£©
     /// </summary>
     private void HandleMouseScrollWheel()
     {
@@ -98,20 +107,21 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
                     Vector3 newPosition = obj.transform.position;
                     newPosition.z += scroll * obj.depthSpeed;
 
-                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¾ï¿½ï¿½ï¿½
+                    // ÏÞÖÆÓëÏà»úµÄ¾àÀë
                     newPosition.z = Mathf.Clamp(newPosition.z, obj.minDistance, obj.maxDistance);
 
                     obj.transform.position = newPosition;
 
-                    // ï¿½ï¿½ï¿½Â¶Ô³ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+                    // ¸üÐÂ¶Ô³ÆÎïÌåÎ»ÖÃ
                     obj.HandleSymmetricObjectUpdate();
                 }
             }
         }
     }
+    #region Í¨¹ØÐ§¹û
 
     /// <summary>
-    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ñµ½´ï¿½Ä¿ï¿½ï¿½Î»ï¿½ï¿½
+    /// ¼ì²âËùÓÐÎïÌåÊÇ·ñµ½´ïÄ¿±êÎ»ÖÃ
     /// </summary>
     private void CheckAllObjects()
     {
@@ -122,7 +132,8 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             {
                 if (obj.CheckIfComplete())
                 {
-                    Debug.Log(obj.name + " ï¿½Ñ´ï¿½ê£¡");
+                    completeObj(obj);
+                    Debug.Log(obj.name + " ÒÑ´ï±ê£¡");
                 }
                 else
                 {
@@ -136,24 +147,41 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             LevelComplete();
         }
     }
-    #region Í¨ï¿½ï¿½Ð§ï¿½ï¿½
+
+    private void completeObj(MouseControlObject obj)
+    {
+        GameObject targetObj = obj.gameObject;
+        Transform targetTransform = targetObj.transform.GetChild(0);
+        if (targetTransform != null)
+        {
+            Material targetMaterial = targetTransform.GetComponent<Material>();
+            if (targetMaterial != null)
+            {
+                StartCoroutine(FadeToAlphaCoroutine(targetMaterial, 0f, 0.5f));
+            }
+        }
+    }
     /// <summary>
-    /// ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ß¼ï¿½
+    /// ´¥·¢Í¨¹ØÂß¼­
     /// </summary>
     private void LevelComplete()
     {
         isLevelComplete = true;
-        Debug.Log("ï¿½ï¿½Ï²ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½Ë£ï¿½");
+        Debug.Log("¹§Ï²£¬ÄãÍ¨¹ØÁË£¡");
         StartCoroutine(CameraPullin());
-        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½Øºï¿½ï¿½ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾Í¨ï¿½Ø½ï¿½ï¿½æ¡¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
+        StartCoroutine(FadeToAlphaCoroutine(fadeInMaterial, 1f, 1f));
+        // ÔÚÕâÀï¿ÉÒÔÌí¼ÓÍ¨¹ØºóµÄÂß¼­£¬±ÈÈçÏÔÊ¾Í¨¹Ø½çÃæ¡¢²¥·ÅÒôÐ§µÈ
         GameEvents.TriggerLevelComplete(0);
     }
-
+    /// <summary>
+    /// ¾µÍ·ÍÆ½ø
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator CameraPullin()
     {
-        if (camera != null) 
+        if (camera != null)
         {
-            float journeyLength = 6f;//ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½
+            float journeyLength = 6f;//ÒÆ¶¯¾àÀë
             Vector3 startPosition = camera.position;
             Vector3 targetPosition = new Vector3(camera.position.x, camera.position.y, camera.position.z + journeyLength);
             float moveSpeed = 1.0f;
@@ -169,9 +197,30 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
         }
         else
         {
-            Debug.LogError("Î´ï¿½Òµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+            Debug.LogError("Î´ÕÒµ½ÉãÏñ»ú");
         }
     }
+    /// <summary>
+    /// ²ÄÖÊÍ¸Ã÷µÄ½¥±ä
+    /// </summary>
+    /// <param name="targetMaterial"></param>
+    /// <param name="targetAlpha"></param>
+    /// <param name="duration"></param>
+    /// <returns></returns>
+    private System.Collections.IEnumerator FadeToAlphaCoroutine(Material targetMaterial, float targetAlpha, float duration)
+    {
+        float startAlpha = targetMaterial.color.a;
+        float elapsed = 0;
 
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / duration);
+            Color color = targetMaterial.color;
+            color.a = alpha;
+            targetMaterial.color = color;
+            yield return null;
+        }
+    }
     #endregion
 }
