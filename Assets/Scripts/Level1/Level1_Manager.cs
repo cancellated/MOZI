@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -5,9 +6,17 @@ using UnityEngine;
 
 public class Level1_Manager : SingletonBase<Level1_Manager>
 {
-    public MouseControlObject[] MouseControlObjects; // 所有可控制的物体
+    [Header("所有可控制的物体")]
+    [Tooltip("场景中的物体")]
+    [SerializeField] public MouseControlObject[] MouseControlObjects; // 所有可控制的物体
+
+    [Header("需要推进的摄像机")]
+    [Tooltip("需要推进的摄像机")]
     public Transform camera;
-    public float checkRadius = 0.5f; // 达标检测范围半径
+
+    [Header("完成图")]
+    [Tooltip("完成时渐显的图片材质")]
+    public Material fadeInMaterial;
     private bool isLevelComplete = false; // 是否通关
 
     private Dictionary<MouseControlObject, bool> objectStatus = new Dictionary<MouseControlObject, bool>(); // 物体状态字典
@@ -109,6 +118,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             }
         }
     }
+    #region 通关效果
 
     /// <summary>
     /// 检测所有物体是否到达目标位置
@@ -122,6 +132,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             {
                 if (obj.CheckIfComplete())
                 {
+                    completeObj(obj);
                     Debug.Log(obj.name + " 已达标！");
                 }
                 else
@@ -136,7 +147,20 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             LevelComplete();
         }
     }
-    #region 通关效果
+    
+    private void completeObj(MouseControlObject obj)
+    {
+        GameObject targetObj = obj.gameObject;
+        Transform targetTransform = targetObj.transform.GetChild(0);
+        if (targetTransform != null)
+        {
+            Material targetMaterial = targetTransform.GetComponent<Material>();
+            if (targetMaterial != null)
+            {
+                StartCoroutine(FadeToAlphaCoroutine(targetMaterial, 0f, 0.5f));
+            }
+        }
+    }
     /// <summary>
     /// 触发通关逻辑
     /// </summary>
@@ -145,10 +169,14 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
         isLevelComplete = true;
         Debug.Log("恭喜，你通关了！");
         StartCoroutine(CameraPullin());
+        StartCoroutine(FadeToAlphaCoroutine(fadeInMaterial,1f, 1f));
         // 在这里可以添加通关后的逻辑，比如显示通关界面、播放音效等
         GameManager.Instance.CompleteLevel(1);
     }
-
+    /// <summary>
+    /// 镜头推进
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator CameraPullin()
     {
         if (camera != null) 
@@ -172,6 +200,27 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             Debug.LogError("未找到摄像机");
         }
     }
+    /// <summary>
+    /// 材质透明的渐变
+    /// </summary>
+    /// <param name="targetMaterial"></param>
+    /// <param name="targetAlpha"></param>
+    /// <param name="duration"></param>
+    /// <returns></returns>
+    private System.Collections.IEnumerator FadeToAlphaCoroutine(Material targetMaterial, float targetAlpha, float duration)
+    {
+        float startAlpha = targetMaterial.color.a;
+        float elapsed = 0;
 
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / duration);
+            Color color = targetMaterial.color;
+            color.a = alpha;
+            targetMaterial.color = color;
+            yield return null;  
+        }
+    }
     #endregion
 }
