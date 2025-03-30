@@ -46,19 +46,7 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
     /// </summary>
     private void GenerateLevelButtons()
     {
-        // 清空现有按钮（热重载时可能需要）
-        foreach (Transform child in buttonContainer)
-        {
-            Destroy(child.gameObject);
-        }
 
-        // 生成新按钮
-        for (int levelId = 1; levelId <= GameManager.Instance.TotalLevels; levelId++)
-        {
-            GameObject btnObj = Instantiate(buttonPrefab, buttonContainer);
-            SetupButton(btnObj, levelId);
-            _levelButtons[levelId] = btnObj.GetComponent<Button>();
-        }
     }
 
     /// <summary>
@@ -87,7 +75,7 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
     /// </summary>
     private void SubscribeToEvents()
     {
-        GameEvents.OnLevelUnlocked.AddListener(UpdateButtonState);
+        
     }
 
     /// <summary>
@@ -119,16 +107,6 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
     /// </summary>
     private void OnLevelSelected(int selectedLevelId)
     {
-        if (GameManager.Instance.IsLevelUnlocked(selectedLevelId))
-        {
-            Debug.Log($"开始加载关卡: {selectedLevelId}");
-            SceneLoader.Instance.LoadLevel(selectedLevelId);
-        }
-        else
-        {
-            Debug.LogWarning($"尝试加载未解锁关卡: {selectedLevelId}");
-            PlayLockedFeedback(_levelButtons[selectedLevelId].gameObject);
-        }
     }
 
     /// <summary>

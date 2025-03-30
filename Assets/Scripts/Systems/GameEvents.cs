@@ -34,12 +34,34 @@ public static class GameEvents
     }
 
     /// <summary>
+    /// 触发故事进入事件
+    /// </summary>
+    public static void TriggerStoryEnter(int storyId){
+        OnStoryEnter?.Invoke(storyId);
+    }
+    
+    /// <summary>
+    /// 触发故事完成事件
+    /// </summary>
+    public static void TriggerStoryComplete(int storyId){
+        OnStoryComplete?.Invoke(storyId);
+    }
+    /// <summary>
     /// 触发关卡解锁事件
     /// </summary>
     public static void TriggerLevelUnlocked(int levelId)
     {
         OnLevelUnlocked?.Invoke(levelId);
     }
+
+    /// <summary>
+    /// 触发故事解锁事件
+    /// </summary>
+    public static void TriggerStoryUnlocked(int storyId)
+    {
+        OnStoryUnlocked?.Invoke(storyId);
+    }
+
     #endregion
     /// <summary>
     /// 触发场景切换事件
