@@ -1,33 +1,33 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MouseControlObject : MonoBehaviour
 {
-    public Transform targetTransform; // ÎïÌåµÄÄ¿±êÎ»ÖÃ
-    public Vector3 positionTolerance = new Vector3(0.5f, 0.5f, 0.5f); // Î»ÖÃ²îÖµÈİÈÌ¶È£¨X, Y, Z£©
-    public float rotationTolerance = 5f; // Ğı×ª½Ç¶È²îÖµÈİÈÌ¶È£¨ZÖá£©
-    public bool isLocked = false; // ÎïÌåÊÇ·ñ±»Ëø¶¨
-    public bool isComplete = false; // ÎïÌåÊÇ·ñÒÑ´ï±ê
-    private bool isMovingToTarget = false; // ÊÇ·ñÕıÔÚÒÆ¶¯µ½Ä¿±êÎ»ÖÃ
-    // ÒÆ¶¯Ïà¹Ø²ÎÊı
+    public Transform targetTransform; // ç‰©ä½“çš„ç›®æ ‡ä½ç½®
+    public Vector3 positionTolerance = new Vector3(0.5f, 0.5f, 0.5f); // ä½ç½®å·®å€¼å®¹å¿åº¦ï¼ˆX, Y, Zï¼‰
+    public float rotationTolerance = 5f; // æ—‹è½¬è§’åº¦å·®å€¼å®¹å¿åº¦ï¼ˆZè½´ï¼‰
+    public bool isLocked = false; // ç‰©ä½“æ˜¯å¦è¢«é”å®š
+    public bool isComplete = false; // ç‰©ä½“æ˜¯å¦å·²è¾¾æ ‡
+    private bool isMovingToTarget = false; // æ˜¯å¦æ­£åœ¨ç§»åŠ¨åˆ°ç›®æ ‡ä½ç½®
+    // ç§»åŠ¨ç›¸å…³å‚æ•°
     public float moveSpeed = 5f;
     public Vector2 minXMaxX = new Vector2(-10f, 10f);
     public Vector2 minYMaxY = new Vector2(-10f, 10f);
-    public float moveSymmetryRatio = 1f; // ÒÆ¶¯¶Ô³Æ±ÈÖµ£¬1ÎªÑÏ¸ñ¶Ô³Æ£¬ÆäËûÖµÎªÏàËÆ
+    public float moveSymmetryRatio = 1f; // ç§»åŠ¨å¯¹ç§°æ¯”å€¼ï¼Œ1ä¸ºä¸¥æ ¼å¯¹ç§°ï¼Œå…¶ä»–å€¼ä¸ºç›¸ä¼¼
 
-    // Ğı×ªÏà¹Ø²ÎÊı
+    // æ—‹è½¬ç›¸å…³å‚æ•°
     public float rotateSpeed = 100f;
 
-    // Ëõ·ÅÏà¹Ø²ÎÊı
+    // ç¼©æ”¾ç›¸å…³å‚æ•°
     public float depthSpeed = 1f;
     public float minDistance = 1f;
     public float maxDistance = 10f;
-    public float scaleSymmetryRatio = 1f; // Ëõ·Å¶Ô³Æ±ÈÖµ£¬1ÎªÑÏ¸ñ¶Ô³Æ£¬ÆäËûÖµÎªÏàËÆ
+    public float scaleSymmetryRatio = 1f; // ç¼©æ”¾å¯¹ç§°æ¯”å€¼ï¼Œ1ä¸ºä¸¥æ ¼å¯¹ç§°ï¼Œå…¶ä»–å€¼ä¸ºç›¸ä¼¼
 
-    // ¶Ô³ÆÖĞĞÄµã
+    // å¯¹ç§°ä¸­å¿ƒç‚¹
     public Transform symmetryCenter;
-    // ¶Ô³ÆÎïÌåµÄÒıÓÃ
+    // å¯¹ç§°ç‰©ä½“çš„å¼•ç”¨
     public GameObject symmetricObject;
 
     public Vector3 lastMousePosition;
@@ -41,9 +41,9 @@ public class MouseControlObject : MonoBehaviour
 
     }
 
-    #region ¿ØÖÆÂß¼­
+    #region æ§åˆ¶é€»è¾‘
     /// <summary>
-    /// ´¦ÀíÎïÌåµÄ±ä»»²Ù×÷
+    /// å¤„ç†ç‰©ä½“çš„å˜æ¢æ“ä½œ
     /// </summary>
     public void HandleObjectTransformation(Vector3 mouseDelta)
     {
@@ -64,17 +64,17 @@ public class MouseControlObject : MonoBehaviour
     }
 
     /// <summary>
-    /// ´¦ÀíĞı×ª²Ù×÷
+    /// å¤„ç†æ—‹è½¬æ“ä½œ
     /// </summary>
-    /// <param name="mouseDelta">Êó±êÒÆ¶¯µÄÔöÁ¿</param>
+    /// <param name="mouseDelta">é¼ æ ‡ç§»åŠ¨çš„å¢é‡</param>
     public void HandleRotation(Vector3 mouseDelta)
     {
         isRotating = true;
-        // ÈÆYÖáĞı×ª
+        // ç»•Yè½´æ—‹è½¬
         float rotateY = mouseDelta.x * rotateSpeed * Time.deltaTime;
         transform.Rotate(0, rotateY, 0);
 
-        // ¶Ô³ÆÎïÌåÍ¬²½Ğı×ª
+        // å¯¹ç§°ç‰©ä½“åŒæ­¥æ—‹è½¬
         if (symmetricObject != null)
         {
             symmetricObject.transform.rotation = transform.rotation * Quaternion.Euler(0, 180f, 0);
@@ -82,43 +82,43 @@ public class MouseControlObject : MonoBehaviour
     }
 
     /// <summary>
-    /// ´¦ÀíÉî¶Èµ÷Õû²Ù×÷£¨Ä£ÄâËõ·Å£©
+    /// å¤„ç†æ·±åº¦è°ƒæ•´æ“ä½œï¼ˆæ¨¡æ‹Ÿç¼©æ”¾ï¼‰
     /// </summary>
-    /// <param name="mouseDelta">Êó±êÒÆ¶¯µÄÔöÁ¿</param>
+    /// <param name="mouseDelta">é¼ æ ‡ç§»åŠ¨çš„å¢é‡</param>
     public void HandleDepthAdjustment(Vector3 mouseDelta)
     {
         isAdjustingDepth = true;
-        // ¸ù¾İÊó±ê´¹Ö±ÒÆ¶¯µ÷ÕûZÖáÎ»ÖÃ
+        // æ ¹æ®é¼ æ ‡å‚ç›´ç§»åŠ¨è°ƒæ•´Zè½´ä½ç½®
         float depthChange = mouseDelta.y * depthSpeed * Time.deltaTime;
         Vector3 newPosition = transform.position;
         newPosition.z += depthChange;
 
-        // ÏŞÖÆÓëÏà»úµÄ¾àÀë
+        // é™åˆ¶ä¸ç›¸æœºçš„è·ç¦»
         newPosition.z = Mathf.Clamp(newPosition.z, minDistance, maxDistance);
 
         transform.position = newPosition;
     }
 
     /// <summary>
-    /// ´¦ÀíÒÆ¶¯²Ù×÷
+    /// å¤„ç†ç§»åŠ¨æ“ä½œ
     /// </summary>
-    /// <param name="mouseDelta">Êó±êÒÆ¶¯µÄÔöÁ¿</param>
+    /// <param name="mouseDelta">é¼ æ ‡ç§»åŠ¨çš„å¢é‡</param>
     public void HandleMovement(Vector3 mouseDelta)
     {
         isRotating = false;
         isAdjustingDepth = false;
-        // ¼ÆËãÒÆ¶¯·½Ïò
+        // è®¡ç®—ç§»åŠ¨æ–¹å‘
         Vector3 moveDirection = new Vector3(mouseDelta.x, mouseDelta.y, 0);
         moveDirection.Normalize();
 
-        // ½«ÆÁÄ»·½Ïò×ª»»ÎªÊÀ½ç·½Ïò
+        // å°†å±å¹•æ–¹å‘è½¬æ¢ä¸ºä¸–ç•Œæ–¹å‘
         Vector3 worldMoveDirection = Camera.main.transform.TransformDirection(moveDirection);
-        worldMoveDirection.z = 0; // ÏŞÖÆÔÚX-YÆ½Ãæ
+        worldMoveDirection.z = 0; // é™åˆ¶åœ¨X-Yå¹³é¢
 
-        // ÒÆ¶¯ÎïÌå
+        // ç§»åŠ¨ç‰©ä½“
         Vector3 newPosition = transform.position + worldMoveDirection * moveSpeed * Time.deltaTime;
 
-        // ÏŞÖÆÒÆ¶¯·¶Î§
+        // é™åˆ¶ç§»åŠ¨èŒƒå›´
         newPosition.x = Mathf.Clamp(newPosition.x, minXMaxX.x, minXMaxX.y);
         newPosition.y = Mathf.Clamp(newPosition.y, minYMaxY.x, minYMaxY.y);
 
@@ -126,29 +126,29 @@ public class MouseControlObject : MonoBehaviour
     }
 
     /// <summary>
-    /// ´¦Àí¶Ô³ÆÎïÌåµÄÎ»ÖÃ¸üĞÂ
+    /// å¤„ç†å¯¹ç§°ç‰©ä½“çš„ä½ç½®æ›´æ–°
     /// </summary>
     public void HandleSymmetricObjectUpdate()
     {
         if (symmetricObject != null)
         {
-            // ¼ÆËãÏà¶ÔÓÚ¶Ô³ÆÖĞĞÄµÄÆ«ÒÆÁ¿
+            // è®¡ç®—ç›¸å¯¹äºå¯¹ç§°ä¸­å¿ƒçš„åç§»é‡
             Vector3 offset = transform.position - symmetryCenter.position;
             Vector3 symmetricOffset = new Vector3();
-            //x¡¢yÖµ×ñÑ­ÒÆ¶¯±ÈÖµ
+            //xã€yå€¼éµå¾ªç§»åŠ¨æ¯”å€¼
             symmetricOffset.x = offset.x * moveSymmetryRatio;
             symmetricOffset.y = offset.y * moveSymmetryRatio;
-            //zÖµ×ñÑ­Ëõ·Å±ÈÖµ
+            //zå€¼éµå¾ªç¼©æ”¾æ¯”å€¼
             symmetricOffset.z = offset.z * scaleSymmetryRatio;
 
-            // ¼ÆËã¶Ô³ÆÎïÌåµÄÎ»ÖÃ
+            // è®¡ç®—å¯¹ç§°ç‰©ä½“çš„ä½ç½®
             Vector3 symmetricPosition = symmetryCenter.position - symmetricOffset;
             symmetricObject.transform.position = symmetricPosition;
         }
     }
 
     /// <summary>
-    /// ´¦ÀíÊó±ê¹öÂÖÊÂ¼ş£¨µ÷ÕûÉî¶È£©
+    /// å¤„ç†é¼ æ ‡æ»šè½®äº‹ä»¶ï¼ˆè°ƒæ•´æ·±åº¦ï¼‰
     /// </summary>
     public void HandleMouseScrollWheel()
     {
@@ -159,7 +159,7 @@ public class MouseControlObject : MonoBehaviour
             Vector3 newPosition = transform.position;
             newPosition.z += scroll * depthSpeed;
 
-            // ÏŞÖÆÓëÏà»úµÄ¾àÀë
+            // é™åˆ¶ä¸ç›¸æœºçš„è·ç¦»
             newPosition.z = Mathf.Clamp(newPosition.z, minDistance, maxDistance);
 
             transform.position = newPosition;
@@ -167,9 +167,9 @@ public class MouseControlObject : MonoBehaviour
     }
     #endregion
 
-    #region ¼ì²âÓëÍ¨¹ıÂß¼­
+    #region æ£€æµ‹ä¸é€šè¿‡é€»è¾‘
     /// <summary>
-    /// ¼ì²âÎïÌåÊÇ·ñµ½´ïÄ¿±êÎ»ÖÃºÍĞı×ª½Ç¶È
+    /// æ£€æµ‹ç‰©ä½“æ˜¯å¦åˆ°è¾¾ç›®æ ‡ä½ç½®å’Œæ—‹è½¬è§’åº¦
     /// </summary>
     /// <returns></returns>
     public bool CheckIfComplete()
@@ -196,7 +196,7 @@ public class MouseControlObject : MonoBehaviour
     }
 
     /// <summary>
-    /// Ëø¶¨ÎïÌå£¬Í£Ö¹ÏìÓ¦ÓÃ»§ÊäÈë
+    /// é”å®šç‰©ä½“ï¼Œåœæ­¢å“åº”ç”¨æˆ·è¾“å…¥
     /// </summary>
     public void LockObject()
     {
@@ -204,7 +204,7 @@ public class MouseControlObject : MonoBehaviour
     }
 
     /// <summary>
-    /// ´Óµ±Ç°Î»ÖÃÒÆ¶¯µ½Ä¿±êÎ»ÖÃ
+    /// ä»å½“å‰ä½ç½®ç§»åŠ¨åˆ°ç›®æ ‡ä½ç½®
     /// </summary>
     private IEnumerator MoveToTarget()
     {

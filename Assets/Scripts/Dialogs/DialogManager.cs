@@ -29,9 +29,7 @@ public class DialogManager : SingletonBase<DialogManager>
     /// </summary>
     protected override void Initialize()
     {
-        dialogPopup.alpha = 0;
-        GameEvents.OnDialogStart.AddListener(HandleDialogStart);
-        GameEvents.OnDialogEnd.AddListener(HandleDialogEnd);
+
     }
 
     /// <summary>
@@ -46,38 +44,18 @@ public class DialogManager : SingletonBase<DialogManager>
     /// <summary>
     /// 事件处理：结束对话
     /// </summary>
-    /// <param name="context">场景上下文类型</param>
-    /// <remarks>
-    /// 根据不同的场景上下文执行对应的场景跳转逻辑
-    /// </remarks>
-    private void HandleDialogEnd(GameEvents.SceneContextType context)
-    {
-        string targetScene = context switch
-        {
-            GameEvents.SceneContextType.LevelSelection => GameManager.Instance.LevelSelectScene,
-            GameEvents.SceneContextType.StoryTrigger => SceneLoader.GetCurrentSceneName(),
-            _ => GameManager.Instance.StartScene
-        };
 
-        if (context != GameEvents.SceneContextType.StoryTrigger)
-        {
-            SceneLoader.Instance.LoadSceneDirect(targetScene);
-        }
+    private void HandleDialogEnd()
+    {
+        
     }
 
     /// <summary>
     /// 对话播放主协程
     /// </summary>
-    /// <remarks>
-    /// 执行流程：
-    /// 1. 显示对话框
-    /// 2. 逐个播放对话条目
-    /// 3. 监听用户输入推进流程
-    /// 4. 完成后隐藏对话框
-    /// </remarks>
     private IEnumerator PlayDialogs()
     {
-        dialogPopup.alpha = 1;
+        dialogPopup.alpha = 255;
         
         while (_currentDialogs.Count > 0)
         {
@@ -91,18 +69,13 @@ public class DialogManager : SingletonBase<DialogManager>
         }
         
         dialogPopup.alpha = 0;
-        GameEvents.OnDialogEnd.Invoke(GameEvents.SceneContextType.StoryTrigger);
+
     }
 
     /// <summary>
     /// 立即跳过当前对话
     /// </summary>
-    /// <remarks>
-    /// 支持多种触发方式：
-    /// 1. 通过UI按钮调用
-    /// 2. 通过键盘快捷键（空格/回车）
-    /// 3. 通过鼠标左键点击
-    /// </remarks>
+
     public void SkipCurrentDialog()
     {
         _isSkipping = true;

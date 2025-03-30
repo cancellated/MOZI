@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class Level1_Manager : SingletonBase<Level1_Manager>
 {
+<<<<<<< HEAD
     [Header("ËùÓÐ¿É¿ØÖÆµÄÎïÌå")]
     [Tooltip("³¡¾°ÖÐµÄÎïÌå")]
     [SerializeField] public MouseControlObject[] MouseControlObjects; // ËùÓÐ¿É¿ØÖÆµÄÎïÌå
@@ -18,9 +19,15 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
     [Tooltip("Íê³ÉÊ±½¥ÏÔµÄÍ¼Æ¬²ÄÖÊ")]
     public Material fadeInMaterial;
     private bool isLevelComplete = false; // ÊÇ·ñÍ¨¹Ø
+=======
+    public MouseControlObject[] MouseControlObjects; // ï¿½ï¿½ï¿½Ð¿É¿ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½
+    public Transform camera;
+    public float checkRadius = 0.5f; // ï¿½ï¿½ï¿½ï¿½â·¶Î§ï¿½ë¾¶
+    private bool isLevelComplete = false; // ï¿½Ç·ï¿½Í¨ï¿½ï¿½
+>>>>>>> 8d48690053d2c81e2483a67b2ba6c420f3ad59c1
 
-    private Dictionary<MouseControlObject, bool> objectStatus = new Dictionary<MouseControlObject, bool>(); // ÎïÌå×´Ì¬×Öµä
-    private Vector3 lastMousePosition; // ÉÏÒ»Ö¡Êó±êÎ»ÖÃ
+    private Dictionary<MouseControlObject, bool> objectStatus = new Dictionary<MouseControlObject, bool>(); // ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½Öµï¿½
+    private Vector3 lastMousePosition; // ï¿½ï¿½Ò»Ö¡ï¿½ï¿½ï¿½Î»ï¿½ï¿½
 
     protected override void Initialize()
     {
@@ -43,11 +50,11 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
     }
 
     /// <summary>
-    /// ´¦ÀíÓÃ»§ÊäÈë
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     private void HandleInput()
     {
-        // ¼ì²âÊó±ê°´ÏÂÊÂ¼þ
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ê°´ï¿½ï¿½ï¿½Â¼ï¿½
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -64,7 +71,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             }
         }
 
-        // ¼ì²âÊó±êÊÍ·ÅÊÂ¼þ
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½Â¼ï¿½
         if (Input.GetMouseButtonUp(0))
         {
             foreach (MouseControlObject obj in MouseControlObjects)
@@ -75,7 +82,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             }
         }
 
-        // Èç¹ûÕýÔÚÍÏ¶¯ÎïÌå£¬´¦Àí±ä»»
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¶ï¿½ï¿½ï¿½ï¿½å£¬ï¿½ï¿½ï¿½ï¿½ï¿½ä»»
         foreach (MouseControlObject obj in MouseControlObjects)
         {
             if (obj.isDragging && !obj.isLocked)
@@ -88,12 +95,12 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             }
         }
 
-        // ´¦ÀíÊó±ê¹öÂÖÊÂ¼þ£¨µ÷ÕûÉî¶È£©
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È£ï¿½
         HandleMouseScrollWheel();
     }
 
     /// <summary>
-    /// ´¦ÀíÊó±ê¹öÂÖÊÂ¼þ£¨µ÷ÕûÉî¶È£©
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È£ï¿½
     /// </summary>
     private void HandleMouseScrollWheel()
     {
@@ -107,12 +114,12 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
                     Vector3 newPosition = obj.transform.position;
                     newPosition.z += scroll * obj.depthSpeed;
 
-                    // ÏÞÖÆÓëÏà»úµÄ¾àÀë
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¾ï¿½ï¿½ï¿½
                     newPosition.z = Mathf.Clamp(newPosition.z, obj.minDistance, obj.maxDistance);
 
                     obj.transform.position = newPosition;
 
-                    // ¸üÐÂ¶Ô³ÆÎïÌåÎ»ÖÃ
+                    // ï¿½ï¿½ï¿½Â¶Ô³ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
                     obj.HandleSymmetricObjectUpdate();
                 }
             }
@@ -121,7 +128,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
     #region Í¨¹ØÐ§¹û
 
     /// <summary>
-    /// ¼ì²âËùÓÐÎïÌåÊÇ·ñµ½´ïÄ¿±êÎ»ÖÃ
+    /// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ñµ½´ï¿½Ä¿ï¿½ï¿½Î»ï¿½ï¿½
     /// </summary>
     private void CheckAllObjects()
     {
@@ -132,8 +139,12 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             {
                 if (obj.CheckIfComplete())
                 {
+<<<<<<< HEAD
                     completeObj(obj);
                     Debug.Log(obj.name + " ÒÑ´ï±ê£¡");
+=======
+                    Debug.Log(obj.name + " ï¿½Ñ´ï¿½ê£¡");
+>>>>>>> 8d48690053d2c81e2483a67b2ba6c420f3ad59c1
                 }
                 else
                 {
@@ -147,6 +158,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             LevelComplete();
         }
     }
+<<<<<<< HEAD
     
     private void completeObj(MouseControlObject obj)
     {
@@ -161,17 +173,25 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             }
         }
     }
+=======
+    #region Í¨ï¿½ï¿½Ð§ï¿½ï¿½
+>>>>>>> 8d48690053d2c81e2483a67b2ba6c420f3ad59c1
     /// <summary>
-    /// ´¥·¢Í¨¹ØÂß¼­
+    /// ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ß¼ï¿½
     /// </summary>
     private void LevelComplete()
     {
         isLevelComplete = true;
-        Debug.Log("¹§Ï²£¬ÄãÍ¨¹ØÁË£¡");
+        Debug.Log("ï¿½ï¿½Ï²ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½Ë£ï¿½");
         StartCoroutine(CameraPullin());
+<<<<<<< HEAD
         StartCoroutine(FadeToAlphaCoroutine(fadeInMaterial,1f, 1f));
         // ÔÚÕâÀï¿ÉÒÔÌí¼ÓÍ¨¹ØºóµÄÂß¼­£¬±ÈÈçÏÔÊ¾Í¨¹Ø½çÃæ¡¢²¥·ÅÒôÐ§µÈ
         GameManager.Instance.CompleteLevel(1);
+=======
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½Øºï¿½ï¿½ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾Í¨ï¿½Ø½ï¿½ï¿½æ¡¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
+        GameEvents.TriggerLevelComplete(0);
+>>>>>>> 8d48690053d2c81e2483a67b2ba6c420f3ad59c1
     }
     /// <summary>
     /// ¾µÍ·ÍÆ½ø
@@ -181,7 +201,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
     {
         if (camera != null) 
         {
-            float journeyLength = 6f;//ÒÆ¶¯¾àÀë
+            float journeyLength = 6f;//ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½
             Vector3 startPosition = camera.position;
             Vector3 targetPosition = new Vector3(camera.position.x, camera.position.y, camera.position.z + journeyLength);
             float moveSpeed = 1.0f;
@@ -197,7 +217,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
         }
         else
         {
-            Debug.LogError("Î´ÕÒµ½ÉãÏñ»ú");
+            Debug.LogError("Î´ï¿½Òµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
         }
     }
     /// <summary>

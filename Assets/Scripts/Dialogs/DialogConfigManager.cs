@@ -14,9 +14,6 @@ public class ChapterDialogMapping
     
     [Tooltip("关联的CSV配置文件")]
     public TextAsset configFile;
-    
-    [Tooltip("适用的场景上下文类型")]
-    public GameEvents.SceneContextType contextType;
 }
 
 /// <summary>
@@ -32,7 +29,7 @@ public class DialogConfigManager : SingletonBase<DialogConfigManager>
     [SerializeField] private List<ChapterDialogMapping> _chapterMappings = new();
 
     // 新增字典存储配置映射
-    private readonly Dictionary<(int, GameEvents.SceneContextType), ChapterDialogMapping> _chapterDict = new();
+
 
     [Header("运行时数据")]
     [Tooltip("当前加载的对话配置字典（键：对话ID，值：对话数据）")]
@@ -53,18 +50,6 @@ public class DialogConfigManager : SingletonBase<DialogConfigManager>
     /// </summary>
     private void InitializeChapterDictionary()
     {
-        foreach (var mapping in _chapterMappings)
-        {
-            var key = (mapping.chapterID, mapping.contextType);
-            if (!_chapterDict.ContainsKey(key))
-            {
-                _chapterDict.Add(key, mapping);
-            }
-            else
-            {
-                Debug.LogWarning($"发现重复章节配置：ChapterID={mapping.chapterID}, Context={mapping.contextType}");
-            }
-        }
     }
 
     /// <summary>
@@ -72,7 +57,7 @@ public class DialogConfigManager : SingletonBase<DialogConfigManager>
     /// </summary>
     private void LoadDefaultDialogues()
     {
-        var defaultConfig = Resources.Load<TextAsset>("Dialogue/default");
+        var defaultConfig = Resources.Load<TextAsset>("Config/Dialogs/第一关 关卡前");
         if(defaultConfig != null)
         {
             LoadDialogues(defaultConfig);
@@ -124,28 +109,10 @@ public class DialogConfigManager : SingletonBase<DialogConfigManager>
     }
 
     /// <summary>
-    /// 根据上下文加载对应章节的对话配置
-    /// </summary>
-    /// <param name="context">场景上下文类型</param>
-    /// <param name="chapterID">当前章节ID</param>
-    /// <remarks>
-    /// 仅在StoryTrigger类型的上下文中生效
-    /// 会自动回退到默认配置当找不到匹配项时
-    /// </remarks>
-    /// <summary>
     /// 根据场景上下文加载对话配置
     /// </summary>
-    public void LoadSceneDialogs(GameEvents.SceneContextType context, int chapterID)
+    public void LoadSceneDialogs( int storyId)
     {
-        if (context != GameEvents.SceneContextType.StoryTrigger) return;
-        if (_chapterDict.TryGetValue((chapterID, context), out var mapping))
-        {
-            LoadDialogues(mapping.configFile);
-            Debug.Log($"已加载章节{chapterID}对话配置");
-        }
-        else
-        {
-            Debug.LogWarning($"未找到章节{chapterID}在{context}上下文中的配置");
-        }
+        
     }
 }
