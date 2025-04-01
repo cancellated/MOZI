@@ -8,7 +8,7 @@ public class SceneManager : SingletonBase<SceneManager>
     [SerializeField] private string startScene = "Start Scene";
     [SerializeField] private string levelSelectScene = "Level Select Scene";
     [SerializeField] private List<string> levelScenes = new() { "Level_1" };
-    [SerializeField] private string storyScene = "StoryScene";
+    [SerializeField] private string dialogScene = "Dialog";
 
     protected override void Initialize()
     {
@@ -37,7 +37,7 @@ public class SceneManager : SingletonBase<SceneManager>
                 // 根据关卡ID获取对话ID
                 int dialogId = GameManager.Instance.GetDialogId(levelId);
                 Debug.Log($"当前关卡 {levelId} 对应的对话ID是 {dialogId}");
-                LoadScene(storyScene);
+                LoadScene(dialogScene);
             }
             else
             {
