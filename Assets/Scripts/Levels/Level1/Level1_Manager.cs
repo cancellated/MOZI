@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -6,21 +6,23 @@ using UnityEngine;
 
 public class Level1_Manager : SingletonBase<Level1_Manager>
 {
-    [Header("ËùÓĞ¿É¿ØÖÆµÄÎïÌå")]
-    [Tooltip("³¡¾°ÖĞµÄÎïÌå")]
-    [SerializeField] public MouseControlObject[] MouseControlObjects; // ËùÓĞ¿É¿ØÖÆµÄÎïÌå
+    [Header("æ‰€æœ‰å¯æ§åˆ¶çš„ç‰©ä½“")]
+    [Tooltip("åœºæ™¯ä¸­çš„ç‰©ä½“")]
+    [SerializeField] public MouseControlObject[] MouseControlObjects; //æ‰€æœ‰å¯æ§åˆ¶çš„ç‰©ä½“
 
-    [Header("ĞèÒªÍÆ½øµÄÉãÏñ»ú")]
-    [Tooltip("ĞèÒªÍÆ½øµÄÉãÏñ»ú")]
+    [Header("éœ€è¦æ¨è¿›çš„æ‘„åƒæœº")]
+    [Tooltip("éœ€è¦æ¨è¿›çš„æ‘„åƒæœº")]
     public Transform camera;
 
-    [Header("Íê³ÉÍ¼")]
-    [Tooltip("Íê³ÉÊ±½¥ÏÔµÄÍ¼Æ¬²ÄÖÊ")]
-    public Material fadeInMaterial;
-    private bool isLevelComplete = false; // ÊÇ·ñÍ¨¹Ø
+    [Header("å®Œæˆæ—¶éœ€è¦æ”¹å˜çš„å¯¹è±¡")]
+    [Tooltip("å®Œæˆæ—¶æ¸æ˜¾çš„å›¾ç‰‡æè´¨")]
+    public Renderer imageRenderer;//æ¸æ˜¾å®Œæˆå›¾
+    public Renderer shadowRenderer;//æ¸äº®é˜´å½±
+    public GameObject AllObject;//å®Œæˆæ—¶æ¶ˆå¤±çš„ç‰©ä½“
+    private bool isLevelComplete = false; // æ˜¯å¦é€šå…³
 
-    private Dictionary<MouseControlObject, bool> objectStatus = new Dictionary<MouseControlObject, bool>(); // ÎïÌå×´Ì¬×Öµä
-    private Vector3 lastMousePosition; // ÉÏÒ»Ö¡Êó±êÎ»ÖÃ
+    private Dictionary<MouseControlObject, bool> objectStatus = new Dictionary<MouseControlObject, bool>(); // ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½Öµï¿½
+    private Vector3 lastMousePosition; // ä¸Šä¸€å¸§é¼ æ ‡ä½ç½®
 
     protected override void Initialize()
     {
@@ -43,11 +45,11 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
     }
 
     /// <summary>
-    /// ´¦ÀíÓÃ»§ÊäÈë
+    /// å¤„ç†ç”¨æˆ·è¾“å…¥
     /// </summary>
     private void HandleInput()
     {
-        // ¼ì²âÊó±ê°´ÏÂÊÂ¼ş
+        // æ£€æµ‹é¼ æ ‡æŒ‰ä¸‹äº‹ä»¶
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -64,7 +66,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             }
         }
 
-        // ¼ì²âÊó±êÊÍ·ÅÊÂ¼ş
+        // æ£€æµ‹é¼ æ ‡é‡Šæ”¾äº‹ä»¶
         if (Input.GetMouseButtonUp(0))
         {
             foreach (MouseControlObject obj in MouseControlObjects)
@@ -75,7 +77,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             }
         }
 
-        // Èç¹ûÕıÔÚÍÏ¶¯ÎïÌå£¬´¦Àí±ä»»
+        // å¦‚æœæ­£åœ¨æ‹–åŠ¨ç‰©ä½“ï¼Œå¤„ç†å˜æ¢
         foreach (MouseControlObject obj in MouseControlObjects)
         {
             if (obj.isDragging && !obj.isLocked)
@@ -88,12 +90,12 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             }
         }
 
-        // ´¦ÀíÊó±ê¹öÂÖÊÂ¼ş£¨µ÷ÕûÉî¶È£©
+        // å¤„ç†é¼ æ ‡æ»šè½®äº‹ä»¶ï¼ˆè°ƒæ•´æ·±åº¦ï¼‰
         HandleMouseScrollWheel();
     }
 
     /// <summary>
-    /// ´¦ÀíÊó±ê¹öÂÖÊÂ¼ş£¨µ÷ÕûÉî¶È£©
+    /// å¤„ç†é¼ æ ‡æ»šè½®äº‹ä»¶ï¼ˆè°ƒæ•´æ·±åº¦ï¼‰
     /// </summary>
     private void HandleMouseScrollWheel()
     {
@@ -107,21 +109,21 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
                     Vector3 newPosition = obj.transform.position;
                     newPosition.z += scroll * obj.depthSpeed;
 
-                    // ÏŞÖÆÓëÏà»úµÄ¾àÀë
+                    // é™åˆ¶ä¸ç›¸æœºçš„è·ç¦»
                     newPosition.z = Mathf.Clamp(newPosition.z, obj.minDistance, obj.maxDistance);
 
                     obj.transform.position = newPosition;
 
-                    // ¸üĞÂ¶Ô³ÆÎïÌåÎ»ÖÃ
+                    // æ›´æ–°å¯¹ç§°ç‰©ä½“ä½ç½®
                     obj.HandleSymmetricObjectUpdate();
                 }
             }
         }
     }
-    #region Í¨¹ØĞ§¹û
+    #region é€šå…³é€»è¾‘
 
     /// <summary>
-    /// ¼ì²âËùÓĞÎïÌåÊÇ·ñµ½´ïÄ¿±êÎ»ÖÃ
+    /// æ£€æµ‹æ‰€æœ‰ç‰©ä½“æ˜¯å¦åˆ°è¾¾ç›®æ ‡ä½ç½®
     /// </summary>
     private void CheckAllObjects()
     {
@@ -133,7 +135,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
                 if (obj.CheckIfComplete())
                 {
                     completeObj(obj);
-                    Debug.Log(obj.name + " ÒÑ´ï±ê£¡");
+                    Debug.Log(obj.name + "å·²è¾¾æ ‡ï¼");
                 }
                 else
                 {
@@ -154,34 +156,43 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
         Transform targetTransform = targetObj.transform.GetChild(0);
         if (targetTransform != null)
         {
-            Material targetMaterial = targetTransform.GetComponent<Material>();
-            if (targetMaterial != null)
+            Renderer renderer = targetTransform.GetComponent<Renderer>();
+            if (renderer != null)
             {
-                StartCoroutine(FadeToAlphaCoroutine(targetMaterial, 0f, 0.5f));
+                StartCoroutine(FadeInCoroutine(renderer, Color.white, 0.5f));
             }
+            else
+            {
+                Debug.LogError("å­ç‰©ä½“ä¸Šæ²¡æœ‰Rendererç»„ä»¶ï¼");
+            }
+        }
+        else
+        {
+            Debug.LogError("æ²¡æœ‰æ‰¾åˆ°å­ç‰©ä½“ï¼");
         }
     }
     /// <summary>
-    /// ´¥·¢Í¨¹ØÂß¼­
+    /// è§¦å‘é€šå…³é€»è¾‘
     /// </summary>
     private void LevelComplete()
     {
         isLevelComplete = true;
-        Debug.Log("¹§Ï²£¬ÄãÍ¨¹ØÁË£¡");
+        Debug.Log("ä½ è¿‡å…³ï¼");
         StartCoroutine(CameraPullin());
-        StartCoroutine(FadeToAlphaCoroutine(fadeInMaterial, 1f, 1f));
-        // ÔÚÕâÀï¿ÉÒÔÌí¼ÓÍ¨¹ØºóµÄÂß¼­£¬±ÈÈçÏÔÊ¾Í¨¹Ø½çÃæ¡¢²¥·ÅÒôĞ§µÈ
+        StartCoroutine(FadeToAlphaCoroutine(imageRenderer, 1f, 1f));//å›¾ç‰‡æ˜¾ç°
+        StartCoroutine(FadeToAlphaCoroutine(shadowRenderer, 0f, 4f));//é˜´å½±æ¶ˆå¤±
+        // åœ¨è¿™é‡Œå¯ä»¥æ·»åŠ é€šå…³åçš„é€»è¾‘ï¼Œæ¯”å¦‚æ˜¾ç¤ºé€šå…³ç•Œé¢ã€æ’­æ”¾éŸ³æ•ˆç­‰
         GameEvents.TriggerLevelComplete(0);
     }
     /// <summary>
-    /// ¾µÍ·ÍÆ½ø
+    /// é•œå¤´æ¨è¿›
     /// </summary>
     /// <returns></returns>
     private IEnumerator CameraPullin()
     {
         if (camera != null)
         {
-            float journeyLength = 6f;//ÒÆ¶¯¾àÀë
+            float journeyLength = 6f;//ç§»åŠ¨è·ç¦»
             Vector3 startPosition = camera.position;
             Vector3 targetPosition = new Vector3(camera.position.x, camera.position.y, camera.position.z + journeyLength);
             float moveSpeed = 1.0f;
@@ -193,22 +204,26 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
                 camera.position = Vector3.Lerp(startPosition, targetPosition, fracJourney);
                 yield return null;
             }
+            AllObject.gameObject.SetActive(false);
             camera.position = targetPosition;
         }
         else
         {
-            Debug.LogError("Î´ÕÒµ½ÉãÏñ»ú");
+            Debug.LogError("æœªæ‰¾åˆ°æ‘„åƒæœº");
         }
     }
+
+
     /// <summary>
-    /// ²ÄÖÊÍ¸Ã÷µÄ½¥±ä
+    /// æè´¨é€æ˜çš„æ¸å˜
     /// </summary>
     /// <param name="targetMaterial"></param>
     /// <param name="targetAlpha"></param>
     /// <param name="duration"></param>
     /// <returns></returns>
-    private System.Collections.IEnumerator FadeToAlphaCoroutine(Material targetMaterial, float targetAlpha, float duration)
+    private System.Collections.IEnumerator FadeToAlphaCoroutine(Renderer renderer, float targetAlpha, float duration)
     {
+        Material targetMaterial = renderer.material;
         float startAlpha = targetMaterial.color.a;
         float elapsed = 0;
 
@@ -218,6 +233,27 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
             float alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / duration);
             Color color = targetMaterial.color;
             color.a = alpha;
+            targetMaterial.color = color;
+            yield return null;
+        }
+    }
+    /// <summary>
+    /// æè´¨é¢œè‰²çš„æ”¹å˜
+    /// </summary>
+    /// <param name="renderer"></param>
+    /// <param name="targetColor"></param>
+    /// <param name="duration"></param>
+    /// <returns></returns>
+    private System.Collections.IEnumerator FadeInCoroutine(Renderer renderer, Color targetColor, float duration)
+    {
+        Material targetMaterial = renderer.material;
+        Color startColor = targetMaterial.color;
+        float elapsed = 0;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            Color color = Color.Lerp(startColor, targetColor, elapsed / duration);
             targetMaterial.color = color;
             yield return null;
         }
