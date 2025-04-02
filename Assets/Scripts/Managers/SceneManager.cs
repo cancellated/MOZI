@@ -10,13 +10,16 @@ public class SceneManager : SingletonBase<SceneManager>
     [SerializeField] private List<string> levelScenes = new() { "Level_1" };
     [SerializeField] private string dialogScene = "Dialog";
 
+    [Header("加载设置")]
+    [SerializeField] private string loadingScene = "LoadingScene";
+    private string _targetScene;
+
     protected override void Initialize()
     {
         GameEvents.OnLevelEnter += HandleLevelSelected;
         GameEvents.OnSceneTransitionRequest += HandleSceneTransition;
     }
 
-    // 添加 override 关键字以重写基类的 OnDestroy 方法
     protected override void OnDestroy()
     {
         GameEvents.OnLevelEnter -= HandleLevelSelected;
@@ -27,14 +30,11 @@ public class SceneManager : SingletonBase<SceneManager>
     {
         if (levelId > 0 && levelId <= levelScenes.Count)
         {
-            // 通过GameManager判断是否需要播放故事
             bool needPlayStory = GameManager.Instance.NeedPlayStory(levelId);
             
             if(needPlayStory)
             {
-                // 设置当前关卡ID后再加载故事场景
                 GameManager.Instance.SetCurrentLevel(levelId);
-                // 根据关卡ID获取对话ID
                 int dialogId = GameManager.Instance.GetDialogId(levelId);
                 Debug.Log($"当前关卡 {levelId} 对应的对话ID是 {dialogId}");
                 LoadScene(dialogScene);
@@ -60,13 +60,28 @@ public class SceneManager : SingletonBase<SceneManager>
         }
     }
 
-        private void LoadScene(string sceneName)
+private void LoadScene(string sceneName)
+{
+    if (!string.IsNullOrEmpty(sceneName))
     {
-        if (!string.IsNullOrEmpty(sceneName))
-        {
-            UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
-        }
+        _targetScene = sceneName;
+        Debug.Log($"准备加载场景: {sceneName}");
+        // 先切换到加载场景
+        UnityEngine.SceneManagement.SceneManager.LoadScene(loadingScene);
     }
+}
+
+    public string GetTargetScene()
+    {
+        return _targetScene;
     }
 
-
+    public float GetLoadingProgress()
+    {
+        // 修改为正确的获取AsyncOperation的方式
+        var asyncOp = UnityEngine.SceneManagement.SceneManager.GetSceneByName(_targetScene).isLoaded ? 
+            null : 
+            UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(_targetScene);
+        return asyncOp?.progress ?? 0f;
+    }
+}

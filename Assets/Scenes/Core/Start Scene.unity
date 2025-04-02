@@ -334,8 +334,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _progress:
-    currentLevel: 1
-    currentStory: 1
+    currentLevel: 0
+    currentStory: 0
 --- !u!114 &48813486
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -353,6 +353,7 @@ MonoBehaviour:
   levelScenes:
   - Level_1
   dialogScene: Dialog
+  loadingScene: Loading Scene
 --- !u!1 &787041029
 GameObject:
   m_ObjectHideFlags: 0
