@@ -21,7 +21,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
     public GameObject AllObject;//完成时消失的物体
     private bool isLevelComplete = false; // 是否通关
 
-    private Dictionary<MouseControlObject, bool> objectStatus = new Dictionary<MouseControlObject, bool>(); // ����״̬�ֵ�
+    private Dictionary<MouseControlObject, bool> objectStatus = new Dictionary<MouseControlObject, bool>();
     private Vector3 lastMousePosition; // 上一帧鼠标位置
 
     protected override void Initialize()
