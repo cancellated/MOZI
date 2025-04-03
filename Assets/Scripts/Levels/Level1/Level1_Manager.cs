@@ -12,7 +12,7 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
 
     [Header("需要推进的摄像机")]
     [Tooltip("需要推进的摄像机")]
-    public Transform camera;
+    public Transform movingCamera;
 
     [Header("完成时需要改变的对象")]
     [Tooltip("完成时渐显的图片材质")]
@@ -182,7 +182,8 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
         StartCoroutine(FadeToAlphaCoroutine(imageRenderer, 1f, 1f));//图片显现
         StartCoroutine(FadeToAlphaCoroutine(shadowRenderer, 0f, 4f));//阴影消失
         // 在这里可以添加通关后的逻辑，比如显示通关界面、播放音效等
-        GameEvents.TriggerLevelComplete(0);
+        int currentLevelId = GameManager.Instance.GetCurrentLevel();
+        GameManager.Instance.CompleteLevel(currentLevelId);
     }
     /// <summary>
     /// 镜头推进
@@ -190,22 +191,22 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
     /// <returns></returns>
     private IEnumerator CameraPullin()
     {
-        if (camera != null)
+        if (movingCamera != null)
         {
             float journeyLength = 6f;//移动距离
-            Vector3 startPosition = camera.position;
-            Vector3 targetPosition = new Vector3(camera.position.x, camera.position.y, camera.position.z + journeyLength);
+            Vector3 startPosition = movingCamera.position;
+            Vector3 targetPosition = new Vector3(movingCamera.position.x, movingCamera.position.y, movingCamera.position.z + journeyLength);
             float moveSpeed = 1.0f;
             float start_time = Time.time;
-            while (Vector3.Distance(camera.position, targetPosition) > 0.01f)
+            while (Vector3.Distance(movingCamera.position, targetPosition) > 0.01f)
             {
                 float distCovered = (Time.time - start_time) * moveSpeed;
                 float fracJourney = distCovered / journeyLength;
-                camera.position = Vector3.Lerp(startPosition, targetPosition, fracJourney);
+                movingCamera.position = Vector3.Lerp(startPosition, targetPosition, fracJourney);
                 yield return null;
             }
             AllObject.gameObject.SetActive(false);
-            camera.position = targetPosition;
+            movingCamera.position = targetPosition;
         }
         else
         {

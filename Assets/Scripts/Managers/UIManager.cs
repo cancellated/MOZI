@@ -17,47 +17,5 @@ public class UIManager : SingletonBase<UIManager>
     {
         
     }
-
-    /// <summary>
-    /// 全局事件订阅中心
-    /// </summary>
-
-    #endregion
-
-    #region 全局事件处理
-    private void HandleSceneLoadStart()
-    {
-        Debug.Log("显示全局加载界面");
-        // 触发加载界面显示事件
-
-    }
-
-    private void HandleSceneReady()
-    {
-        Debug.Log("隐藏全局加载界面");
-    }
-    #endregion
-
-    #region 弹窗调度
-    private void ShowPopup(string popupType)
-    {
-        Debug.Log($"显示{popupType}类型弹窗");
-        // 触发具体弹窗管理器的显示逻辑
-
-    }
-
-    private void HidePopup(string popupType)
-    {
-        Debug.Log($"隐藏{popupType}类型弹窗");
-    }
-    #endregion
-
-    #region 关卡按钮状态更新
-    private void UpdateLevelButtonState(int unlockedLevelId)
-    {
-        Debug.Log($"更新关卡{unlockedLevelId}按钮状态");
-        // 调用具体UI组件更新方法
-
-    }
     #endregion
 }

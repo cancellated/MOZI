@@ -34,34 +34,36 @@ public class GameManager : SingletonBase<GameManager>
     #region 事件处理
     private void HandleLevelEnter(int levelId)
     {
-        _progress.currentLevel = levelId;
-        Debug.Log($"当前关卡: {levelId}");
+        SetCurrentLevel(levelId);
+        Debug.Log($"进入关卡: {levelId}");
     }
 
     private void HandleLevelComplete(int levelId)
     {
         if (levelId == _progress.currentLevel)
         {
+            CompleteLevel(levelId);
             UnlockLevel(levelId + 1);
-            UnlockStory(levelId*2+1);
+            UnlockStory(levelId * 2 + 1);
             SaveProgress();
+            GameEvents.TriggerLevelComplete(levelId);
         }
     }
 
     private void HandleStoryEnter(int storyId)
     {   
-        if(!IsStoryViewed(storyId)){
-            _progress.viewedStories[storyId] = true;
-            SaveProgress();
-        }
+        SetCurrentStory(storyId);
+        Debug.Log($"进入故事: {storyId}");
     }
 
     private void HandleStoryComplete(int storyId)
     {
         if (storyId == _progress.currentStory && storyId == 1)
         {
+            CompeleteStory(storyId);
             UnlockStory(storyId++);
             SaveProgress();
+            GameEvents.TriggerStoryComplete(storyId);
         }
     }
     public bool NeedPlayStory(int storyId){
@@ -81,7 +83,34 @@ public class GameManager : SingletonBase<GameManager>
         public void SetCurrentStory(int storyId){
             _progress.currentStory = storyId;
         }
-
+        public int GetCompletedLevels()
+        {
+            if (_progress.completedLevels.Count == 0)
+                return 0;
+            int maxLevel = 0;
+            foreach (var level in _progress.completedLevels)
+            {
+            if (level.Value && level.Key > maxLevel)
+                maxLevel = level.Key;
+            }
+            return maxLevel;
+        }
+        public int GetViewedStories()
+        {
+            if (_progress.viewedStories.Count == 0)
+                return 0;
+            int maxStory = 0;
+            foreach (var story in _progress.viewedStories)
+            {
+                if (story.Value && story.Key > maxStory)
+                    maxStory = story.Key;
+            }
+            return maxStory;
+        }
+        public Dictionary<int, bool> GetCompletedLevelsDictionary()
+        {  
+            return _progress.completedLevels;
+        }
         public int GetDialogId(int levelId){
             if(!_progress.unlockedLevels.ContainsKey(levelId)){
                 return levelId*2; 
@@ -100,6 +129,7 @@ public class GameManager : SingletonBase<GameManager>
         string path = Path.Combine(Application.persistentDataPath, "savedata", "savegame.dat");
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         File.WriteAllText(path, JsonUtility.ToJson(_progress));
+        Debug.Log("进度已保存");
     }
 
     private void LoadProgress()
@@ -113,16 +143,36 @@ public class GameManager : SingletonBase<GameManager>
     #endregion
 
     #region 关卡管理
+    public void CompleteLevel(int levelId)
+    {
+        if (levelId > 0 && !IsLevelCompleted(levelId))
+        {
+            _progress.completedLevels[levelId] = true;
+            GameEvents.TriggerLevelComplete(levelId);
+            SaveProgress();
+            Debug.Log($"完成关卡: {levelId}");
+        }
+    }
     public void UnlockLevel(int levelId)
     {
-        if (levelId > 0 && !IsLevelUnlocked(levelId))
+        if (levelId >= 0 && !IsLevelUnlocked(levelId))
         {
             _progress.unlockedLevels[levelId] = true;
             GameEvents.TriggerLevelUnlocked(levelId);
             SaveProgress();
+            Debug.Log($"解锁关卡: {levelId}");
         }
     }
-
+    public void CompeleteStory(int storyId)
+    {
+        if (storyId >= 0 &&!IsStoryViewed(storyId))
+        {
+            _progress.viewedStories[storyId] = true;
+            GameEvents.TriggerStoryComplete(storyId);
+            SaveProgress();
+            Debug.Log($"完成故事: {storyId}");
+        }
+    }
     public void UnlockStory(int storyId)
     {
         if (storyId > 0 &&!IsStoryViewed(storyId))
@@ -130,13 +180,16 @@ public class GameManager : SingletonBase<GameManager>
             _progress.unlockedStories[storyId] = true;
             GameEvents.TriggerStoryUnlocked(storyId);
             SaveProgress();
+            Debug.Log($"解锁故事: {storyId}");
         }
     }
 
-
+    public bool IsLevelCompleted(int levelId) =>
+    _progress.completedLevels.ContainsKey(levelId) && _progress.completedLevels[levelId];
     public bool IsLevelUnlocked(int levelId) => 
         _progress.unlockedLevels.ContainsKey(levelId) && _progress.unlockedLevels[levelId];
-    
+    public bool IsStoryUnlocked(int storyId) =>
+        _progress.unlockedStories.ContainsKey(storyId) && _progress.unlockedStories[storyId];
     public bool IsStoryViewed(int storyId) =>
         _progress.viewedStories.ContainsKey(storyId) && _progress.viewedStories[storyId];
     private void ValidateProgress()
@@ -163,8 +216,9 @@ public class GameManager : SingletonBase<GameManager>
     {
         public int currentLevel = 1;
         public int currentStory = 1;
+        public Dictionary<int, bool> viewedStories = new();
+        public Dictionary<int, bool> completedLevels = new();
         public Dictionary<int, bool> unlockedLevels = new();
         public Dictionary<int, bool> unlockedStories = new();
-        public Dictionary<int ,bool> viewedStories = new();
     }
 }

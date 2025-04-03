@@ -3,20 +3,20 @@ using UnityEngine.UI;
 
 public class LevelSelectButton : MonoBehaviour
 {
-    [SerializeField] private int targetLevelID;
+    [SerializeField] public int targetLevelId;
     [SerializeField] private GameObject lockedIcon;
     [SerializeField] private GameObject unlockedIcon;
 
-    public void Setup(int levelID, string displayText)
+    public void Setup(int levelId, string displayText)
     {
-        targetLevelID = levelID;
+        targetLevelId = levelId;
         GetComponentInChildren<Text>().text = displayText;
         UpdateButtonState();
     }
 
     public void UpdateButtonState()
     {
-        bool isUnlocked = GameManager.Instance.IsLevelUnlocked(targetLevelID);
+        bool isUnlocked = GameManager.Instance.IsLevelUnlocked(targetLevelId);
         gameObject.SetActive(isUnlocked);
         
         if (lockedIcon != null) lockedIcon.SetActive(!isUnlocked);
@@ -25,9 +25,9 @@ public class LevelSelectButton : MonoBehaviour
 
     public void OnClick()
     {
-        if (GameManager.Instance.IsLevelUnlocked(targetLevelID))
+        if (GameManager.Instance.IsLevelUnlocked(targetLevelId))
         {
-            GameManager.Instance.SetCurrentLevel(targetLevelID);
+            GameManager.Instance.SetCurrentLevel(targetLevelId);
             GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevel);
         }
     }
