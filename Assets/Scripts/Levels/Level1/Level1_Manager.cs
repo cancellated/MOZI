@@ -176,15 +176,33 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
     /// </summary>
     private void LevelComplete()
     {
+        if (isLevelComplete) return; // 防止重复调用
+        
         isLevelComplete = true;
-        Debug.Log("你过关！");
-        StartCoroutine(CameraPullin());
-        StartCoroutine(FadeToAlphaCoroutine(imageRenderer, 1f, 1f));//图片显现
-        StartCoroutine(FadeToAlphaCoroutine(shadowRenderer, 0f, 4f));//阴影消失
-        // 在这里可以添加通关后的逻辑，比如显示通关界面、播放音效等
-        int currentLevelId = GameManager.Instance.GetCurrentLevel();
-        GameManager.Instance.CompleteLevel(currentLevelId);
+        Debug.Log("关卡完成！");
+        
+        // 使用StopAllCoroutines确保没有残留的协程
+        StopAllCoroutines();
+        
+        // 启动新的协程组
+        StartCoroutine(LevelCompleteSequence());
     }
+    private IEnumerator LevelCompleteSequence()
+{
+    int currentLevelId = GameManager.Instance.GetCurrentLevel();
+    
+    // 按顺序执行通关效果
+    yield return StartCoroutine(CameraPullin());
+    yield return StartCoroutine(FadeToAlphaCoroutine(imageRenderer, 1f, 1f));
+    yield return StartCoroutine(FadeToAlphaCoroutine(shadowRenderer, 0f, 4f));
+    
+    // 确保所有效果完成后再通知GameManager
+    GameManager.Instance.CompleteLevel(currentLevelId);
+    
+    // 显式释放资源
+    Resources.UnloadUnusedAssets();
+}
+
     /// <summary>
     /// 镜头推进
     /// </summary>
@@ -260,4 +278,10 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
         }
     }
     #endregion
+    protected override void OnDestroy()
+{
+    // 确保销毁时停止所有协程
+    StopAllCoroutines();
+    base.OnDestroy();
+}
 }

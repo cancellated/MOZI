@@ -3610,7 +3610,7 @@ MonoBehaviour:
   - {fileID: 1510164514}
   - {fileID: 872728256}
   - {fileID: 82183665}
-  camera: {fileID: 519420032}
+  movingCamera: {fileID: 519420032}
   imageRenderer: {fileID: 1514777385}
   shadowRenderer: {fileID: 383917988}
   AllObject: {fileID: 1946414918}
