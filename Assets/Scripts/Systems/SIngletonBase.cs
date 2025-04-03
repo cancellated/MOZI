@@ -22,7 +22,6 @@ public abstract class SingletonBase<T> : MonoBehaviour where T : SingletonBase<T
             {
                 if (_instance == null)
                 {
-                    // 更新为新的查找方法
                     _instance = FindFirstObjectByType<T>();
                     if (_instance == null)
                     {

@@ -63,15 +63,17 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
                GameManager.Instance.IsStoryViewed(levelId);
     }
 
-    public void ShowStoryReviewPanel()
+    public void OnStoryReviewButtonClicked()
     {
-        storyReviewPanel.SetActive(true);
+        // 确保每次点击都能正确切换面板状态
+        if(storyReviewPanel != null)
+        {
+            bool newState = !storyReviewPanel.activeSelf;
+            storyReviewPanel.SetActive(newState);
+            Debug.Log($"面板状态切换至: {newState}");
+        }
     }
 
-    public void HideStoryReviewPanel() 
-    {
-        storyReviewPanel.SetActive(false);
-    }
     public void ReturnToLevelSelect()
     {
         GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);
