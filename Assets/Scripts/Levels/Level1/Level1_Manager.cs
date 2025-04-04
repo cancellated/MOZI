@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class Level1_Manager : SingletonBase<Level1_Manager>
+public class Level1_Manager : MonoBehaviour
 {
     [Header("所有可控制的物体")]
     [Tooltip("场景中的物体")]
@@ -24,9 +24,9 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
     private Dictionary<MouseControlObject, bool> objectStatus = new Dictionary<MouseControlObject, bool>();
     private Vector3 lastMousePosition; // 上一帧鼠标位置
 
-    protected override void Initialize()
-    {
-    }
+    //protected override void Initialize()
+    //{
+    //}
     void Start()
     {
         foreach (MouseControlObject obj in MouseControlObjects)
@@ -179,30 +179,49 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
         if (isLevelComplete) return; // 防止重复调用
         
         isLevelComplete = true;
-        Debug.Log("关卡完成！");
-        
+   
         // 使用StopAllCoroutines确保没有残留的协程
         StopAllCoroutines();
         
         // 启动新的协程组
-        StartCoroutine(LevelCompleteSequence());
+        StartCoroutine(LevelCompleteSequence(OnLevelSequenceFinished));
+    
     }
-    private IEnumerator LevelCompleteSequence()
+    private IEnumerator LevelCompleteSequence(Action onComplete)
+    {
+        int currentLevelId = GameManager.Instance.GetCurrentLevel();
+
+        // 记录完成的协程数量
+        int completedCount = 0;
+        int totalCoroutines = 3; // 总协程数
+
+     StartCoroutine(RunParallelCoroutine(CameraPullin(), () => completedCount++));
+     StartCoroutine(RunParallelCoroutine(FadeToAlphaCoroutine(imageRenderer, 1f, 1f), () => completedCount++));
+     StartCoroutine(RunParallelCoroutine(FadeToAlphaCoroutine(shadowRenderer, 0f, 4f), () => completedCount++));
+
+    yield return new WaitUntil(() => completedCount >= totalCoroutines);
+        Debug.Log("关卡完成！");
+        // 确保所有效果完成后再通知GameManager
+        //GameEvents.TriggerLevelComplete(currentLevelId);
+
+        // 显式释放资源
+        //Resources.UnloadUnusedAssets();
+        // 通过回调通知外部
+    onComplete?.Invoke();
+    }
+    // 定义回调方法
+private void OnLevelSequenceFinished()
 {
+    // 此时协程已完全结束，安全调用
     int currentLevelId = GameManager.Instance.GetCurrentLevel();
-    
-    // 按顺序执行通关效果
-    yield return StartCoroutine(CameraPullin());
-    yield return StartCoroutine(FadeToAlphaCoroutine(imageRenderer, 1f, 1f));
-    yield return StartCoroutine(FadeToAlphaCoroutine(shadowRenderer, 0f, 4f));
-    
-    // 确保所有效果完成后再通知GameManager
-    GameManager.Instance.CompleteLevel(currentLevelId);
-    
-    // 显式释放资源
-    Resources.UnloadUnusedAssets();
+    //GameManager.Instance.CompleteLevel(currentLevelId);
 }
 
+    private IEnumerator RunParallelCoroutine(IEnumerator coroutine, Action onComplete)
+    {
+        yield return StartCoroutine(coroutine);
+        onComplete?.Invoke();
+    }
     /// <summary>
     /// 镜头推进
     /// </summary>
@@ -248,13 +267,14 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
 
         while (elapsed < duration)
         {
-            elapsed += Time.deltaTime;
-            float alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / duration);
-            Color color = targetMaterial.color;
-            color.a = alpha;
-            targetMaterial.color = color;
-            yield return null;
+           elapsed += Time.deltaTime;
+           float alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / duration);
+           Color color = targetMaterial.color;
+           color.a = alpha;
+           targetMaterial.color = color;
+           yield return null;
         }
+
     }
     /// <summary>
     /// 材质颜色的改变
@@ -278,10 +298,10 @@ public class Level1_Manager : SingletonBase<Level1_Manager>
         }
     }
     #endregion
-    protected override void OnDestroy()
+    protected void OnDestroy()
 {
     // 确保销毁时停止所有协程
     StopAllCoroutines();
-    base.OnDestroy();
+    //base.OnDestroy();
 }
 }
