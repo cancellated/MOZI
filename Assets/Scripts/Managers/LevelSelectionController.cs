@@ -6,16 +6,39 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
     [Header("UI配置")]
     [SerializeField] private GameObject storyReviewPanel;
 
-    private Dictionary<int, LevelSelectButton> _levelButtons = new();
+    private readonly Dictionary<int, LevelSelectButton> _levelButtons = new();
 
     protected override void Initialize()
     {
-        // 初始化场景中的关卡按钮
         InitializeLevelButtons();
         RegisterEventHandlers();
-    
-        // 初始化时隐藏面板
         storyReviewPanel.SetActive(false);
+    }
+
+    public void OnLevelButtonClicked(int levelId)
+    {
+        if (!GameManager.Instance.IsLevelUnlocked(levelId))
+            return;
+
+        if (!GameManager.Instance.IsStoryViewed(levelId))
+        {
+            // 触发剧情播放
+            GameEvents.TriggerStoryEnter(levelId);
+            // 订阅剧情完成事件
+            GameEvents.OnStoryComplete += (id) => {
+                if(id == levelId) LoadLevel(levelId);
+            };
+        }
+        else
+        {
+            LoadLevel(levelId);
+        }
+    }
+
+    private void LoadLevel(int levelId)
+    {
+        GameManager.Instance.SetCurrentLevel(levelId);
+        GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevel);
     }
 
     private void InitializeLevelButtons()
@@ -45,16 +68,7 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
 
     private void UpdateButtonState(int levelId)
     {
-        if (_levelButtons.TryGetValue(levelId, out var button))
-        {
-            button.UpdateButtonState();
-            
-            // 自动隐藏已完成的关卡按钮
-            if (ShouldHideButton(levelId))
-            {
-                button.gameObject.SetActive(false);
-            }
-        }
+        
     }
 
     private bool ShouldHideButton(int levelId)

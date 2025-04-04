@@ -3,32 +3,36 @@ using UnityEngine.UI;
 
 public class LevelSelectButton : MonoBehaviour
 {
+    public enum StoryType
+    {
+        PreLevel,  // 关卡前故事
+        PostLevel  // 关卡后故事
+    }
+
     [SerializeField] public int targetLevelId;
-    [SerializeField] private GameObject lockedIcon;
-    [SerializeField] private GameObject unlockedIcon;
-
-    public void Setup(int levelId, string displayText)
+    [SerializeField] private Button button;
+    
+    private void Start()
     {
-        targetLevelId = levelId;
-        GetComponentInChildren<Text>().text = displayText;
-        UpdateButtonState();
+        button.onClick.AddListener(OnClick);
     }
 
-    public void UpdateButtonState()
+    public void UpdateVisualState(bool isUnlocked)
     {
-        bool isUnlocked = GameManager.Instance.IsLevelUnlocked(targetLevelId);
         gameObject.SetActive(isUnlocked);
-        
-        if (lockedIcon != null) lockedIcon.SetActive(!isUnlocked);
-        if (unlockedIcon != null) unlockedIcon.SetActive(isUnlocked);
+
     }
 
-    public void OnClick()
+    private void OnClick()
     {
-        if (GameManager.Instance.IsLevelUnlocked(targetLevelId))
-        {
-            GameManager.Instance.SetCurrentLevel(targetLevelId);
-            GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevel);
-        }
+        LevelSelectionController.Instance.OnLevelButtonClicked(targetLevelId);
+    }
+
+    public int GetStoryId(StoryType storyType)
+    {
+        // 生成唯一故事ID: 前故事=1000+levelId, 后故事=2000+levelId
+        return storyType == StoryType.PreLevel ? 
+            1000 + targetLevelId : 
+            2000 + targetLevelId;
     }
 }

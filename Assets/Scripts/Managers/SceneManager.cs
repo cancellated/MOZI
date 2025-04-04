@@ -17,6 +17,7 @@ public class SceneManager : SingletonBase<SceneManager>
     protected override void Initialize()
     {
         GameEvents.OnLevelEnter += HandleLevelSelected;
+
         GameEvents.OnSceneTransitionRequest += HandleSceneTransition;
     }
 
