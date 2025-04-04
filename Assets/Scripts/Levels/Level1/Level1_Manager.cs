@@ -21,7 +21,7 @@ public class Level1_Manager : MonoBehaviour
     public GameObject AllObject;//完成时消失的物体
     private bool isLevelComplete = false; // 是否通关
 
-    private Dictionary<MouseControlObject, bool> objectStatus = new Dictionary<MouseControlObject, bool>();
+    private Dictionary<MouseControlObject, bool> objectStatus = new();
     private Vector3 lastMousePosition; // 上一帧鼠标位置
 
     //protected override void Initialize()
@@ -134,7 +134,7 @@ public class Level1_Manager : MonoBehaviour
             {
                 if (obj.CheckIfComplete())
                 {
-                    completeObj(obj);
+                    CompleteObj(obj);
                     Debug.Log(obj.name + "已达标！");
                 }
                 else
@@ -150,7 +150,7 @@ public class Level1_Manager : MonoBehaviour
         }
     }
 
-    private void completeObj(MouseControlObject obj)
+    private void CompleteObj(MouseControlObject obj)
     {
         GameObject targetObj = obj.gameObject;
         Transform targetTransform = targetObj.transform.GetChild(0);
@@ -232,7 +232,7 @@ private void OnLevelSequenceFinished()
         {
             float journeyLength = 6f;//移动距离
             Vector3 startPosition = movingCamera.position;
-            Vector3 targetPosition = new Vector3(movingCamera.position.x, movingCamera.position.y, movingCamera.position.z + journeyLength);
+            Vector3 targetPosition = new(movingCamera.position.x, movingCamera.position.y, movingCamera.position.z + journeyLength);
             float moveSpeed = 1.0f;
             float start_time = Time.time;
             while (Vector3.Distance(movingCamera.position, targetPosition) > 0.01f)
