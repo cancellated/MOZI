@@ -20,14 +20,23 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
         if (!GameManager.Instance.IsLevelUnlocked(levelId))
             return;
 
-        if (!GameManager.Instance.IsStoryViewed(levelId))
+        // 获取前置故事ID（使用LevelSelectButton的枚举和生成规则）
+        int preStoryId = 1000 + levelId;
+        int postStoryId = 2000 + levelId;
+
+        // 检查是否需要播放前置故事
+        if (!GameManager.Instance.IsStoryCompleted(preStoryId))
         {
-            // 触发剧情播放
-            GameEvents.TriggerStoryEnter(levelId);
-            // 订阅剧情完成事件
+            GameEvents.TriggerStoryEnter(preStoryId);
             GameEvents.OnStoryComplete += (id) => {
-                if(id == levelId) LoadLevel(levelId);
+                if(id == preStoryId) LoadLevel(levelId);
             };
+        }
+        // 检查是否需要播放后置故事（当关卡已完成但后置故事未播放时）
+        else if (GameManager.Instance.IsLevelCompleted(levelId) && 
+                !GameManager.Instance.IsStoryCompleted(postStoryId))
+        {
+            GameEvents.TriggerStoryEnter(postStoryId);
         }
         else
         {
@@ -66,15 +75,28 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
         GameEvents.OnLevelUnlocked += UpdateButtonState;
     }
 
+    // 更新按钮状态方法
     private void UpdateButtonState(int levelId)
     {
-        
+        if (_levelButtons.TryGetValue(levelId, out var button))
+        {
+            bool isUnlocked = GameManager.Instance.IsLevelUnlocked(levelId);
+            button.UpdateVisualState(isUnlocked);
+            
+            // 根据需求决定是否隐藏已完成的关卡按钮
+            if (ShouldHideButton(levelId))
+            {
+                button.gameObject.SetActive(false);
+            }
+        }
     }
 
+    // 修改隐藏条件判断
     private bool ShouldHideButton(int levelId)
     {
+        int postStoryId = 2000 + levelId;
         return GameManager.Instance.IsLevelCompleted(levelId) && 
-               GameManager.Instance.IsStoryViewed(levelId);
+               GameManager.Instance.IsStoryCompleted(postStoryId);
     }
 
     public void OnStoryReviewButtonClicked()

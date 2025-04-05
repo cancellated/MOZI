@@ -212,9 +212,13 @@ public class Level1_Manager : MonoBehaviour
     // 定义回调方法
 private void OnLevelSequenceFinished()
 {
-    // 此时协程已完全结束，安全调用
+    if (!isLevelComplete) return;
+    
     int currentLevelId = GameManager.Instance.GetCurrentLevel();
-    //GameManager.Instance.CompleteLevel(currentLevelId);
+    if (!GameManager.Instance.IsLevelCompleted(currentLevelId))
+    {
+        GameEvents.TriggerLevelComplete(currentLevelId);
+    }
 }
 
     private IEnumerator RunParallelCoroutine(IEnumerator coroutine, Action onComplete)
