@@ -29,22 +29,24 @@ public class SceneManager : SingletonBase<SceneManager>
 
     private void HandleLevelSelected(int levelId)
     {
-        if (levelId > 0 && levelId <= levelScenes.Count)
+    if (levelId > 0 && levelId <= levelScenes.Count)
+    {
+        // 使用CalculatePreStoryId获取前置故事ID
+        int preStoryId = GameManager.Instance.CalculatePreStoryId(levelId);
+        bool needPlayStory = GameManager.Instance.NeedPlayStory(preStoryId);
+        
+        if(needPlayStory)
         {
-            bool needPlayStory = GameManager.Instance.NeedPlayStory(levelId);
-            
-            if(needPlayStory)
-            {
-                GameManager.Instance.SetCurrentLevel(levelId);
-                int dialogId = GameManager.Instance.GetDialogId(levelId);
-                Debug.Log($"当前关卡 {levelId} 对应的对话ID是 {dialogId}");
-                LoadScene(dialogScene);
-            }
-            else
-            {
-                LoadScene(levelScenes[levelId - 1]);
-            }
+            GameManager.Instance.SetCurrentLevel(levelId);
+            // 移除旧的GetDialogId调用，直接使用故事ID
+            Debug.Log($"准备播放关卡 {levelId} 的前置故事: {preStoryId}");
+            LoadScene(dialogScene);
         }
+        else
+        {
+            LoadScene(levelScenes[levelId - 1]);
+        }
+    }
     }
 
     private void HandleSceneTransition(GameEvents.SceneTransitionType transitionType)

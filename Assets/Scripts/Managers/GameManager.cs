@@ -41,15 +41,15 @@ public class GameManager : SingletonBase<GameManager>
     private void HandleLevelComplete(int levelId)
     {
         // 添加状态检查
-        if (levelId == _progress.currentLevel && !IsLevelCompleted(levelId)) 
+        if (levelId == _progress.currentLevel && !IsLevelCompleted(levelId))
         {
             CompleteLevel(levelId);
             UnlockLevel(levelId + 1);
-            // 修改为只解锁下一关的前置故事（1000+levelId）
-            UnlockStory(1000 + levelId + 1); 
+            int nextStoryId = CalculatePreStoryId(levelId + 1);
+            UnlockStory(nextStoryId);
             SaveProgress();
-            // 触发当前关卡的后续故事（2000+levelId）
-            GameEvents.TriggerStoryEnter(2000 + levelId);
+            int postStoryId = CalculatePostStoryId(levelId);
+            GameEvents.TriggerStoryEnter(postStoryId);
         }
     }
 
@@ -63,18 +63,11 @@ public class GameManager : SingletonBase<GameManager>
     private void HandleStoryComplete(int storyId)
     {
         if (storyId == _progress.currentStory && !IsStoryCompleted(storyId))
-        {
-            CompeleteStory(storyId);
-            SaveProgress();
-            GameEvents.TriggerStoryComplete(storyId);
-            
-            // 自动计算对应的关卡ID
-            int levelId = storyId % 1000;
-            if (storyId >= 2000) // 如果是后置故事完成
-            {
-                // 可以在这里添加后置故事完成后的逻辑
-            }
-        }
+    {
+        CompeleteStory(storyId);
+        SaveProgress();
+        GameEvents.TriggerStoryComplete(storyId);
+    }
     }
     public bool NeedPlayStory(int storyId){
         return !IsStoryCompleted(storyId); 
@@ -118,18 +111,10 @@ public class GameManager : SingletonBase<GameManager>
                 }
                 return maxStory;
             }
-            public Dictionary<int, bool> GetCompletedLevelsDictionary()
-            {  
-                return _progress.completedLevels;
-            }
-            public int GetDialogId(int levelId){
-                if(!_progress.unlockedLevels.ContainsKey(levelId)){
-                    return levelId*2; 
-                } 
-                else{
-                    return levelId*2+1;
-                }
-            }
+            public int CalculatePreStoryId(int levelId) => 1000 + levelId;
+            public int CalculatePostStoryId(int levelId) => 2000 + levelId;
+            public int GetLevelIdFromStoryId(int storyId) => storyId % 1000;
+            public bool IsPostStory(int storyId) => storyId >= 2000;
         #endregion
 
     #endregion
@@ -209,19 +194,26 @@ public class GameManager : SingletonBase<GameManager>
     // 进度验证
     private void ValidateProgress()
     {
-        int CurrentLevel = GetCurrentLevel();
-        int CurrentStory = GetCurrentStory();
-        if (!_progress.unlockedLevels.ContainsKey(CurrentLevel))
+        int currentLevel = GetCurrentLevel();
+        int currentStory = GetCurrentStory();
+        
+        // 修正关卡解锁验证
+        if (!_progress.unlockedLevels.ContainsKey(currentLevel))
         {
-            _progress.unlockedLevels[CurrentLevel] = true;
+            _progress.unlockedLevels[currentLevel] = true;
         }
-        if (!_progress.unlockedStories.ContainsKey(CurrentLevel))
+        
+        // 修正故事解锁验证（使用前置故事ID）
+        int preStoryId = CalculatePreStoryId(currentLevel);
+        if (!_progress.unlockedStories.ContainsKey(preStoryId))
         {
-            _progress.unlockedStories[CurrentLevel] = true;
+            _progress.unlockedStories[preStoryId] = true;
         }
-        if (!_progress.completedStories.ContainsKey(CurrentStory))
+        
+        // 修正故事完成验证
+        if (!_progress.completedStories.ContainsKey(currentStory))
         {
-            _progress.completedStories[CurrentStory-1] = true; 
+            _progress.completedStories[currentStory] = false; // 初始应为未完成
         }
     }
     #endregion
