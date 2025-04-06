@@ -29,7 +29,6 @@ public class SceneMirrorControl : MonoBehaviour
 
     private void OnMouseDown()
     {
-        // 添加调试日志
         Debug.Log("鼠标按下事件触发");
         
         if (Input.GetMouseButton(0))
@@ -42,22 +41,6 @@ public class SceneMirrorControl : MonoBehaviour
         }
     }
 
-    private void OnMouseDrag()
-    {
-        // 添加调试日志
-        Debug.Log("正在拖动镜子");
-        
-        if (isDragging)
-        {
-            // 添加Z轴偏移计算
-            Vector3 mousePosition = Input.mousePosition;
-            mousePosition.z = Camera.main.WorldToScreenPoint(transform.position).z;
-            Vector3 newPosition = Camera.main.ScreenToWorldPoint(mousePosition) + offset;
-            newPosition.z = 0; // 保持Z轴不变
-            transform.position = newPosition;
-        }
-    }
-
     private void OnMouseUp()
     {
         isDragging = false;
@@ -65,11 +48,45 @@ public class SceneMirrorControl : MonoBehaviour
 
     private void Update()
     {
-        // 处理旋转
-        if (Input.GetMouseButton(1) && isDragging)
+        if (Input.GetKey(KeyCode.LeftShift))
         {
-            float angle = Input.GetAxis("Mouse X") * 2f;
-            transform.Rotate(0, 0, angle);
+            HandleRotation();
+        }
+        else
+        {
+            HandleDrag();
+        }
+    }
+
+    /// <summary>
+    /// 处理拖动逻辑
+    /// </summary>
+    private void HandleDrag()
+    {
+        if (isDragging && Input.GetMouseButton(0))
+        {
+            Vector3 mousePosition = Input.mousePosition;
+            mousePosition.z = Camera.main.WorldToScreenPoint(transform.position).z;
+            Vector3 newPosition = Camera.main.ScreenToWorldPoint(mousePosition) + offset;
+            newPosition.z = 0;
+
+            // 限制移动范围
+            newPosition.x = Mathf.Clamp(newPosition.x, -10f, 10f);
+            newPosition.y = Mathf.Clamp(newPosition.y, -4f, 6f);
+
+            transform.position = newPosition;
+        }
+    }
+
+    /// <summary>
+    /// 处理旋转逻辑
+    /// </summary>
+    private void HandleRotation()
+    {
+        if (isDragging)
+        {
+            float angleZ = Input.GetAxis("Mouse X") * 4f;
+            transform.Rotate(0, 0, angleZ);
             UpdateSurfaceNormal();
         }
     }
@@ -79,6 +96,7 @@ public class SceneMirrorControl : MonoBehaviour
     /// </summary>
     private void UpdateSurfaceNormal()
     {
-        surfaceNormal = Quaternion.Euler(0, 0, transform.eulerAngles.z) * Vector3.up;
+        //surfaceNormal = Quaternion.Euler(0, 0, transform.eulerAngles.z) * Vector3.up;
+        surfaceNormal = transform.up;
     }
 }

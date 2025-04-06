@@ -20,21 +20,40 @@ public class UIMirrorControl : MonoBehaviour, IPointerDownHandler, IDragHandler,
     /// <summary>
     /// 处理点击事件，创建实例并开始拖动
     /// </summary>
+    private float clickStartTime; // 记录点击开始时间
+
     public void OnPointerDown(PointerEventData eventData)
     {
         Debug.Log("UI对象被点击");
         isDragging = true;
+        clickStartTime = Time.time; // 记录点击开始时间
         
         // 创建临时镜子实例
         if (mirrorPrefab != null)
         {
-            // 获取鼠标在摄像机视角下的世界坐标
             Vector3 screenPoint = Input.mousePosition;
-            screenPoint.z = Camera.main.nearClipPlane + 1; // 设置合适的Z值
+            screenPoint.z = Camera.main.nearClipPlane + 1;
             Vector3 worldPosition = Camera.main.ScreenToWorldPoint(screenPoint);
-            worldPosition.z = 0; // 固定Z值为0
+            worldPosition.z = 0;
             
             tempMirrorInstance = Instantiate(mirrorPrefab, worldPosition, Quaternion.identity);
+        }
+
+        // 添加点击事件处理
+        StartCoroutine(CheckForClickWithoutDrag());
+    }
+
+    private System.Collections.IEnumerator CheckForClickWithoutDrag()
+    {
+        float clickDuration = 0.2f; // 点击持续时间阈值
+        while (Time.time - clickStartTime < clickDuration)
+        {
+            if (!Input.GetMouseButton(0)) // 如果鼠标已经松开
+            {
+                OnEndDrag(null); // 调用结束拖动逻辑
+                yield break;
+            }
+            yield return null;
         }
     }
 
