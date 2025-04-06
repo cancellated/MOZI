@@ -23,6 +23,8 @@ public class DialogManager : SingletonBase<DialogManager>
     private Queue<DialogData> _currentDialogs = new();
     private Coroutine _typingCoroutine;
     private bool _isSkipping;
+    private bool _isTypingComplete;
+    private bool _shouldSkipCurrentText;
 
     /// <summary>
     /// 单例初始化方法
@@ -98,9 +100,12 @@ public class DialogManager : SingletonBase<DialogManager>
             var data = _currentDialogs.Dequeue();
             ShowText(data.Content, data.Character);
             
-            // 精简后的输入等待日志
+            // 等待打字完成
+            yield return new WaitUntil(() => _typingCoroutine == null);
+            
             Debug.Log($"[对话系统] 等待用户输入 (剩余:{_currentDialogs.Count}条)");
             
+            // 等待用户输入切换到下一句
             bool inputDetected = false;
             while (!inputDetected)
             {
@@ -120,24 +125,68 @@ public class DialogManager : SingletonBase<DialogManager>
         GameEvents.TriggerLevelEnter(currentLevel);
     }
 
+    private IEnumerator TypeText(string content, string character)
+    {
+        Debug.Log($"开始逐字显示文本 - 内容:{content}");
+        characterName.text = character;
+        dialogText.text = "";
+        _isTypingComplete = false;
+        _shouldSkipCurrentText = false;
+        
+        foreach (char c in content)
+        {
+            if (_shouldSkipCurrentText)
+            {
+                Debug.Log("立即完成当前对话显示");
+                dialogText.text = content;
+                break;
+            }
+            
+            dialogText.text += c;
+            yield return new WaitForSeconds(0.05f);
+        }
+    
+        _isTypingComplete = true;
+        _typingCoroutine = null;
+        Debug.Log("文本显示完成");
+    }
+
+    // 修改SkipCurrentDialog方法
+    public void SkipCurrentDialog()
+    {
+        if (_typingCoroutine != null && !_isSkipping)
+        {
+            _isSkipping = true;
+            Debug.Log("主动调用跳过当前对话");
+        }
+    }
+
     private void ShowText(string content, string character)
     {
-        // 精简后的显示日志
         Debug.Log($"[对话系统] 显示对话 - 角色:{character}");
         
         if(dialogText == null) Debug.LogError("dialogText未赋值!");
         if(characterName == null) Debug.LogError("characterName未赋值!");
     
         characterName.text = character;
-        dialogText.text = content;
-        _typingCoroutine = null;
+        
+        // 启用打字机效果
+        if (_typingCoroutine != null)
+        {
+            StopCoroutine(_typingCoroutine);
+        }
+        _typingCoroutine = StartCoroutine(TypeText(content, character));
     }
 
     void Update()
     {
-        if (Input.anyKeyDown)
+        if (_typingCoroutine != null && !_isTypingComplete)
         {
-            Debug.Log($"按键检测: {Input.inputString} 鼠标点击: {Input.GetMouseButtonDown(0)}");
+            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+            {
+                Debug.Log($"[输入检测] 检测到跳过输入");
+                _shouldSkipCurrentText = true;
+            }
         }
     }
 }

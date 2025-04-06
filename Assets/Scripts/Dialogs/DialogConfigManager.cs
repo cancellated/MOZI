@@ -27,7 +27,7 @@ public class DialogConfigManager : SingletonBase<DialogConfigManager>
     {
         // 移除BOM头
         if (csvText.StartsWith("\uFEFF")) {
-            csvText = csvText.Substring(1);
+            csvText = csvText[1..];
         }
 
         var lines = csvText.Split('\n');
