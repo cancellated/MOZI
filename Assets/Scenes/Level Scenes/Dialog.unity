@@ -403,6 +403,7 @@ GameObject:
   - component: {fileID: 851615657}
   - component: {fileID: 851615656}
   - component: {fileID: 851615655}
+  - component: {fileID: 851615659}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -422,10 +423,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cbac31d699494f478d0ede370bd709f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _chapterMappings:
-  - chapterID: 0
-    configFile: {fileID: 4900000, guid: 26617e0c359fece44bdc3578b0f1803b, type: 3}
-    contextType: 2
 --- !u!114 &851615656
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -453,19 +450,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4870438d91684744bf4461c205c1901, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelScenes:
-  - Level_1
-  - Level_2
-  - Level_3
   _progress:
-    isFirstLaunch: 1
     currentLevel: 1
-  _startscene: Start Scene
-  _levelSelectScene: Level Select Scene
-  sceneMappings:
-  - levelId: 1
-    contextType: 0
-    sceneName: Level_1
+    currentStory: 1001
 --- !u!4 &851615658
 Transform:
   m_ObjectHideFlags: 0
@@ -481,6 +468,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &851615659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 851615654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cebf0e37d719c1d46ae58fa4e719b9e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startScene: Start Scene
+  levelSelectScene: Level Select Scene
+  levelScenes:
+  - Level_1
+  dialogScene: Dialog
+  loadingScene: Loading Scene
 --- !u!1 &1041410948
 GameObject:
   m_ObjectHideFlags: 0

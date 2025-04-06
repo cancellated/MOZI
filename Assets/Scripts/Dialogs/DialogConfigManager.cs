@@ -1,118 +1,62 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 
-/// <summary>
-/// 对话配置映射数据结构
-/// 用于关联章节ID与对应的对话配置文件
-/// </summary>
-[System.Serializable]
-public class ChapterDialogMapping
-{
-    [Tooltip("章节唯一标识符（与关卡ID对应）")]
-    public int chapterID;
-    
-    [Tooltip("关联的CSV配置文件")]
-    public TextAsset configFile;
-}
-
-/// <summary>
-/// 对话配置管理系统，功能包括：
-/// 1. 加载和管理多套对话配置
-/// 2. 根据场景上下文动态切换配置
-/// 3. 提供对话数据快速查询接口
-/// </summary>
 public class DialogConfigManager : SingletonBase<DialogConfigManager>
 {
-    [Header("主配置表")]
-    [Tooltip("章节对话配置映射表")]
-    [SerializeField] private List<ChapterDialogMapping> _chapterMappings = new();
+    private readonly Dictionary<int, TextAsset> _storyConfigMap = new();
 
-    // 新增字典存储配置映射
-
-
-    [Header("运行时数据")]
-    [Tooltip("当前加载的对话配置字典（键：对话ID，值：对话数据）")]
-    private Dictionary<string, DialogData> _dialogDict = new();
-
-    /// <summary>
-    /// 单例初始化方法
-    /// 加载默认对话配置并准备运行时数据
-    /// </summary>
     protected override void Initialize()
     {
-        InitializeChapterDictionary(); // 新增字典初始化
-        LoadDefaultDialogues();
+        // 初始化故事ID与配置文件的映射
+        _storyConfigMap.Add(1001, Resources.Load<TextAsset>("Config/Dialogs/第一关 关卡前"));
+        _storyConfigMap.Add(2001, Resources.Load<TextAsset>("Config/Dialogs/第一关 关卡后"));
+        // 添加更多映射...
     }
 
-    /// <summary>
-    /// 初始化章节配置字典
-    /// </summary>
-    private void InitializeChapterDictionary()
+    public List<DialogData> GetDialogsByStoryId(int storyId)
     {
-    }
-
-    /// <summary>
-    /// 加载默认对话配置
-    /// </summary>
-    private void LoadDefaultDialogues()
-    {
-        var defaultConfig = Resources.Load<TextAsset>("Config/Dialogs/第一关 关卡前");
-        if(defaultConfig != null)
+        if (_storyConfigMap.TryGetValue(storyId, out var config))
         {
-            LoadDialogues(defaultConfig);
+            return ParseCSV(config.text);
         }
-        else
-        {
-            Debug.LogError("默认对话配置文件缺失！");
-        }
+        return null;
     }
 
-    /// <summary>
-    /// 加载CSV对话配置到内存字典
-    /// </summary>
-    /// <param name="csvFile">CSV文本资源</param>
-    /// <remarks>
-    /// 文件格式要求：
-    /// 第1行：中文表头（仅文档说明）
-    /// 第2行：英文变量名（实际解析用）
-    /// 第3行起：对话数据行
-    /// </remarks>
-    public void LoadDialogues(TextAsset csvFile)
+    private List<DialogData> ParseCSV(string csvText)
     {
-        using var reader = new StringReader(csvFile.text);
-        // 第一行（中文表头）仅用于文档说明，不参与逻辑
-        var chineseHeader = reader.ReadLine();
+        // 移除BOM头
+        if (csvText.StartsWith("\uFEFF")) {
+            csvText = csvText.Substring(1);
+        }
 
-        // 第二行（英文变量名）作为实际表头
-        var englishHeader = reader.ReadLine().Trim();
-        var headers = englishHeader.Split(',');
+        var lines = csvText.Split('\n');
+        if (lines.Length < 3) {
+            Debug.LogError("CSV行数不足，至少需要两行表头+一行数据");
+            return new List<DialogData>();
+        }
 
+        // 跳过第一行中文表头，直接使用第二行英文表头
+        var headerLine = lines[1]; 
+        var headers = headerLine.Split(',');
+
+        // 创建字段名映射字典
         var headerMap = new Dictionary<string, int>();
-        for (int i = 0; i < headers.Length; i++)
-        {
-            headerMap[headers[i].Trim()] = i; // 双重Trim确保去除空格
+        for (int i = 0; i < headers.Length; i++) {
+            string header = headers[i].Trim();
+            headerMap[header] = i;
+            Debug.Log($"表头映射: '{header}' -> {i}");
         }
 
-        // 调试输出表头映射
-        Debug.Log($"成功解析表头：{string.Join("; ", headers)}");
-
-        while (reader.Peek() != -1)
-        {
-            var line = reader.ReadLine().Trim();
-            if (string.IsNullOrEmpty(line)) continue;
-
-            var fields = line.Split(',');
-            var data = new DialogData(fields, headerMap);
-            _dialogDict[data.DialogID] = data;
+        // 从第三行开始解析数据
+        List<DialogData> dialogList = new();
+        for (int i = 2; i < lines.Length; i++) {
+            if (string.IsNullOrWhiteSpace(lines[i])) continue;
+            
+            var fields = lines[i].Split(',');
+            dialogList.Add(new DialogData(fields, headerMap));
         }
-    }
 
-    /// <summary>
-    /// 根据场景上下文加载对话配置
-    /// </summary>
-    public void LoadSceneDialogs( int storyId)
-    {
-        
+        return dialogList;
     }
 }

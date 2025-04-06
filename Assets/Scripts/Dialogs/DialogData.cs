@@ -1,52 +1,41 @@
 using System.Collections.Generic;
-
-/// <summary>
-/// 对话数据实体类，用于存储从CSV配置表加载的单条对话数据
-/// </summary>
+using UnityEngine;
 [System.Serializable]
 public class DialogData
 {
-    /// <summary>
-    /// 对话唯一标识符，格式：章节_序号（例：1_001）
-    /// </summary>
+    // 对话ID
     public string DialogID;
-    
-    /// <summary>
-    /// 对话正文内容，支持富文本标签
-    /// </summary>
+    // 对话正文内容，支持富文本标签
     public string Content;
-    
-    /// <summary>
-    /// 说话角色名称
-    /// </summary>
+    // 说话角色名称
     public string Character;
-    
-    /// <summary>
-    /// 关联的背景音乐资源路径
-    /// </summary>
+    //关联的背景音乐资源路径
     public string BGM;
-    
-    /// <summary>
-    /// 关联的背景图片资源路径
-    /// </summary>
+    //关联的背景图片资源路径
     public string Background;
-
-    /// <summary>
-    /// 构造函数，从CSV行数据创建对话数据对象
-    /// </summary>
-    /// <param name="fields">CSV分割后的字段数组</param>
-    /// <param name="headerMap">CSV表头映射字典（列名 -> 列索引）</param>
     public DialogData(string[] fields, Dictionary<string, int> headerMap)
     {
-        DialogID = GetField(fields, "DialogID", headerMap);
-        Content = GetField(fields, "Content", headerMap);
-        Character = GetField(fields, "Character", headerMap);
-        BGM = GetField(fields, "BGM", headerMap);
-        Background = GetField(fields, "Background", headerMap);
+        Debug.Log($"正在解析行数据，字段数: {fields.Length}");
+        for(int i=0; i<fields.Length; i++)
+        {
+            Debug.Log($"字段[{i}]: '{fields[i]}'");
+        }
+
+        DialogID = GetFieldSafe(fields, "DialogID", headerMap);
+        Content = GetFieldSafe(fields, "Content", headerMap);
+        Character = GetFieldSafe(fields, "Character", headerMap);
+        BGM = GetFieldSafe(fields, "BGM", headerMap);
+        Background = GetFieldSafe(fields, "Background", headerMap);
+
+        Debug.Log($"解析结果 - ID:{DialogID} 内容:{Content} 角色:{Character}");
     }
 
-    private string GetField(string[] fields, string header, Dictionary<string, int> headerMap)
+    private string GetFieldSafe(string[] fields, string header, Dictionary<string, int> headerMap)
     {
-        return headerMap.ContainsKey(header) ? fields[headerMap[header]] : "";
+        if (headerMap.TryGetValue(header, out int index) && index < fields.Length)
+        {
+            return fields[index];
+        }
+        return string.Empty;
     }
 }

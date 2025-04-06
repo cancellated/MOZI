@@ -29,93 +29,115 @@ public class DialogManager : SingletonBase<DialogManager>
     /// </summary>
     protected override void Initialize()
     {
-
+        GameEvents.OnStoryEnter += OnStoryEnter;
+    
+        // 测试代码
+        #if UNITY_EDITOR
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals("Dialog"))
+        {
+            Debug.Log("编辑器直接运行对话场景，使用测试storyId");
+            OnStoryEnter(1001); // 使用你的测试storyId
+        }
+        #endif
     }
 
-    /// <summary>
-    /// 事件处理：开始对话
-    /// </summary>
+    private void OnStoryEnter(int storyId)
+    {
+        Debug.Log($"收到故事进入事件，storyId: {storyId}");
+        var dialogs = DialogConfigManager.Instance.GetDialogsByStoryId(storyId);
+        
+        if(dialogs != null) 
+        {
+            Debug.Log($"成功加载对话配置，共{dialogs.Count}条对话");
+            // 添加对话内容验证
+            foreach(var dialog in dialogs)
+            {
+                if(string.IsNullOrEmpty(dialog.Character) || string.IsNullOrEmpty(dialog.Content))
+                {
+                    Debug.LogError($"发现空对话数据 - 角色: '{dialog.Character}', 内容: '{dialog.Content}'");
+                }
+            }
+            HandleDialogStart(dialogs);
+        }
+        else
+        {
+            Debug.LogError($"无法加载storyId={storyId}的对话配置");
+        }
+    }
+
     private void HandleDialogStart(List<DialogData> dialogs)
     {
-        _currentDialogs = new Queue<DialogData>(dialogs);
+        Debug.Log("开始处理对话队列");
+        
+        // 将列表转为字典并按ID排序
+        var sortedDialogs = new SortedDictionary<int, DialogData>();
+        foreach(var dialog in dialogs)
+        {
+            if(int.TryParse(dialog.DialogID, out int id))
+            {
+                sortedDialogs.Add(id, dialog);
+            }
+            else
+            {
+                Debug.LogError($"无效的DialogID格式: {dialog.DialogID}");
+            }
+        }
+        
+        // 将排序后的对话存入队列
+        _currentDialogs = new Queue<DialogData>(sortedDialogs.Values);
         StartCoroutine(PlayDialogs());
     }
 
-    /// <summary>
-    /// 事件处理：结束对话
-    /// </summary>
-
-    private void HandleDialogEnd()
-    {
-        
-    }
-
-    /// <summary>
-    /// 对话播放主协程
-    /// </summary>
     private IEnumerator PlayDialogs()
     {
-        dialogPopup.alpha = 255;
+        Debug.Log("[对话系统] 开始播放对话序列");
+        dialogPopup.alpha = 1;
         
         while (_currentDialogs.Count > 0)
         {
             var data = _currentDialogs.Dequeue();
             ShowText(data.Content, data.Character);
             
-            yield return new WaitUntil(() => 
-                Input.GetKeyDown(KeyCode.Space) || 
-                Input.GetKeyDown(KeyCode.Return) || 
-                Input.GetMouseButtonDown(0));
-        }
-        
-        dialogPopup.alpha = 0;
-
-    }
-
-    /// <summary>
-    /// 立即跳过当前对话
-    /// </summary>
-
-    public void SkipCurrentDialog()
-    {
-        _isSkipping = true;
-        
-        if(Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.Return) || Input.GetMouseButton(0))
-        {
-            _isSkipping = true;
-        }
-    }
-
-    /// <summary>
-    /// 文本逐字显示协程
-    /// </summary>
-    private IEnumerator TypeText(string content, string character)
-    {
-        characterName.text = character;
-        dialogText.text = "";
-        _isSkipping = false;
-
-        foreach (char c in content)
-        {
-            if (_isSkipping) 
-            {
-                dialogText.text = content;
-                break;
-            }
+            // 精简后的输入等待日志
+            Debug.Log($"[对话系统] 等待用户输入 (剩余:{_currentDialogs.Count}条)");
             
-            dialogText.text += c;
-            yield return new WaitForSeconds(0.05f);
+            bool inputDetected = false;
+            while (!inputDetected)
+            {
+                if (Input.GetMouseButtonDown(0) || 
+                    Input.GetKeyDown(KeyCode.Space) ||
+                    Input.GetKeyDown(KeyCode.Return))
+                {
+                    inputDetected = true;
+                }
+                yield return null;
+            }
         }
+        
+        Debug.Log("[对话系统] 对话播放完成");
+        dialogPopup.alpha = 0;
+        int currentLevel = GameManager.Instance.GetCurrentLevel();
+        GameEvents.TriggerLevelEnter(currentLevel);
+    }
 
+    private void ShowText(string content, string character)
+    {
+        // 精简后的显示日志
+        Debug.Log($"[对话系统] 显示对话 - 角色:{character}");
+        
+        if(dialogText == null) Debug.LogError("dialogText未赋值!");
+        if(characterName == null) Debug.LogError("characterName未赋值!");
+    
+        characterName.text = character;
+        dialogText.text = content;
         _typingCoroutine = null;
     }
 
-    /// <summary>
-    /// 启动文本显示流程
-    /// </summary>
-    private void ShowText(string content, string character)
+    void Update()
     {
-        if (_typingCoroutine != null) StopCoroutine(_typingCoroutine);
-        _typingCoroutine = StartCoroutine(TypeText(content, character));
+        if (Input.anyKeyDown)
+        {
+            Debug.Log($"按键检测: {Input.inputString} 鼠标点击: {Input.GetMouseButtonDown(0)}");
+        }
     }
 }

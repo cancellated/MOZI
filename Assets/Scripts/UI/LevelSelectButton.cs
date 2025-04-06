@@ -8,9 +8,8 @@ public class LevelSelectButton : MonoBehaviour
         PreLevel,  // 关卡前故事
         PostLevel  // 关卡后故事
     }
-
-    [SerializeField] public int targetLevelId;
     [SerializeField] private Button button;
+    public int targetLevelId;
     
     private void Start()
     {
