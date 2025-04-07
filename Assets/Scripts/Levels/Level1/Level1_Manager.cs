@@ -6,6 +6,10 @@ using UnityEngine;
 
 public class Level1_Manager : MonoBehaviour
 {
+    [Header("关前引导")]
+    [Tooltip("关前解说图")]
+    [SerializeField] private GameObject guideImage; // 关前引导图
+
     [Header("所有可控制的物体")]
     [Tooltip("场景中的物体")]
     [SerializeField] public MouseControlObject[] MouseControlObjects; //所有可控制的物体
@@ -29,6 +33,12 @@ public class Level1_Manager : MonoBehaviour
     //}
     void Start()
     {
+        // 显示关前引导图
+        if (guideImage != null)
+        {
+            guideImage.SetActive(true);
+        }
+
         foreach (MouseControlObject obj in MouseControlObjects)
         {
             objectStatus[obj] = false;
@@ -37,6 +47,12 @@ public class Level1_Manager : MonoBehaviour
 
     void Update()
     {
+        // 检测点击事件以关闭引导图
+        if (guideImage != null && guideImage.activeSelf && Input.GetMouseButtonDown(0))
+        {
+            guideImage.SetActive(false);
+        }
+
         if (!isLevelComplete)
         {
             HandleInput();
