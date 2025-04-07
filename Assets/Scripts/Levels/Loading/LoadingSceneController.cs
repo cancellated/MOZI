@@ -21,8 +21,9 @@ public class LoadingSceneController : MonoBehaviour
         _isLoading = true;
 
         string targetScene = SceneManager.Instance.GetTargetScene();
-        Debug.Log($"目标场景: {targetScene}");
-        
+        int targetStoryId = SceneManager.Instance.GetTargetStoryId(); // 新增：获取故事ID
+        Debug.Log($"目标场景: {targetScene}, 故事ID: {targetStoryId}"); // 修改日志输出
+
         // 确保场景存在
         if (string.IsNullOrEmpty(targetScene))
         {
@@ -52,6 +53,16 @@ public class LoadingSceneController : MonoBehaviour
             if (_asyncOperation.progress >= 0.9f)
             {
                 Debug.Log("场景加载完成，准备切换");
+                
+                if (targetStoryId > 0 && targetScene == "Dialog")
+                {
+                    GameManager.Instance.SetCurrentStory(targetStoryId);
+                    Debug.Log($"已设置当前故事ID: {targetStoryId}");
+                    
+                    // 额外等待一帧确保数据同步
+                    yield return null;
+                }
+
                 _asyncOperation.allowSceneActivation = true;
                 yield break;
             }
@@ -69,4 +80,6 @@ public class LoadingSceneController : MonoBehaviour
             _asyncOperation = null;
         }
     }
+
+
 }

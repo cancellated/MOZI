@@ -10,7 +10,7 @@ using UnityEngine.UI;
 /// 3. 处理用户输入的中断逻辑
 /// 4. 与全局事件系统集成
 /// </summary>
-public class DialogManager : SingletonBase<DialogManager>
+public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
 {
     [Header("UI Components")]
     [Tooltip("对话弹窗的CanvasGroup组件")]
@@ -29,24 +29,43 @@ public class DialogManager : SingletonBase<DialogManager>
     /// <summary>
     /// 单例初始化方法
     /// </summary>
-    protected override void Initialize()
+    void Awake()
     {
+        // 初始化事件监听
         GameEvents.OnStoryEnter += OnStoryEnter;
-    
-        // 测试代码
-        #if UNITY_EDITOR
-        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals("Dialog"))
+        
+        // 检查当前故事ID
+        int currentStory = GameManager.Instance.GetCurrentStory();
+        if (currentStory > 0)
         {
-            Debug.Log("编辑器直接运行对话场景，使用测试storyId");
-            OnStoryEnter(1001); // 使用你的测试storyId
+            Debug.Log($"立即加载故事ID: {currentStory}");
+            OnStoryEnter(currentStory);
         }
-        #endif
+    }
+
+    void OnDestroy()
+    {
+        // 清理事件监听
+        GameEvents.OnStoryEnter -= OnStoryEnter;
+    }
+
+    private IEnumerator DelayedStoryCheck()
+    {
+        // 等待一帧确保所有单例已初始化
+        yield return null;
+        
+        int currentStory = GameManager.Instance.GetCurrentStory();
+        if (currentStory > 0)
+        {
+            Debug.Log($"强制加载故事ID: {currentStory}");
+            OnStoryEnter(currentStory);
+        }
     }
 
     private void OnStoryEnter(int storyId)
     {
         Debug.Log($"收到故事进入事件，storyId: {storyId}");
-        var dialogs = DialogConfigManager.Instance.GetDialogsByStoryId(storyId);
+        var dialogs = DialogConfigManager.GetDialogsByStoryId(storyId);
         
         if(dialogs != null) 
         {
@@ -97,13 +116,10 @@ public class DialogManager : SingletonBase<DialogManager>
         
         while (_currentDialogs.Count > 0)
         {
-            var data = _currentDialogs.Dequeue();
+            var data = _currentDialogs.Peek(); // 先Peek而不是Dequeue
             ShowText(data.Content, data.Character);
             
-            // 等待打字完成
             yield return new WaitUntil(() => _typingCoroutine == null);
-            
-            Debug.Log($"[对话系统] 等待用户输入 (剩余:{_currentDialogs.Count}条)");
             
             // 等待用户输入切换到下一句
             bool inputDetected = false;
@@ -117,12 +133,31 @@ public class DialogManager : SingletonBase<DialogManager>
                 }
                 yield return null;
             }
+            
+            _currentDialogs.Dequeue(); // 确认完成后再移除
         }
         
         Debug.Log("[对话系统] 对话播放完成");
         dialogPopup.alpha = 0;
-        int currentLevel = GameManager.Instance.GetCurrentLevel();
-        GameEvents.TriggerLevelEnter(currentLevel);
+        
+        // 添加队列空检查
+        if(_currentDialogs.Count == 0)
+        {
+            // 获取当前故事ID并标记完成
+            int currentStory = GameManager.Instance.GetCurrentStory();
+            GameManager.Instance.CompeleteStory(currentStory);
+            
+            // 根据故事类型决定下一步操作
+            if (currentStory >= 2000) // 后置故事
+            {
+                GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);
+            }
+            else // 前置故事
+            {
+                int levelId = currentStory % 1000;
+                GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevel);
+            }
+        }
     }
 
     private IEnumerator TypeText(string content, string character)
@@ -143,7 +178,7 @@ public class DialogManager : SingletonBase<DialogManager>
             }
             
             dialogText.text += c;
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSeconds(0.05f);  // 确保这里的时间间隔正常执行
         }
     
         _isTypingComplete = true;
@@ -186,6 +221,18 @@ public class DialogManager : SingletonBase<DialogManager>
             {
                 Debug.Log($"[输入检测] 检测到跳过输入");
                 _shouldSkipCurrentText = true;
+                
+                // 立即完成当前文本显示
+                if(_typingCoroutine != null) 
+                {
+                    StopCoroutine(_typingCoroutine);
+                    if(_currentDialogs.Count > 0)
+                    {
+                        dialogText.text = _currentDialogs.Peek().Content;
+                    }
+                    _typingCoroutine = null;
+                    _isTypingComplete = true;
+                }
             }
         }
     }

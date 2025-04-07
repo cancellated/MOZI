@@ -67,17 +67,9 @@ public static class GameEvents
 
     #region 场景切换
     /// <summary>
-    /// 触发场景切换事件（兼容旧版）
-    /// </summary>
-    public static void TriggerSceneTransition(SceneTransitionType transitionType)
-    {
-        TriggerSceneTransition(transitionType, 0);
-    }
-
-    /// <summary>
     /// 触发场景切换事件（新版带ID参数）
     /// </summary>
-    public static void TriggerSceneTransition(SceneTransitionType transitionType, int id)
+    public static void TriggerSceneTransition(SceneTransitionType transitionType, int id = 0)
     {
         // 需要ID的场景(故事和关卡)必须提供有效ID
         if ((transitionType == SceneTransitionType.ToLevel || 

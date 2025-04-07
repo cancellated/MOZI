@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 
+// 在类定义前添加执行顺序属性
+[DefaultExecutionOrder(-100)]
 public class GameManager : SingletonBase<GameManager>
 {
     public static class StoryConfig 
@@ -13,11 +15,18 @@ public class GameManager : SingletonBase<GameManager>
     [Header("玩家进度")]
     [SerializeField] private GameProgress _progress = new();
 
+    // 添加初始化状态
+    public bool IsInitialized { get; private set; } = false;
+
     protected override void Initialize()
     {
         LoadProgress();
         RegisterEventHandlers();
         ValidateProgress();
+        
+        // 标记初始化完成
+        IsInitialized = true;
+        Debug.Log("GameManager初始化完成");
     }
 
     #region 事件注册
@@ -130,18 +139,26 @@ public class GameManager : SingletonBase<GameManager>
     #region 存档管理
     public void SaveProgress()
     {
-        string path = Path.Combine(Application.persistentDataPath, "savedata", "savegame.dat");
+        string path = Path.Combine(Application.dataPath, "../SaveData/savegame.dat");
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         File.WriteAllText(path, JsonUtility.ToJson(_progress));
-        Debug.Log("进度已保存");
+        Debug.Log($"进度已保存到: {path}");
     }
 
     private void LoadProgress()
     {
-        string path = Path.Combine(Application.persistentDataPath, "savedata", "savegame.dat");
+        string path = Path.Combine(Application.dataPath, "../SaveData/savegame.dat");
         if (File.Exists(path))
         {
             _progress = JsonUtility.FromJson<GameProgress>(File.ReadAllText(path));
+            Debug.Log($"从 {path} 加载存档");
+        }
+        else
+        {
+            // 确保新游戏时第一关是解锁且未完成状态
+            _progress.unlockedLevels[1] = true; 
+            _progress.completedLevels[1] = false;
+            Debug.Log("创建新存档，初始化默认值");
         }
     }
     #endregion
@@ -152,7 +169,7 @@ public class GameManager : SingletonBase<GameManager>
         if (levelId > 0 && !IsLevelCompleted(levelId))
         {
             _progress.completedLevels[levelId] = true;
-            GameEvents.TriggerLevelComplete(levelId);
+            //GameEvents.TriggerLevelComplete(levelId);
             SaveProgress();
             Debug.Log($"完成关卡: {levelId}");
         }

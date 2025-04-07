@@ -19,12 +19,23 @@ public class SceneManager : SingletonBase<SceneManager>
     {
         GameEvents.OnLevelEnter += HandleLevelSelected;
         GameEvents.OnSceneTransitionRequest += HandleSceneTransition;
+        GameEvents.OnStoryEnter += HandleStoryEnter; // 新增订阅
     }
 
     protected override void OnDestroy()
     {
         GameEvents.OnLevelEnter -= HandleLevelSelected;
         GameEvents.OnSceneTransitionRequest -= HandleSceneTransition;
+        GameEvents.OnStoryEnter -= HandleStoryEnter; // 新增取消订阅
+    }
+
+    // 新增故事进入处理方法
+    private void HandleStoryEnter(int storyId)
+    {
+        Debug.Log($"处理故事进入事件，storyId: {storyId}");
+        GameManager.Instance.SetCurrentStory(storyId);
+        _targetStoryId = storyId;
+        LoadScene(dialogScene);
     }
 
     private void HandleLevelSelected(int levelId)
@@ -96,8 +107,13 @@ public class SceneManager : SingletonBase<SceneManager>
     {
         if (!string.IsNullOrEmpty(sceneName))
         {
+            // 如果是加载Dialog场景，确保重置对话状态
+            if (sceneName == "Dialog")
+            {
+                // 可以在这里添加额外的对话状态重置逻辑
+                Debug.Log("准备加载对话场景，重置对话状态");
+            }
             _targetScene = sceneName;
-            Debug.Log($"准备加载场景: {sceneName}");
             UnityEngine.SceneManagement.SceneManager.LoadScene(loadingScene);
         }
     }

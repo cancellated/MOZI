@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+[DefaultExecutionOrder(-50)] 
 public class LevelSelectionController : SingletonBase<LevelSelectionController>
 {
     [Header("UI配置")]
@@ -10,9 +11,19 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
 
     protected override void Initialize()
     {
+        // 确保GameManager已初始化
+        if(!GameManager.Instance.IsInitialized)
+        {
+            Debug.LogError("GameManager未初始化！");
+            return;
+        }
+
         InitializeLevelButtons();
         RegisterEventHandlers();
         storyReviewPanel.SetActive(false);
+        
+        // 修改日志输出，显示更详细的状态
+        Debug.Log($"关卡选择控制器初始化 - 第一关状态: 解锁:{GameManager.Instance.IsLevelUnlocked(1)} 完成:{GameManager.Instance.IsLevelCompleted(1)}");
     }
 
     public void OnLevelButtonClicked(int levelId)
@@ -20,19 +31,16 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
         if (!GameManager.Instance.IsLevelUnlocked(levelId))
             return;
 
-        // 获取前置故事ID（使用LevelSelectButton的枚举和生成规则）
         int preStoryId = 1000 + levelId;
         int postStoryId = 2000 + levelId;
 
         // 检查是否需要播放前置故事
         if (!GameManager.Instance.IsStoryCompleted(preStoryId))
         {
+            GameManager.Instance.SetCurrentLevel(levelId);
             GameEvents.TriggerStoryEnter(preStoryId);
-            GameEvents.OnStoryComplete += (id) => {
-                if(id == preStoryId) LoadLevel(levelId);
-            };
         }
-        // 检查是否需要播放后置故事（当关卡已完成但后置故事未播放时）
+        // 检查是否需要播放后置故事
         else if (GameManager.Instance.IsLevelCompleted(levelId) && 
                 !GameManager.Instance.IsStoryCompleted(postStoryId))
         {
@@ -46,8 +54,9 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
 
     private void LoadLevel(int levelId)
     {
+        Debug.Log($"请求加载关卡: {levelId}");
         GameManager.Instance.SetCurrentLevel(levelId);
-        GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevel);
+        GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevel, levelId);
     }
 
     private void InitializeLevelButtons()
@@ -81,18 +90,17 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
         if (_levelButtons.TryGetValue(levelId, out var button))
         {
             bool isUnlocked = GameManager.Instance.IsLevelUnlocked(levelId);
+            bool shouldHide = !isUnlocked || IsLevelFullyCompleted(levelId);
+            
+            button.gameObject.SetActive(!shouldHide);
             button.UpdateVisualState(isUnlocked);
             
-            // 根据需求决定是否隐藏已完成的关卡按钮
-            if (ShouldHideButton(levelId))
-            {
-                button.gameObject.SetActive(false);
-            }
+            Debug.Log($"关卡 {levelId} 状态 - 解锁:{isUnlocked} 完成:{shouldHide}");
         }
     }
-
-    // 修改隐藏条件判断
-    private bool ShouldHideButton(int levelId)
+    
+    // 判断关卡是否完全完成(通关且后置故事已完成)
+    private bool IsLevelFullyCompleted(int levelId)
     {
         int postStoryId = 2000 + levelId;
         return GameManager.Instance.IsLevelCompleted(levelId) && 

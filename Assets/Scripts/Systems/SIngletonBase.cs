@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 /// <summary>
 /// 单例模式基类，提供全局唯一实例访问和自动初始化功能
@@ -53,10 +54,19 @@ public abstract class SingletonBase<T> : MonoBehaviour where T : SingletonBase<T
             // 确保只初始化一次
             if (!_isInitialized)
             {
-                Initialize();
-                _isInitialized = true;
+                // 延迟初始化到下一帧
+                StartCoroutine(DelayedInitialize());
             }
         }
+    }
+
+    private IEnumerator DelayedInitialize()
+    {
+        // 等待一帧确保所有单例都已创建
+        yield return null;
+        
+        Initialize();
+        _isInitialized = true;
     }
 
     /// <summary>

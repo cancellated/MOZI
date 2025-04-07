@@ -7,14 +7,20 @@ public class StartSceneController : MonoBehaviour
     [SerializeField] private VideoClip introVideoClip;
     [SerializeField] private VideoPlayer videoPlayer;
     private bool _hasStarted = false;
-    private bool _isTransitioning = false; // 新增标志防止重复切换
+    private bool _isTransitioning = false;
 
     void Start()
     {
+        // 设置音频缓冲区大小
+        videoPlayer.audioOutputMode = VideoAudioOutputMode.Direct;
+        videoPlayer.SetDirectAudioVolume(0, 1f);
+        videoPlayer.controlledAudioTrackCount = 1;
+        videoPlayer.EnableAudioTrack(0, true);
+        
         videoPlayer.clip = introVideoClip;
         videoPlayer.playOnAwake = false;
         videoPlayer.loopPointReached += OnVideoEnd;
-        videoPlayer.errorReceived += OnVideoError; // 添加错误回调
+        videoPlayer.errorReceived += OnVideoError;
     }
 
     void OnDestroy()

@@ -319,8 +319,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _progress:
-    currentLevel: 0
-    currentStory: 0
+    currentLevel: 1
+    currentStory: 1001
 --- !u!114 &48813486
 MonoBehaviour:
   m_ObjectHideFlags: 0
