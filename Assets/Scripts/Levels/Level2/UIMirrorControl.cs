@@ -83,10 +83,10 @@ public class UIMirrorControl : MonoBehaviour, IPointerDownHandler, IDragHandler,
         if (isDragging && tempMirrorInstance != null)
         {
             // 初始化场景镜子
-            var mirrorControl = tempMirrorInstance.GetComponent<SceneMirrorControl>();
+            var mirrorControl = tempMirrorInstance.GetComponent<BaseMirrorControl>();
             if (mirrorControl != null)
             {
-                mirrorControl.Initialize(mirrorIndex);
+                mirrorControl.Initialize();
             }
             
             isDragging = false;

@@ -37,8 +37,11 @@ public class LightBeamManager : MonoBehaviour
     /// <summary>
     /// 更新光线路径，处理光线反射
     /// </summary>
+    private bool hasPassedThroughLens = false;
+
     private void UpdateBeamPath()
     {
+        hasPassedThroughLens = false; // 重置状态
         Vector3 direction = lightOrigin.right;
         Vector3 currentPos = lightOrigin.position;
         
@@ -52,12 +55,16 @@ public class LightBeamManager : MonoBehaviour
                 beamRenderer.positionCount++;
                 beamRenderer.SetPosition(beamRenderer.positionCount - 1, hit.point);
                 
+                if (hit.collider.CompareTag("ConvexLens"))
+                {
+                    hasPassedThroughLens = true; // 标记已通过凸透镜
+                }
                 if (hit.collider.CompareTag("Mirror"))
                 {
-                    SceneMirrorControl mirrorControl = hit.collider.GetComponent<SceneMirrorControl>();
+                    var mirrorControl = hit.collider.GetComponent<BaseMirrorControl>();
                     if (mirrorControl != null)
                     {
-                        // 检查光线是否从正面照射到镜子
+                        // 检查光线是否从正面照射
                         if (Vector3.Dot(direction, -mirrorControl.surfaceNormal) > 0)
                         {
                             direction = Vector3.Reflect(direction, mirrorControl.surfaceNormal);
@@ -68,6 +75,15 @@ public class LightBeamManager : MonoBehaviour
                             break; // 如果从背面照射，结束反射
                         }
                     }
+                }
+                else if (hit.collider.CompareTag("ConvexLens"))
+                {
+                    var lensControl = hit.collider.GetComponent<ConvexLensControl>();
+                    if (lensControl != null)
+                    {
+                        direction = lensControl.HandleLightPass(direction, hit.point);
+                    }
+                    currentPos = hit.point;
                 }
                 else
                 {
@@ -86,11 +102,18 @@ public class LightBeamManager : MonoBehaviour
     /// </summary>
     private void CheckTargetHit()
     {
-        Vector3 endPos = beamRenderer.GetPosition(beamRenderer.positionCount - 1); // 获取光线终点位置
-        // 如果光线终点在目标区域内，触发关卡完成
-        if (Vector3.Distance(endPos, targetZone.position) < targetRadius)
+        Vector3 endPos = beamRenderer.GetPosition(beamRenderer.positionCount - 1);
+        Collider targetCollider = targetZone.GetComponent<Collider>();
+        
+        if (targetCollider != null && targetCollider.bounds.Contains(endPos) && hasPassedThroughLens)
         {
-            GetComponent<Level2_Manager>().TriggerLevelComplete(); // 调用关卡管理器完成关卡
+            // 禁用所有镜子/透镜的控制
+        var mirrors = FindObjectsOfType<BaseMirrorControl>();
+        foreach (var mirror in mirrors)
+        {
+            mirror.DisableControl();
+        }
+            GetComponent<Level2_Manager>().TriggerLevelComplete();
         }
     }
 }
