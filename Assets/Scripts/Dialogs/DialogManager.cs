@@ -9,8 +9,9 @@ using UnityEngine.UI;
 /// 2. 实现逐字显示的文字效果
 /// 3. 处理用户输入的中断逻辑
 /// 4. 与全局事件系统集成
+/// 5. 背景音乐控制
 /// </summary>
-public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
+public class DialogManager : MonoBehaviour
 {
     [Header("UI Components")]
     [Tooltip("对话弹窗的CanvasGroup组件")]
@@ -20,21 +21,27 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
     [Tooltip("显示当前说话角色名的Text组件")]
     [SerializeField] private Text characterName;
 
+    [Header("音频组件")]
+    [Tooltip("BGM音频源")]
+    [SerializeField] private AudioSource bgmSource;
+
+    [Header("图像组件")]
+    [Tooltip("角色立绘Image组件")]
+    [SerializeField] private Image characterImage;
+    [Tooltip("背景图Image组件")] 
+    [SerializeField] private Image backgroundImage;
+
     private Queue<DialogData> _currentDialogs = new();
     private Coroutine _typingCoroutine;
     private bool _isSkipping;
     private bool _isTypingComplete;
     private bool _shouldSkipCurrentText;
+    private AudioClip _currentBGM;
 
-    /// <summary>
-    /// 单例初始化方法
-    /// </summary>
     void Awake()
     {
-        // 初始化事件监听
         GameEvents.OnStoryEnter += OnStoryEnter;
         
-        // 检查当前故事ID
         int currentStory = GameManager.Instance.GetCurrentStory();
         if (currentStory > 0)
         {
@@ -45,8 +52,8 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
 
     void OnDestroy()
     {
-        // 清理事件监听
         GameEvents.OnStoryEnter -= OnStoryEnter;
+        StopBGM();
     }
 
     private void OnStoryEnter(int storyId)
@@ -57,7 +64,8 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
         if(dialogs != null) 
         {
             Debug.Log($"成功加载对话配置，共{dialogs.Count}条对话");
-            // 添加对话内容验证
+            PlayBGM(dialogs[0].BGM);
+            
             foreach(var dialog in dialogs)
             {
                 if(string.IsNullOrEmpty(dialog.Character) || string.IsNullOrEmpty(dialog.Content))
@@ -73,11 +81,49 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
         }
     }
 
+    private void PlayBGM(string bgmName)
+    {
+        if (string.IsNullOrEmpty(bgmName) || bgmName == "None") 
+        {
+            // 如果配置为None则停止当前BGM
+            if(bgmSource.isPlaying)
+            {
+                bgmSource.Stop();
+                _currentBGM = null;
+            }
+            return;
+        }
+
+        var bgmClip = Resources.Load<AudioClip>($"Audios/对话/{bgmName}");
+        if (bgmClip == null)
+        {
+            Debug.LogError($"无法加载BGM: {bgmName}");
+            return;
+        }
+
+        // 只有BGM变化时才重新播放
+        if(bgmClip != _currentBGM || !bgmSource.isPlaying)
+        {
+            _currentBGM = bgmClip;
+            bgmSource.clip = _currentBGM;
+            bgmSource.loop = true;
+            bgmSource.Play();
+        }
+    }
+
+    private void StopBGM()
+    {
+        if (bgmSource.isPlaying)
+        {
+            bgmSource.Stop();
+        }
+        _currentBGM = null;
+    }
+
     private void HandleDialogStart(List<DialogData> dialogs)
     {
         Debug.Log("开始处理对话队列");
         
-        // 将列表转为字典并按ID排序
         var sortedDialogs = new SortedDictionary<int, DialogData>();
         foreach(var dialog in dialogs)
         {
@@ -91,7 +137,6 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
             }
         }
         
-        // 将排序后的对话存入队列
         _currentDialogs = new Queue<DialogData>(sortedDialogs.Values);
         StartCoroutine(PlayDialogs());
     }
@@ -104,12 +149,30 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
         while (_currentDialogs.Count > 0)
         {
             var data = _currentDialogs.Peek();
+            
+            // 加载并显示背景图
+            if(!string.IsNullOrEmpty(data.Background))
+            {
+                var bgSprite = Resources.Load<Sprite>($"Images/Backgrounds/{data.Background}");
+                if(bgSprite != null)
+                {
+                    backgroundImage.sprite = bgSprite;
+                    backgroundImage.gameObject.SetActive(true);
+                }
+                else
+                {
+                    Debug.LogWarning($"无法加载背景图: {data.Background}");
+                    backgroundImage.gameObject.SetActive(false);
+                }
+            }
+            
+            // 每次显示新对话前检查是否需要切换BGM
+            PlayBGM(data.BGM);
+            
             ShowText(data.Content, data.Character);
             
-            // 等待打字完成或跳过
             yield return new WaitUntil(() => _isTypingComplete);
             
-            // 等待用户确认进入下一句
             bool inputDetected = false;
             while (!inputDetected)
             {
@@ -125,20 +188,18 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
         
         Debug.Log("[对话系统] 对话播放完成");
         dialogPopup.alpha = 0;
+        StopBGM();
         
-        // 添加队列空检查
         if(_currentDialogs.Count == 0)
         {
-            // 获取当前故事ID并标记完成
             int currentStory = GameManager.Instance.GetCurrentStory();
             GameManager.Instance.CompeleteStory(currentStory);
             
-            // 根据故事类型决定下一步操作
-            if (currentStory >= 2000) // 后置故事
+            if (currentStory >= 2000)
             {
                 GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);
             }
-            else // 前置故事
+            else
             {
                 int levelId = currentStory % 1000;
                 GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevel, levelId);
@@ -170,7 +231,6 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
         _typingCoroutine = null;
     }
 
-    // 修改SkipCurrentDialog方法
     public void SkipCurrentDialog()
     {
         if (_typingCoroutine != null && !_isSkipping)
@@ -184,12 +244,32 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
     {
         Debug.Log($"[对话系统] 显示对话 - 角色:{character}");
         
+        // 加载并显示角色立绘
+        if(!string.IsNullOrEmpty(character))
+        {
+            // 处理CSV中的"角色-表情"格式 (如"主角-平常")
+            var characterParts = character.Split('-');
+            var characterName = characterParts.Length > 0 ? characterParts[0] : character;
+            var expression = characterParts.Length > 1 ? characterParts[1] : "default";
+            
+            var sprite = Resources.Load<Sprite>($"Images/Characters/{characterName}/{expression}");
+            if(sprite != null)
+            {
+                characterImage.sprite = sprite;
+                characterImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                Debug.LogWarning($"无法加载角色立绘: {characterName}/{expression}");
+                characterImage.gameObject.SetActive(false);
+            }
+        }
+        
         if(dialogText == null) Debug.LogError("dialogText未赋值!");
         if(characterName == null) Debug.LogError("characterName未赋值!");
     
         characterName.text = character;
         
-        // 启用打字机效果
         if (_typingCoroutine != null)
         {
             StopCoroutine(_typingCoroutine);

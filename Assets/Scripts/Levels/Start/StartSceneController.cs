@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Video;
+using System.Collections;
 
 public class StartSceneController : MonoBehaviour
 {
@@ -11,62 +12,35 @@ public class StartSceneController : MonoBehaviour
 
     void Start()
     {
-        // 设置音频缓冲区大小
-        videoPlayer.audioOutputMode = VideoAudioOutputMode.Direct;
-        videoPlayer.SetDirectAudioVolume(0, 1f);
-        videoPlayer.controlledAudioTrackCount = 1;
-        videoPlayer.EnableAudioTrack(0, true);
-        
-        videoPlayer.clip = introVideoClip;
-        videoPlayer.playOnAwake = false;
-        videoPlayer.loopPointReached += OnVideoEnd;
-        videoPlayer.errorReceived += OnVideoError;
-    }
-
-    void OnDestroy()
-    {
-        // 清理事件监听
-        videoPlayer.loopPointReached -= OnVideoEnd;
-        videoPlayer.errorReceived -= OnVideoError;
-    }
-
-    private void OnVideoError(VideoPlayer source, string message)
-    {
-        Debug.LogWarning($"视频播放错误: {message}");
-        if (!_isTransitioning)
+        if (videoPlayer != null && introVideoClip != null)
         {
-            OnVideoEnd(source);
+            videoPlayer.clip = introVideoClip;
+            videoPlayer.Play();
         }
-    }
-
-    private void OnVideoEnd(VideoPlayer source)
-    {
-        if (_isTransitioning) return;
-        _isTransitioning = true;
-        
-        // 停止并清理视频播放器
-        if (videoPlayer != null)
+        else
         {
-            videoPlayer.Stop();
-            videoPlayer.clip = null;
+            Debug.LogError("视频播放器或视频剪辑未设置");
         }
-        
-        GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);
     }
 
     void Update()
     {
         if (!_hasStarted && Input.anyKeyDown)
         {
-            // 首次点击开始播放
             _hasStarted = true;
-            videoPlayer.Play();
+            StartCoroutine(StartGameSequence());
         }
-        else if (_hasStarted && Input.anyKeyDown)
-        {
-            // 播放中点击跳过
-            videoPlayer.Stop();
-            OnVideoEnd(videoPlayer);
-        }
+    }
+
+    private IEnumerator StartGameSequence()
+    {
+        if (_isTransitioning) yield break;
+        
+        _isTransitioning = true;
+        videoPlayer.Stop();
+
+
+        // 加载选关场景
+        GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);
     }
 }

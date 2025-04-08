@@ -878,6 +878,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1737209457}
   - component: {fileID: 1737209458}
+  - component: {fileID: 1737209459}
   m_Layer: 0
   m_Name: Loading
   m_TagString: Untagged
@@ -915,6 +916,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   progressBar: {fileID: 1117496078}
   progressText: {fileID: 170579846}
+--- !u!114 &1737209459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1737209456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fd978c1356465447b310403d86ac8c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  backgroundMusicClip: {fileID: 8300000, guid: b076ea0fb954a8c4293333cfaddf8243, type: 3}
+  completeMusicClip: {fileID: 8300000, guid: b076ea0fb954a8c4293333cfaddf8243, type: 3}
 --- !u!1 &1807412248
 GameObject:
   m_ObjectHideFlags: 0
