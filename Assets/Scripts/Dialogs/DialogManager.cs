@@ -189,7 +189,6 @@ public class DialogManager : MonoBehaviour
 
     private IEnumerator TypeText(string content, string character)
     {
-        Debug.Log($"开始逐字显示文本 - 内容:{content}");
         characterName.text = character;
         dialogText.text = "";
         _isTypingComplete = false;
@@ -224,7 +223,7 @@ public class DialogManager : MonoBehaviour
     {
         Debug.Log($"[对话系统] 显示对话 - 角色:{character} 背景:{background}");
         
-        // 加载并显示背景图 - 添加资源存在性检查
+        // 处理背景图加载
         if(!string.IsNullOrEmpty(background))
         {
             string bgPath = $"Images/Dialog/Background/{background}";
@@ -238,50 +237,41 @@ public class DialogManager : MonoBehaviour
             }
             else
             {
-                // 添加更详细的错误信息
-                Debug.LogError($"背景图加载失败，请检查以下内容：\n" +
-                             $"1. 文件路径: Assets/Resources/{bgPath}.png\n" +
-                             $"2. 文件是否存在于项目中\n" +
-                             $"3. 文件导入设置是否正确(Sprite类型)\n" +
-                             $"4. 文件名大小写是否匹配");
-                backgroundImage.gameObject.SetActive(false);
-                
-                // 测试Resources文件夹是否存在
-                var testObj = Resources.Load<UnityEngine.Object>("Images/Dialog/Background");
-                Debug.Log($"Resources文件夹测试: {testObj != null}");
+                Debug.LogError($"背景图加载失败，完整路径：Assets/Resources/{bgPath}.png");
+                //backgroundImage.gameObject.SetActive(false);
             }
         }
-        
-        // 加载并显示角色立绘（旁白不显示）
-        if(!string.IsNullOrEmpty(character))
+        else
         {
-            if(character == "旁白")
+            backgroundImage.gameObject.SetActive(false);
+        }
+    
+        // 处理角色立绘
+        if(character == "旁白")
+        {
+            characterImage.gameObject.SetActive(false);
+            Debug.Log("旁白对话，不显示角色立绘");
+            character = "";
+        }
+        else if(!string.IsNullOrEmpty(character)) 
+        {
+            string charPath = $"Images/Dialog/Character/{character}";
+            var sprite = Resources.Load<Sprite>(charPath);
+            
+            if(sprite != null)
             {
-                characterImage.gameObject.SetActive(false);
-                Debug.Log("旁白对话，不显示角色立绘");
+                characterImage.sprite = sprite;
+                characterImage.gameObject.SetActive(true);
             }
             else
             {
-                string charPath = $"Images/Dialog/Character/{character}";
-                var sprite = Resources.Load<Sprite>(charPath);
-                if(sprite != null)
-                {
-                    characterImage.sprite = sprite;
-                    characterImage.gameObject.SetActive(true);
-                    Debug.Log($"成功加载角色立绘: {charPath}");
-                }
-                else
-                {
-                    Debug.LogWarning($"无法加载角色立绘，请检查资源是否存在: {charPath}");
-                    characterImage.gameObject.SetActive(false);
-                }
+                Debug.LogWarning($"角色立绘加载失败：{charPath}");
+                characterImage.gameObject.SetActive(false);
             }
-            
         }
         
-        if(dialogText == null) Debug.LogError("dialogText未赋值!");
-        if(characterName == null) Debug.LogError("characterName未赋值!");
-    
+        
+        // 设置角色名显示
         characterName.text = character;
         
         if (_typingCoroutine != null)

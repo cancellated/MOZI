@@ -7,7 +7,7 @@ public class SceneManager : SingletonBase<SceneManager>
     [Header("场景配置")]
     [SerializeField] private string startScene = "Start Scene";
     [SerializeField] private string levelSelectScene = "Level Select Scene";
-    [SerializeField] private List<string> levelScenes = new() { "Level_1" };
+    [SerializeField] private List<string> levelScenes = new() { "Level_1", "Level_2" };
     [SerializeField] private string dialogScene = "Dialog";
 
     [Header("加载设置")]
