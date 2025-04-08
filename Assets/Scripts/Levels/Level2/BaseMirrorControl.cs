@@ -42,7 +42,6 @@ public class BaseMirrorControl : MonoBehaviour
     protected virtual void OnMouseDown()
     {
         if (!canControl) return;
-        Debug.Log("鼠标按下事件触发");
         if (Input.GetMouseButton(0))
         {
             isDragging = true;

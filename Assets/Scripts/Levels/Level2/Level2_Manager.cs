@@ -18,8 +18,6 @@ public class Level2_Manager : MonoBehaviour
 
     private bool isLevelComplete = false;
 
-    [Header("点燃火堆")] 
-    [SerializeField] private GameObject completeImage;
 
 
     private void Start()
@@ -58,6 +56,12 @@ public class Level2_Manager : MonoBehaviour
     /// <summary>
     /// 处理关卡完成逻辑
     /// </summary>
+    [Header("通关动画")]
+    [Tooltip("通关UI动画控制器")]
+    [SerializeField] private Animator completeAnimator;
+    [Tooltip("通关动画bool参数名称")]
+    [SerializeField] private string completeAnimationBool = "isComplete";
+
     private void HandleLevelComplete()
     {
         // 切换为通关音乐
@@ -66,8 +70,22 @@ public class Level2_Manager : MonoBehaviour
             audioManager.StopBackgroundMusic();
             audioManager.PlayCompleteMusic();
         }
-        completeImage.SetActive(true);
-        GameEvents.TriggerLevelComplete(2);
+        
+        // 播放通关动画
+        if (completeAnimator != null)
+        {
+            completeAnimator.SetBool(completeAnimationBool, true);
+        }
+        
+        // 延迟1秒触发关卡完成事件
+        StartCoroutine(DelayLevelComplete());
+        
         Debug.Log("第二关完成！");
+    }
+
+    private System.Collections.IEnumerator DelayLevelComplete()
+    {
+        yield return new WaitForSeconds(1f);
+        GameEvents.TriggerLevelComplete(2);
     }
 }
