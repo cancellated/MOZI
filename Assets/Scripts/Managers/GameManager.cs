@@ -60,18 +60,15 @@ public class GameManager : SingletonBase<GameManager>
             CompleteLevel(levelId);
             UnlockLevel(levelId + 1);
             
-            // 修正前置故事ID计算
             int nextPreStoryId = StoryConfig.PreStoryOffset + (levelId + 1);
             UnlockStory(nextPreStoryId);
             
-            SaveProgress();
-            
-            // 修正后置故事ID计算
             int postStoryId = StoryConfig.PostStoryOffset + levelId;
             if(NeedPlayStory(postStoryId)) 
             {
                 GameEvents.TriggerStoryEnter(postStoryId);
             }
+            SaveProgress();
         }
     }
 

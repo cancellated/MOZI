@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+
 [System.Serializable]
 public class DialogData
 {
@@ -13,6 +14,7 @@ public class DialogData
     public string BGM;
     //关联的背景图片资源路径
     public string Background;
+    
     public DialogData(string[] fields, Dictionary<string, int> headerMap)
     {
         DialogID = GetFieldSafe(fields, "DialogID", headerMap);

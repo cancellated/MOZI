@@ -1,11 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 [DefaultExecutionOrder(-50)] 
-public class LevelSelectionController : MonoBehaviour // 移除SingletonBase继承
+public class LevelSelectionController : MonoBehaviour
 {
     [Header("UI配置")]
     [SerializeField] private GameObject storyReviewPanel;
+
+    [Header("音频管理")]
+    [SerializeField] private AudioManager audioManager;
 
     private readonly Dictionary<int, LevelSelectButton> _levelButtons = new();
 
@@ -15,7 +19,18 @@ public class LevelSelectionController : MonoBehaviour // 移除SingletonBase继�
         if(!GameManager.Instance.IsInitialized)
         {
             Debug.LogError("GameManager未初始化！");
+            StartCoroutine(WaitForGameManagerInitialization());
             return;
+        }
+
+        // 播放选关界面BGM
+        if(audioManager != null)
+        {
+            audioManager.PlayBackgroundMusic();
+        }
+        else
+        {
+            Debug.LogError("AudioManager未赋值！");
         }
 
         InitializeLevelButtons();
@@ -135,5 +150,21 @@ public class LevelSelectionController : MonoBehaviour // 移除SingletonBase继�
         GameEvents.OnLevelComplete -= UpdateButtonState;
         GameEvents.OnStoryComplete -= UpdateButtonState;
         GameEvents.OnLevelUnlocked -= UpdateButtonState;
+    }
+
+    private IEnumerator WaitForGameManagerInitialization()
+    {
+        while(!GameManager.Instance.IsInitialized)
+        {
+            yield return null;
+        }
+        
+        InitializeLevelButtons();
+        RegisterEventHandlers();
+        
+        if(storyReviewPanel != null)
+        {
+            storyReviewPanel.SetActive(false);
+        }
     }
 }
