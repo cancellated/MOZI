@@ -5,6 +5,10 @@ using UnityEngine;
 /// </summary>
 public class Level2_Manager : MonoBehaviour
 {
+    [Header("关前引导")]
+    [Tooltip("关前解说图")]
+    [SerializeField] private GameObject guideImage; // 新增关前引导图
+
     [Header("关卡设置")]
     [Tooltip("光线管理器")]
     [SerializeField] private LightBeamManager lightBeamManager;
@@ -16,10 +20,25 @@ public class Level2_Manager : MonoBehaviour
 
     private void Start()
     {
-        // 进入关卡时播放背景音乐
+        // 显示关前引导图
+        if (guideImage != null)
+        {
+            guideImage.SetActive(true);
+        }
+
+        // 播放背景音乐
         if (audioManager != null)
         {
             audioManager.PlayBackgroundMusic();
+        }
+    }
+
+    private void Update()
+    {
+        // 检测点击事件以关闭引导图
+        if (guideImage != null && guideImage.activeSelf && Input.GetMouseButtonDown(0))
+        {
+            guideImage.SetActive(false);
         }
     }
 
