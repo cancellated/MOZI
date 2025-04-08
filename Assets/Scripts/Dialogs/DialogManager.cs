@@ -150,26 +150,9 @@ public class DialogManager : MonoBehaviour
         {
             var data = _currentDialogs.Peek();
             
-            // 加载并显示背景图
-            if(!string.IsNullOrEmpty(data.Background))
-            {
-                var bgSprite = Resources.Load<Sprite>($"Images/Backgrounds/{data.Background}");
-                if(bgSprite != null)
-                {
-                    backgroundImage.sprite = bgSprite;
-                    backgroundImage.gameObject.SetActive(true);
-                }
-                else
-                {
-                    Debug.LogWarning($"无法加载背景图: {data.Background}");
-                    backgroundImage.gameObject.SetActive(false);
-                }
-            }
-            
-            // 每次显示新对话前检查是否需要切换BGM
+            // 移除背景图加载逻辑，移到ShowText中处理
             PlayBGM(data.BGM);
-            
-            ShowText(data.Content, data.Character);
+            ShowText(data.Content, data.Character, data.Background); // 新增background参数
             
             yield return new WaitUntil(() => _isTypingComplete);
             
@@ -240,29 +223,53 @@ public class DialogManager : MonoBehaviour
         }
     }
 
-    private void ShowText(string content, string character)
+    private void ShowText(string content, string character, string background)
     {
-        Debug.Log($"[对话系统] 显示对话 - 角色:{character}");
+        Debug.Log($"[对话系统] 显示对话 - 角色:{character} 背景:{background}");
         
-        // 加载并显示角色立绘
-        if(!string.IsNullOrEmpty(character))
+        // 加载并显示背景图
+        if(!string.IsNullOrEmpty(background))
         {
-            // 处理CSV中的"角色-表情"格式 (如"主角-平常")
-            var characterParts = character.Split('-');
-            var characterName = characterParts.Length > 0 ? characterParts[0] : character;
-            var expression = characterParts.Length > 1 ? characterParts[1] : "default";
-            
-            var sprite = Resources.Load<Sprite>($"Images/Characters/{characterName}/{expression}");
-            if(sprite != null)
+            string bgPath = $"Images/对话/背景/{background}";
+            var bgSprite = Resources.Load<Sprite>(bgPath);
+            if(bgSprite != null)
             {
-                characterImage.sprite = sprite;
-                characterImage.gameObject.SetActive(true);
+                backgroundImage.sprite = bgSprite;
+                backgroundImage.gameObject.SetActive(true);
+                Debug.Log($"成功加载背景图: {bgPath}");
             }
             else
             {
-                Debug.LogWarning($"无法加载角色立绘: {characterName}/{expression}");
-                characterImage.gameObject.SetActive(false);
+                Debug.LogWarning($"无法加载背景图，请检查资源是否存在: {bgPath}");
+                backgroundImage.gameObject.SetActive(false);
             }
+        }
+        
+        // 加载并显示角色立绘（旁白不显示）
+        if(!string.IsNullOrEmpty(character))
+        {
+            if(character == "旁白")
+            {
+                characterImage.gameObject.SetActive(false);
+                Debug.Log("旁白对话，不显示角色立绘");
+            }
+            else
+            {
+                string charPath = $"Images/对话/角色/{character}";
+                var sprite = Resources.Load<Sprite>(charPath);
+                if(sprite != null)
+                {
+                    characterImage.sprite = sprite;
+                    characterImage.gameObject.SetActive(true);
+                    Debug.Log($"成功加载角色立绘: {charPath}");
+                }
+                else
+                {
+                    Debug.LogWarning($"无法加载角色立绘，请检查资源是否存在: {charPath}");
+                    characterImage.gameObject.SetActive(false);
+                }
+            }
+            
         }
         
         if(dialogText == null) Debug.LogError("dialogText未赋值!");
