@@ -13,7 +13,7 @@ public class SceneManager : SingletonBase<SceneManager>
     [Header("加载设置")]
     [SerializeField] private string loadingScene = "Loading Scene";
     private string _targetScene;
-    private int _targetStoryId;
+    private int _targetId;
 
     protected override void Initialize()
     {
@@ -34,7 +34,7 @@ public class SceneManager : SingletonBase<SceneManager>
     {
         Debug.Log($"处理故事进入事件，storyId: {storyId}");
         GameManager.Instance.SetCurrentStory(storyId);
-        _targetStoryId = storyId;
+        _targetId = storyId;
         LoadScene(dialogScene);
     }
 
@@ -48,7 +48,7 @@ public class SceneManager : SingletonBase<SceneManager>
             if(needPlayStory)
             {
                 GameManager.Instance.SetCurrentLevel(levelId);
-                _targetStoryId = preStoryId;
+                _targetId = preStoryId;
                 
                 // 注册故事完成事件处理
                 GameEvents.OnStoryComplete += HandleStoryComplete;
@@ -64,7 +64,7 @@ public class SceneManager : SingletonBase<SceneManager>
 
     private void HandleStoryComplete(int storyId)
     {
-        if(storyId == _targetStoryId)
+        if(storyId == _targetId)
         {
             // 取消注册事件
             GameEvents.OnStoryComplete -= HandleStoryComplete;
@@ -89,6 +89,7 @@ public class SceneManager : SingletonBase<SceneManager>
                 int currentLevel = GameManager.Instance.GetCurrentLevel();
                 if(currentLevel > 0 && currentLevel <= levelScenes.Count)
                 {
+                    _targetId = currentLevel;
                     LoadScene(levelScenes[currentLevel - 1]);
                 }
                 break;
@@ -96,7 +97,7 @@ public class SceneManager : SingletonBase<SceneManager>
                 int currentStory = GameManager.Instance.GetCurrentStory();
                 if(currentStory > 0)
                 {
-                    _targetStoryId = currentStory; // 存储故事ID
+                    _targetId = currentStory; // 存储故事ID
                     LoadScene(dialogScene);
                 }
             break;
@@ -123,9 +124,9 @@ public class SceneManager : SingletonBase<SceneManager>
         return _targetScene;
     }
 
-    public int GetTargetStoryId()
+    public int GetTargetId()
     {
-        return _targetStoryId;
+        return _targetId;
     }
     
     public float GetLoadingProgress()

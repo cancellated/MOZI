@@ -41,20 +41,6 @@ public static class DialogConfigManager
                 Debug.LogError($"无效的对话文件名: {config.name}, 必须为数字ID");
             }
         }
-
-        if (_storyConfigMap.Count == 0)
-        {
-            Debug.LogWarning("未加载到任何对话配置，将创建默认配置");
-            CreateDefaultConfigs();
-        }
-    }
-
-    private static void CreateDefaultConfigs()
-    {
-        string defaultCsv = "DialogID,Content,Character\n1,默认对话内容,默认角色";
-        var defaultConfig = new TextAsset(defaultCsv);
-        _storyConfigMap[1001] = defaultConfig;
-        Debug.Log("已创建默认对话配置 (ID: 1001)");
     }
 
     public static List<DialogData> GetDialogsByStoryId(int storyId)

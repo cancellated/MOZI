@@ -21,8 +21,10 @@ public class LoadingSceneController : MonoBehaviour
         _isLoading = true;
 
         string targetScene = SceneManager.Instance.GetTargetScene();
-        int targetStoryId = SceneManager.Instance.GetTargetStoryId(); // 新增：获取故事ID
-        Debug.Log($"目标场景: {targetScene}, 故事ID: {targetStoryId}"); // 修改日志输出
+        int targetId = SceneManager.Instance.GetTargetId();
+        
+        // 修改日志输出，显示场景类型和ID
+        Debug.Log($"目标场景: {targetScene}, 类型: {(targetScene == "Dialog" ? "故事" : "关卡")}, ID: {targetId}");
 
         // 确保场景存在
         if (string.IsNullOrEmpty(targetScene))
@@ -54,12 +56,21 @@ public class LoadingSceneController : MonoBehaviour
             {
                 Debug.Log("场景加载完成，准备切换");
                 
-                if (targetStoryId > 0 && targetScene == "Dialog")
+                if (targetId > 0)
                 {
-                    GameManager.Instance.SetCurrentStory(targetStoryId);
-                    Debug.Log($"已设置当前故事ID: {targetStoryId}");
+                    if (targetScene == "Dialog")
+                    {
+                        // 故事场景直接使用传入的ID（已含偏移量）
+                        GameManager.Instance.SetCurrentStory(targetId);
+                        Debug.Log($"已设置当前故事ID: {targetId}");
+                    }
+                    else
+                    {
+                        // 关卡场景直接使用原始ID
+                        GameManager.Instance.SetCurrentLevel(targetId); 
+                        Debug.Log($"已设置当前关卡ID: {targetId}");
+                    }
                     
-                    // 额外等待一帧确保数据同步
                     yield return null;
                 }
 
@@ -70,7 +81,6 @@ public class LoadingSceneController : MonoBehaviour
             yield return null;
         }
     }
-
     void OnDestroy()
     {
         // 清理资源

@@ -21,10 +21,9 @@ public class GameManager : SingletonBase<GameManager>
     protected override void Initialize()
     {
         LoadProgress();
+        ValidateProgress(); // 确保在初始化前验证进度
         RegisterEventHandlers();
-        ValidateProgress();
         
-        // 标记初始化完成
         IsInitialized = true;
         Debug.Log("GameManager初始化完成");
     }
@@ -61,11 +60,13 @@ public class GameManager : SingletonBase<GameManager>
             CompleteLevel(levelId);
             UnlockLevel(levelId + 1);
             
+            // 修正前置故事ID计算
             int nextPreStoryId = StoryConfig.PreStoryOffset + (levelId + 1);
             UnlockStory(nextPreStoryId);
             
             SaveProgress();
             
+            // 修正后置故事ID计算
             int postStoryId = StoryConfig.PostStoryOffset + levelId;
             if(NeedPlayStory(postStoryId)) 
             {
@@ -139,19 +140,28 @@ public class GameManager : SingletonBase<GameManager>
     #region 存档管理
     public void SaveProgress()
     {
-        string path = Path.Combine(Application.dataPath, "../SaveData/savegame.dat");
-        Directory.CreateDirectory(Path.GetDirectoryName(path));
+        string saveDir = Path.Combine(Application.dataPath, "..", "SaveData");
+        string path = Path.Combine(saveDir, "savegame.dat");
+        
+        // 确保目录存在
+        if (!Directory.Exists(saveDir))
+        {
+            Directory.CreateDirectory(saveDir);
+        }
+        
         File.WriteAllText(path, JsonUtility.ToJson(_progress));
-        Debug.Log($"进度已保存到: {path}");
+        Debug.Log($"进度已保存到: {path.Replace('\\', '/')}"); // 统一使用正斜杠显示
     }
 
     private void LoadProgress()
     {
-        string path = Path.Combine(Application.dataPath, "../SaveData/savegame.dat");
+        string saveDir = Path.Combine(Application.dataPath, "..", "SaveData");
+        string path = Path.Combine(saveDir, "savegame.dat");
+        
         if (File.Exists(path))
         {
             _progress = JsonUtility.FromJson<GameProgress>(File.ReadAllText(path));
-            Debug.Log($"从 {path} 加载存档");
+            Debug.Log($"从 {path.Replace('\\', '/')} 加载存档"); // 统一使用正斜杠显示
         }
         else
         {
@@ -219,23 +229,25 @@ public class GameManager : SingletonBase<GameManager>
 
     private void ValidateProgress()
     {
-        int currentLevel = GetCurrentLevel();
-        int currentStory = GetCurrentStory();
-        
-        if (!_progress.unlockedLevels.ContainsKey(currentLevel))
+        // 确保当前关卡和故事状态一致
+        if(_progress.currentLevel <= 0) 
         {
-            _progress.unlockedLevels[currentLevel] = true;
+            _progress.currentLevel = 1;
         }
         
-        int preStoryId = StoryConfig.PreStoryOffset + currentLevel;
-        if (!_progress.unlockedStories.ContainsKey(preStoryId))
+        // 确保第一关解锁状态正确
+        if(!_progress.unlockedLevels.ContainsKey(1))
         {
-            _progress.unlockedStories[preStoryId] = true;
+            _progress.unlockedLevels[1] = true;
         }
         
-        if (!_progress.completedStories.ContainsKey(currentStory))
+        // 确保已完成状态与解锁状态一致
+        foreach(var level in _progress.completedLevels)
         {
-            _progress.completedStories[currentStory] = false;
+            if(level.Value && !_progress.unlockedLevels.ContainsKey(level.Key))
+            {
+                _progress.unlockedLevels[level.Key] = true;
+            }
         }
     }
     #endregion

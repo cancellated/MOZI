@@ -49,19 +49,6 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
         GameEvents.OnStoryEnter -= OnStoryEnter;
     }
 
-    private IEnumerator DelayedStoryCheck()
-    {
-        // 等待一帧确保所有单例已初始化
-        yield return null;
-        
-        int currentStory = GameManager.Instance.GetCurrentStory();
-        if (currentStory > 0)
-        {
-            Debug.Log($"强制加载故事ID: {currentStory}");
-            OnStoryEnter(currentStory);
-        }
-    }
-
     private void OnStoryEnter(int storyId)
     {
         Debug.Log($"收到故事进入事件，storyId: {storyId}");
@@ -116,25 +103,24 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
         
         while (_currentDialogs.Count > 0)
         {
-            var data = _currentDialogs.Peek(); // 先Peek而不是Dequeue
+            var data = _currentDialogs.Peek();
             ShowText(data.Content, data.Character);
             
-            yield return new WaitUntil(() => _typingCoroutine == null);
+            // 等待打字完成或跳过
+            yield return new WaitUntil(() => _isTypingComplete);
             
-            // 等待用户输入切换到下一句
+            // 等待用户确认进入下一句
             bool inputDetected = false;
             while (!inputDetected)
             {
-                if (Input.GetMouseButtonDown(0) || 
-                    Input.GetKeyDown(KeyCode.Space) ||
-                    Input.GetKeyDown(KeyCode.Return))
+                if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
                 {
                     inputDetected = true;
                 }
                 yield return null;
             }
             
-            _currentDialogs.Dequeue(); // 确认完成后再移除
+            _currentDialogs.Dequeue();
         }
         
         Debug.Log("[对话系统] 对话播放完成");
@@ -155,7 +141,7 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
             else // 前置故事
             {
                 int levelId = currentStory % 1000;
-                GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevel);
+                GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevel, levelId);
             }
         }
     }
@@ -172,18 +158,16 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
         {
             if (_shouldSkipCurrentText)
             {
-                Debug.Log("立即完成当前对话显示");
                 dialogText.text = content;
                 break;
             }
             
             dialogText.text += c;
-            yield return new WaitForSeconds(0.05f);  // 确保这里的时间间隔正常执行
+            yield return new WaitForSeconds(0.05f);
         }
     
         _isTypingComplete = true;
         _typingCoroutine = null;
-        Debug.Log("文本显示完成");
     }
 
     // 修改SkipCurrentDialog方法
@@ -219,20 +203,7 @@ public class DialogManager : MonoBehaviour  // 移除SingletonBase继承
         {
             if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
             {
-                Debug.Log($"[输入检测] 检测到跳过输入");
                 _shouldSkipCurrentText = true;
-                
-                // 立即完成当前文本显示
-                if(_typingCoroutine != null) 
-                {
-                    StopCoroutine(_typingCoroutine);
-                    if(_currentDialogs.Count > 0)
-                    {
-                        dialogText.text = _currentDialogs.Peek().Content;
-                    }
-                    _typingCoroutine = null;
-                    _isTypingComplete = true;
-                }
             }
         }
     }

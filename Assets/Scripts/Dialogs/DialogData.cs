@@ -15,19 +15,11 @@ public class DialogData
     public string Background;
     public DialogData(string[] fields, Dictionary<string, int> headerMap)
     {
-        Debug.Log($"正在解析行数据，字段数: {fields.Length}");
-        for(int i=0; i<fields.Length; i++)
-        {
-            Debug.Log($"字段[{i}]: '{fields[i]}'");
-        }
-
         DialogID = GetFieldSafe(fields, "DialogID", headerMap);
         Content = GetFieldSafe(fields, "Content", headerMap);
         Character = GetFieldSafe(fields, "Character", headerMap);
         BGM = GetFieldSafe(fields, "BGM", headerMap);
         Background = GetFieldSafe(fields, "Background", headerMap);
-
-        Debug.Log($"解析结果 - ID:{DialogID} 内容:{Content} 角色:{Character}");
     }
 
     private string GetFieldSafe(string[] fields, string header, Dictionary<string, int> headerMap)

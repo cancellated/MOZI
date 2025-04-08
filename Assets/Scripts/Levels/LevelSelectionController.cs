@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 
 [DefaultExecutionOrder(-50)] 
-public class LevelSelectionController : SingletonBase<LevelSelectionController>
+public class LevelSelectionController : MonoBehaviour // 移除SingletonBase继承
 {
     [Header("UI配置")]
     [SerializeField] private GameObject storyReviewPanel;
 
     private readonly Dictionary<int, LevelSelectButton> _levelButtons = new();
 
-    protected override void Initialize()
+    private void Start()
     {
         // 确保GameManager已初始化
         if(!GameManager.Instance.IsInitialized)
@@ -20,9 +20,16 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
 
         InitializeLevelButtons();
         RegisterEventHandlers();
-        storyReviewPanel.SetActive(false);
         
-        // 修改日志输出，显示更详细的状态
+        if(storyReviewPanel != null)
+        {
+            storyReviewPanel.SetActive(false);
+        }
+        else
+        {
+            Debug.LogError("storyReviewPanel未赋值！");
+        }
+        
         Debug.Log($"关卡选择控制器初始化 - 第一关状态: 解锁:{GameManager.Instance.IsLevelUnlocked(1)} 完成:{GameManager.Instance.IsLevelCompleted(1)}");
     }
 
@@ -123,7 +130,7 @@ public class LevelSelectionController : SingletonBase<LevelSelectionController>
         GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);
     }
 
-    protected override void OnDestroy()
+    private void OnDestroy()
     {
         GameEvents.OnLevelComplete -= UpdateButtonState;
         GameEvents.OnStoryComplete -= UpdateButtonState;

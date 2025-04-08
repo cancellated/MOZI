@@ -394,7 +394,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1157111876}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: LevelSelectionController, Assembly-CSharp
         m_MethodName: OnStoryReviewButtonClicked
         m_Mode: 1
@@ -901,7 +901,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1157111876}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: LevelSelectionController, Assembly-CSharp
         m_MethodName: OnStoryReviewButtonClicked
         m_Mode: 1
@@ -951,6 +951,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1054931779}
   m_CullTransparentMesh: 1
+--- !u!1 &1086498003
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1086498005}
+  - component: {fileID: 1086498004}
+  m_Layer: 0
+  m_Name: Level Select
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1086498004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1086498003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d01495ac5d6a572499e42e944e1cf26c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  storyReviewPanel: {fileID: 1798347324}
+--- !u!4 &1086498005
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1086498003}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 960, y: 268.761, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1157111874
 GameObject:
   m_ObjectHideFlags: 0
@@ -961,7 +1006,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1157111878}
   - component: {fileID: 1157111877}
-  - component: {fileID: 1157111876}
   - component: {fileID: 1157111879}
   m_Layer: 0
   m_Name: Managers
@@ -970,19 +1014,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1157111876
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1157111874}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d01495ac5d6a572499e42e944e1cf26c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  storyReviewPanel: {fileID: 1798347324}
 --- !u!114 &1157111877
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1749,3 +1780,4 @@ SceneRoots:
   - {fileID: 1467381857}
   - {fileID: 2109189384}
   - {fileID: 1157111878}
+  - {fileID: 1086498005}
