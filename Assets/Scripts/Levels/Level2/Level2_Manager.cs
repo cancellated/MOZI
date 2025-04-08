@@ -9,12 +9,20 @@ public class Level2_Manager : MonoBehaviour
     [Tooltip("光线管理器")]
     [SerializeField] private LightBeamManager lightBeamManager;
     
-    [Tooltip("是否关卡已完成")]
+    [Header("音频管理")] 
+    [SerializeField] private AudioManager audioManager;
+
     private bool isLevelComplete = false;
 
-    /// <summary>
-    /// 触发关卡完成
-    /// </summary>
+    private void Start()
+    {
+        // 进入关卡时播放背景音乐
+        if (audioManager != null)
+        {
+            audioManager.PlayBackgroundMusic();
+        }
+    }
+
     public void TriggerLevelComplete()
     {
         if (!isLevelComplete)
@@ -29,7 +37,13 @@ public class Level2_Manager : MonoBehaviour
     /// </summary>
     private void HandleLevelComplete()
     {
-        // 触发关卡完成事件
+        // 切换为通关音乐
+        if (audioManager != null)
+        {
+            audioManager.StopBackgroundMusic();
+            audioManager.PlayCompleteMusic();
+        }
+        
         GameEvents.TriggerLevelComplete(2);
         Debug.Log("第二关完成！");
     }

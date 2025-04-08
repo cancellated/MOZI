@@ -3816,6 +3816,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1923613225}
   - component: {fileID: 1923613226}
+  - component: {fileID: 1923613227}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -3860,6 +3861,21 @@ MonoBehaviour:
   imageRenderer: {fileID: 1514777385}
   shadowRenderer: {fileID: 383917988}
   AllObject: {fileID: 1946414918}
+  audioManager: {fileID: 1923613227}
+--- !u!114 &1923613227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1923613223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fd978c1356465447b310403d86ac8c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  backgroundMusicClip: {fileID: 8300000, guid: 698703437c589424cbe0196d31e9858d, type: 3}
+  completeMusicClip: {fileID: 8300000, guid: ff07438f2d808584f862395003747ac0, type: 3}
 --- !u!1 &1946414918
 GameObject:
   m_ObjectHideFlags: 0

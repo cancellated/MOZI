@@ -31,8 +31,17 @@ public class Level1_Manager : MonoBehaviour
     //protected override void Initialize()
     //{
     //}
+    [Header("音频管理")]
+    [SerializeField] private AudioManager audioManager;
+
     void Start()
     {
+        // 播放背景音乐
+        if (audioManager != null)
+        {
+            audioManager.PlayBackgroundMusic();
+        }
+        
         // 显示关前引导图
         if (guideImage != null)
         {
@@ -195,6 +204,13 @@ public class Level1_Manager : MonoBehaviour
         if (isLevelComplete) return; // 防止重复调用
         
         isLevelComplete = true;
+        
+        // 切换为通关音乐
+        if (audioManager != null)
+        {
+            audioManager.StopBackgroundMusic();
+            audioManager.PlayCompleteMusic();
+        }
    
         // 使用StopAllCoroutines确保没有残留的协程
         StopAllCoroutines();

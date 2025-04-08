@@ -1527,6 +1527,7 @@ GameObject:
   - component: {fileID: 1853438776}
   - component: {fileID: 1853438775}
   - component: {fileID: 1853438774}
+  - component: {fileID: 1853438777}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -1547,6 +1548,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lightBeamManager: {fileID: 1853438775}
+  audioManager: {fileID: 1853438777}
 --- !u!114 &1853438775
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1582,6 +1584,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1853438777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1853438773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fd978c1356465447b310403d86ac8c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  backgroundMusicClip: {fileID: 8300000, guid: 698703437c589424cbe0196d31e9858d, type: 3}
+  completeMusicClip: {fileID: 8300000, guid: ff07438f2d808584f862395003747ac0, type: 3}
 --- !u!1 &2004132489
 GameObject:
   m_ObjectHideFlags: 0
