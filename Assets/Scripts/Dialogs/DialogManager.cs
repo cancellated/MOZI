@@ -101,7 +101,6 @@ public class DialogManager : MonoBehaviour
             return;
         }
 
-        // 只有BGM变化时才重新播放
         if(bgmClip != _currentBGM || !bgmSource.isPlaying)
         {
             _currentBGM = bgmClip;
@@ -149,8 +148,6 @@ public class DialogManager : MonoBehaviour
         while (_currentDialogs.Count > 0)
         {
             var data = _currentDialogs.Peek();
-            
-            // 移除背景图加载逻辑，移到ShowText中处理
             PlayBGM(data.BGM);
             ShowText(data.Content, data.Character, data.Background); // 新增background参数
             
@@ -227,11 +224,12 @@ public class DialogManager : MonoBehaviour
     {
         Debug.Log($"[对话系统] 显示对话 - 角色:{character} 背景:{background}");
         
-        // 加载并显示背景图
+        // 加载并显示背景图 - 添加资源存在性检查
         if(!string.IsNullOrEmpty(background))
         {
-            string bgPath = $"Images/对话/背景/{background}";
+            string bgPath = $"Images/Dialog/Background/{background}";
             var bgSprite = Resources.Load<Sprite>(bgPath);
+            
             if(bgSprite != null)
             {
                 backgroundImage.sprite = bgSprite;
@@ -240,8 +238,17 @@ public class DialogManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"无法加载背景图，请检查资源是否存在: {bgPath}");
+                // 添加更详细的错误信息
+                Debug.LogError($"背景图加载失败，请检查以下内容：\n" +
+                             $"1. 文件路径: Assets/Resources/{bgPath}.png\n" +
+                             $"2. 文件是否存在于项目中\n" +
+                             $"3. 文件导入设置是否正确(Sprite类型)\n" +
+                             $"4. 文件名大小写是否匹配");
                 backgroundImage.gameObject.SetActive(false);
+                
+                // 测试Resources文件夹是否存在
+                var testObj = Resources.Load<UnityEngine.Object>("Images/Dialog/Background");
+                Debug.Log($"Resources文件夹测试: {testObj != null}");
             }
         }
         
@@ -255,7 +262,7 @@ public class DialogManager : MonoBehaviour
             }
             else
             {
-                string charPath = $"Images/对话/角色/{character}";
+                string charPath = $"Images/Dialog/Character/{character}";
                 var sprite = Resources.Load<Sprite>(charPath);
                 if(sprite != null)
                 {
