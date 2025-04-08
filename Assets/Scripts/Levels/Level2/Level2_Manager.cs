@@ -18,6 +18,10 @@ public class Level2_Manager : MonoBehaviour
 
     private bool isLevelComplete = false;
 
+    [Header("点燃火堆")] 
+    [SerializeField] private GameObject completeImage;
+
+
     private void Start()
     {
         // 显示关前引导图
@@ -62,7 +66,7 @@ public class Level2_Manager : MonoBehaviour
             audioManager.StopBackgroundMusic();
             audioManager.PlayCompleteMusic();
         }
-        
+        completeImage.SetActive(true);
         GameEvents.TriggerLevelComplete(2);
         Debug.Log("第二关完成！");
     }
