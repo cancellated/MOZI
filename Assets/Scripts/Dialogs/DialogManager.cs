@@ -101,7 +101,6 @@ public class DialogManager : MonoBehaviour
             return;
         }
 
-        // 只有BGM变化时才重新播放
         if(bgmClip != _currentBGM || !bgmSource.isPlaying)
         {
             _currentBGM = bgmClip;
@@ -149,27 +148,8 @@ public class DialogManager : MonoBehaviour
         while (_currentDialogs.Count > 0)
         {
             var data = _currentDialogs.Peek();
-            
-            // 加载并显示背景图
-            if(!string.IsNullOrEmpty(data.Background))
-            {
-                var bgSprite = Resources.Load<Sprite>($"Images/Backgrounds/{data.Background}");
-                if(bgSprite != null)
-                {
-                    backgroundImage.sprite = bgSprite;
-                    backgroundImage.gameObject.SetActive(true);
-                }
-                else
-                {
-                    Debug.LogWarning($"无法加载背景图: {data.Background}");
-                    backgroundImage.gameObject.SetActive(false);
-                }
-            }
-            
-            // 每次显示新对话前检查是否需要切换BGM
             PlayBGM(data.BGM);
-            
-            ShowText(data.Content, data.Character);
+            ShowText(data.Content, data.Character, data.Background); // 新增background参数
             
             yield return new WaitUntil(() => _isTypingComplete);
             
@@ -209,7 +189,6 @@ public class DialogManager : MonoBehaviour
 
     private IEnumerator TypeText(string content, string character)
     {
-        Debug.Log($"开始逐字显示文本 - 内容:{content}");
         characterName.text = character;
         dialogText.text = "";
         _isTypingComplete = false;
@@ -240,19 +219,45 @@ public class DialogManager : MonoBehaviour
         }
     }
 
-    private void ShowText(string content, string character)
+    private void ShowText(string content, string character, string background)
     {
-        Debug.Log($"[对话系统] 显示对话 - 角色:{character}");
+        Debug.Log($"[对话系统] 显示对话 - 角色:{character} 背景:{background}");
         
-        // 加载并显示角色立绘
-        if(!string.IsNullOrEmpty(character))
+        // 处理背景图加载
+        if(!string.IsNullOrEmpty(background))
         {
-            // 处理CSV中的"角色-表情"格式 (如"主角-平常")
-            var characterParts = character.Split('-');
-            var characterName = characterParts.Length > 0 ? characterParts[0] : character;
-            var expression = characterParts.Length > 1 ? characterParts[1] : "default";
+            string bgPath = $"Images/Dialog/Background/{background}";
+            var bgSprite = Resources.Load<Sprite>(bgPath);
             
-            var sprite = Resources.Load<Sprite>($"Images/Characters/{characterName}/{expression}");
+            if(bgSprite != null)
+            {
+                backgroundImage.sprite = bgSprite;
+                backgroundImage.gameObject.SetActive(true);
+                Debug.Log($"成功加载背景图: {bgPath}");
+            }
+            else
+            {
+                Debug.LogError($"背景图加载失败，完整路径：Assets/Resources/{bgPath}.png");
+                //backgroundImage.gameObject.SetActive(false);
+            }
+        }
+        else
+        {
+            backgroundImage.gameObject.SetActive(false);
+        }
+    
+        // 处理角色立绘
+        if(character == "旁白")
+        {
+            characterImage.gameObject.SetActive(false);
+            Debug.Log("旁白对话，不显示角色立绘");
+            character = "";
+        }
+        else if(!string.IsNullOrEmpty(character)) 
+        {
+            string charPath = $"Images/Dialog/Character/{character}";
+            var sprite = Resources.Load<Sprite>(charPath);
+            
             if(sprite != null)
             {
                 characterImage.sprite = sprite;
@@ -260,14 +265,13 @@ public class DialogManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"无法加载角色立绘: {characterName}/{expression}");
+                Debug.LogWarning($"角色立绘加载失败：{charPath}");
                 characterImage.gameObject.SetActive(false);
             }
         }
         
-        if(dialogText == null) Debug.LogError("dialogText未赋值!");
-        if(characterName == null) Debug.LogError("characterName未赋值!");
-    
+        
+        // 设置角色名显示
         characterName.text = character;
         
         if (_typingCoroutine != null)
