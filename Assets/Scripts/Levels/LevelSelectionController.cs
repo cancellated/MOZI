@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections;
 
-[DefaultExecutionOrder(-50)] 
 public class LevelSelectionController : MonoBehaviour
 {
     [Header("UI配置")]
@@ -15,14 +14,6 @@ public class LevelSelectionController : MonoBehaviour
 
     private void Start()
     {
-        // 确保GameManager已初始化
-        if(!GameManager.Instance.IsInitialized)
-        {
-            Debug.LogError("GameManager未初始化！");
-            StartCoroutine(WaitForGameManagerInitialization());
-            return;
-        }
-
         // 播放选关界面BGM
         if(audioManager != null)
         {
@@ -44,41 +35,24 @@ public class LevelSelectionController : MonoBehaviour
         {
             Debug.LogError("storyReviewPanel未赋值！");
         }
-        
-        Debug.Log($"关卡选择控制器初始化 - 第一关状态: 解锁:{GameManager.Instance.IsLevelUnlocked(1)} 完成:{GameManager.Instance.IsLevelCompleted(1)}");
     }
 
     public void OnLevelButtonClicked(int levelId)
     {
-        if (!GameManager.Instance.IsLevelUnlocked(levelId))
-            return;
-
-        int preStoryId = 1000 + levelId;
-        int postStoryId = 2000 + levelId;
-
-        // 检查是否需要播放前置故事
-        if (!GameManager.Instance.IsStoryCompleted(preStoryId))
+        Debug.Log($"点击关卡按钮: {levelId}");
+        
+        // 检查是否需要播放前故事
+        int preStoryId = GameManager.Instance.CalculatePreStoryId(levelId);
+        if(GameManager.Instance.NeedPlayStory(preStoryId))
         {
-            GameManager.Instance.SetCurrentLevel(levelId);
+            Debug.Log($"需要播放前故事: {preStoryId}");
             GameEvents.TriggerStoryEnter(preStoryId);
-        }
-        // 检查是否需要播放后置故事
-        else if (GameManager.Instance.IsLevelCompleted(levelId) && 
-                !GameManager.Instance.IsStoryCompleted(postStoryId))
-        {
-            GameEvents.TriggerStoryEnter(postStoryId);
         }
         else
         {
-            LoadLevel(levelId);
+            Debug.Log($"直接进入关卡: {levelId}");
+            GameEvents.TriggerLevelEnter(levelId);
         }
-    }
-
-    private void LoadLevel(int levelId)
-    {
-        Debug.Log($"请求加载关卡: {levelId}");
-        GameManager.Instance.SetCurrentLevel(levelId);
-        GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevel, levelId);
     }
 
     private void InitializeLevelButtons()
@@ -124,9 +98,8 @@ public class LevelSelectionController : MonoBehaviour
     // 判断关卡是否完全完成(通关且后置故事已完成)
     private bool IsLevelFullyCompleted(int levelId)
     {
-        int postStoryId = 2000 + levelId;
         return GameManager.Instance.IsLevelCompleted(levelId) && 
-               GameManager.Instance.IsStoryCompleted(postStoryId);
+               GameManager.Instance.IsStoryCompleted(GameManager.Instance.CalculatePostStoryId(levelId));
     }
 
     public void OnStoryReviewButtonClicked()
@@ -152,19 +125,4 @@ public class LevelSelectionController : MonoBehaviour
         GameEvents.OnLevelUnlocked -= UpdateButtonState;
     }
 
-    private IEnumerator WaitForGameManagerInitialization()
-    {
-        while(!GameManager.Instance.IsInitialized)
-        {
-            yield return null;
-        }
-        
-        InitializeLevelButtons();
-        RegisterEventHandlers();
-        
-        if(storyReviewPanel != null)
-        {
-            storyReviewPanel.SetActive(false);
-        }
-    }
 }

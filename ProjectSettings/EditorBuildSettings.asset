@@ -9,14 +9,14 @@ EditorBuildSettings:
     path: Assets/Scenes/Core/Start Scene.unity
     guid: db7b909457acf0947af957916899e91c
   - enabled: 1
-    path: Assets/Scenes/Core/Loading Scene.unity
-    guid: 77115e01f0530a745a46295a7e21007c
-  - enabled: 1
     path: Assets/Scenes/Core/Level Select Scene.unity
     guid: 54b2485417f63504e8d3638adc02d76f
   - enabled: 1
     path: Assets/Scenes/Dialog.unity
     guid: 2f82abd8a9a127a4fa9415a52fcfc325
+  - enabled: 1
+    path: Assets/Scenes/Core/CG Scene.unity
+    guid: b8ed139b2a599e44d82096ef4b4d0c86
   - enabled: 1
     path: Assets/Scenes/Level Scenes/Level_1.unity
     guid: ed3a60ef1f5754849b6a3904f1c86d67

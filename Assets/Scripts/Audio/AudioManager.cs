@@ -1,6 +1,5 @@
 using UnityEngine;
 
-[DefaultExecutionOrder(-75)] 
 public class AudioManager : MonoBehaviour
 {
     [Header("背景音乐")]

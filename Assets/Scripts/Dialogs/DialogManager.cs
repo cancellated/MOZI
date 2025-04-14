@@ -33,7 +33,6 @@ public class DialogManager : MonoBehaviour
 
     private Queue<DialogData> _currentDialogs = new();
     private Coroutine _typingCoroutine;
-    private bool _isSkipping;
     private bool _isTypingComplete;
     private bool _shouldSkipCurrentText;
     private AudioClip _currentBGM;
@@ -149,7 +148,7 @@ public class DialogManager : MonoBehaviour
         {
             var data = _currentDialogs.Peek();
             PlayBGM(data.BGM);
-            ShowText(data.Content, data.Character, data.Background); // 新增background参数
+            ShowText(data.Content, data.Character, data.Background);
             
             yield return new WaitUntil(() => _isTypingComplete);
             
@@ -173,17 +172,7 @@ public class DialogManager : MonoBehaviour
         if(_currentDialogs.Count == 0)
         {
             int currentStory = GameManager.Instance.GetCurrentStory();
-            GameManager.Instance.CompeleteStory(currentStory);
-            
-            if (currentStory >= 2000)
-            {
-                GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);
-            }
-            else
-            {
-                int levelId = currentStory % 1000;
-                GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevel, levelId);
-            }
+            GameEvents.TriggerStoryComplete(currentStory);
         }
     }
 
@@ -210,34 +199,24 @@ public class DialogManager : MonoBehaviour
         _typingCoroutine = null;
     }
 
-    public void SkipCurrentDialog()
-    {
-        if (_typingCoroutine != null && !_isSkipping)
-        {
-            _isSkipping = true;
-            Debug.Log("主动调用跳过当前对话");
-        }
-    }
-
     private void ShowText(string content, string character, string background)
     {
-        Debug.Log($"[对话系统] 显示对话 - 角色:{character} 背景:{background}");
+        //Debug.Log($"[对话系统] 显示对话 - 角色:{character} 背景:{background}");
         
         // 处理背景图加载
         if(!string.IsNullOrEmpty(background))
         {
             string bgPath = $"Images/Dialog/Background/{background}";
             var bgSprite = Resources.Load<Sprite>(bgPath);
-            
             if(bgSprite != null)
             {
                 backgroundImage.sprite = bgSprite;
                 backgroundImage.gameObject.SetActive(true);
-                Debug.Log($"成功加载背景图: {bgPath}");
+                //Debug.Log($"成功加载背景图: {bgPath}");
             }
             else
             {
-                Debug.LogError($"背景图加载失败，完整路径：Assets/Resources/{bgPath}.png");
+                Debug.LogError($"背景图加载失败，路径：Assets/Resources/{bgPath}");
                 //backgroundImage.gameObject.SetActive(false);
             }
         }
@@ -250,7 +229,7 @@ public class DialogManager : MonoBehaviour
         if(character == "旁白")
         {
             characterImage.gameObject.SetActive(false);
-            Debug.Log("旁白对话，不显示角色立绘");
+            //Debug.Log("旁白对话，不显示角色立绘");
             character = "";
         }
         else if(!string.IsNullOrEmpty(character)) 
@@ -271,7 +250,7 @@ public class DialogManager : MonoBehaviour
         }
         
         
-        // 设置角色名显示
+        // 设置角色名显示（暂时隐藏）
         characterName.text = character;
         
         if (_typingCoroutine != null)
@@ -280,8 +259,7 @@ public class DialogManager : MonoBehaviour
         }
         _typingCoroutine = StartCoroutine(TypeText(content, character));
     }
-
-    void Update()
+        void Update()
     {
         if (_typingCoroutine != null && !_isTypingComplete)
         {

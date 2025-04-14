@@ -77,40 +77,45 @@ public static class DialogConfigManager
             Debug.LogError("CSV文本为空");
             return new List<DialogData>();
         }
-
+    
         // 移除BOM头
         if (csvText.StartsWith("\uFEFF")) {
             csvText = csvText[1..];
         }
-
+    
         var lines = csvText.Split('\n');
         if (lines.Length < 3) {
             Debug.LogError("CSV行数不足，至少需要两行表头+一行数据");
             return new List<DialogData>();
         }
-
-        // 跳过第一行中文表头，直接使用第二行英文表头
-        var headerLine = lines[1]; 
+    
+        // 处理表头
+        var headerLine = lines[1].TrimEnd('\r', '\n');
         var headers = headerLine.Split(',');
-
-        // 创建字段名映射字典
+    
         var headerMap = new Dictionary<string, int>();
         for (int i = 0; i < headers.Length; i++) {
             string header = headers[i].Trim();
             headerMap[header] = i;
             Debug.Log($"表头映射: '{header}' -> {i}");
         }
-
+    
+        // 处理数据行
         // 从第三行开始解析数据
         List<DialogData> dialogList = new();
         for (int i = 2; i < lines.Length; i++) {
-            if (string.IsNullOrWhiteSpace(lines[i])) continue;
-            
-            var fields = lines[i].Split(',');
-            dialogList.Add(new DialogData(fields, headerMap));
-        }
-
-        Debug.Log($"成功解析出{dialogList.Count}条对话");
+        if (string.IsNullOrWhiteSpace(lines[i])) continue;
+            // 修改后的字段处理逻辑
+            var rawFields = lines[i].Split(',');
+            var fields = new string[headers.Length]; // 确保字段数与表头一致
+            for (int j = 0; j < Mathf.Min(rawFields.Length, headers.Length); j++) {
+                fields[j] = rawFields[j].Trim();
+            }
+                
+        dialogList.Add(new DialogData(fields, headerMap));
+    }
+    
         return dialogList;
     }
+
 }

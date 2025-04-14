@@ -14,83 +14,67 @@ public static class GameEvents
     public static event Action<int> OnStoryComplete;
     public static event Action<int> OnLevelUnlocked;
     public static event Action<int> OnStoryUnlocked;
+    public static event Action<int> OnCGEnter;
+    public static event Action<int> OnCGComplete;
 
     public static event Action<SceneTransitionType> OnSceneTransitionRequest;
 
-    /// <summary>
-    /// 触发场景进入事件
-    /// </summary>
+
+    // 触发关卡进入事件
+
     public static void TriggerLevelEnter(int levelId)
     {
         OnLevelEnter?.Invoke(levelId);
     }
 
-    /// <summary>
-    /// 触发场景完成事件
-    /// </summary>
+    // 触发关卡完成事件
+
     public static void TriggerLevelComplete(int levelId)
     {
         OnLevelComplete?.Invoke(levelId);
     }
 
-    /// <summary>
-    /// 触发故事进入事件
-    /// </summary>
+    // 触发故事进入事件
+
     public static void TriggerStoryEnter(int storyId){
         OnStoryEnter?.Invoke(storyId);
     }
     
-    /// <summary>
-    /// 触发故事完成事件
-    /// </summary>
+    // 触发故事完成事件
     public static void TriggerStoryComplete(int storyId){
         OnStoryComplete?.Invoke(storyId);
     }
 
-    /// <summary>
-    /// 触发关卡解锁事件
-    /// </summary>
+
+    //触发关卡解锁事件
     public static void TriggerLevelUnlocked(int levelId)
     {
         OnLevelUnlocked?.Invoke(levelId);
     }
 
-    /// <summary>
-    /// 触发故事解锁事件
-    /// </summary>
+    //触发故事解锁事件
     public static void TriggerStoryUnlocked(int storyId)
     {
         OnStoryUnlocked?.Invoke(storyId);
     }
 
+    //触发CG进入事件
+        public static void TriggerCGEnter(int cgId)
+    {
+        OnCGEnter?.Invoke(cgId);
+    }
+    
+    //触发CG完成事件
+    public static void TriggerCGComplete(int cgId)
+    {
+        OnCGComplete?.Invoke(cgId);
+    }
     #endregion
 
     #region 场景切换
-    /// <summary>
-    /// 触发场景切换事件（新版带ID参数）
-    /// </summary>
-    public static void TriggerSceneTransition(SceneTransitionType transitionType, int id = 0)
+    public static void TriggerSceneTransition(SceneTransitionType transitionType)
     {
-        // 需要ID的场景(故事和关卡)必须提供有效ID
-        if ((transitionType == SceneTransitionType.ToLevel || 
-             transitionType == SceneTransitionType.ToStory) && id <= 0)
-        {
-            Debug.LogError($"切换{transitionType}场景必须提供有效ID");
-            return;
-        }
-
         OnSceneTransitionRequest?.Invoke(transitionType);
-
-        // 自动触发关联事件
-        switch(transitionType)
-        {
-            case SceneTransitionType.ToLevel:
-                TriggerLevelEnter(id);
-                break;
-            case SceneTransitionType.ToStory:
-                TriggerStoryEnter(id);
-                break;
-        }
     }
 
     public enum SceneTransitionType
@@ -98,7 +82,9 @@ public static class GameEvents
         ToMainMenu,
         ToLevelSelect,
         ToLevel,   // 需要配合LevelID
-        ToStory    // 需要配合StoryID
+        ToStory,    // 需要配合StoryID
+        ToCG,       // 需要配合CGID
     }
     #endregion
+
 }

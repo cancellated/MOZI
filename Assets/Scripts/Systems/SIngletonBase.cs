@@ -10,7 +10,7 @@ public abstract class SingletonBase<T> : MonoBehaviour where T : SingletonBase<T
 {
     private static T _instance;
     private static readonly object _lock = new();
-    private bool _isInitialized;
+    protected bool _isInitialized;
 
     /// <summary>
     /// 全局访问点，线程安全且支持延迟初始化
@@ -50,23 +50,10 @@ public abstract class SingletonBase<T> : MonoBehaviour where T : SingletonBase<T
             // 设置单例实例并持久化
             _instance = this as T;
             DontDestroyOnLoad(gameObject);
+            Initialize();
+            _isInitialized = true;
 
-            // 确保只初始化一次
-            if (!_isInitialized)
-            {
-                // 延迟初始化到下一帧
-                StartCoroutine(DelayedInitialize());
-            }
         }
-    }
-
-    private IEnumerator DelayedInitialize()
-    {
-        // 等待一帧确保所有单例都已创建
-        yield return null;
-        
-        Initialize();
-        _isInitialized = true;
     }
 
     /// <summary>

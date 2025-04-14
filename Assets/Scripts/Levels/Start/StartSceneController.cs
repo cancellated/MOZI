@@ -15,6 +15,7 @@ public class StartSceneController : MonoBehaviour
         if (videoPlayer != null && introVideoClip != null)
         {
             videoPlayer.clip = introVideoClip;
+            videoPlayer.loopPointReached += OnVideoFinished; // 添加播放完成监听
             videoPlayer.Play();
         }
         else
@@ -32,14 +33,20 @@ public class StartSceneController : MonoBehaviour
         }
     }
 
-    private IEnumerator StartGameSequence()
+    private void OnVideoFinished(VideoPlayer vp)
+    {
+        if (!_isTransitioning)
+        {
+            StartCoroutine(StartGameSequence());
+        }
+    }
+
+        private IEnumerator StartGameSequence()
     {
         if (_isTransitioning) yield break;
         
         _isTransitioning = true;
         videoPlayer.Stop();
-
-
         // 加载选关场景
         GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);
     }
