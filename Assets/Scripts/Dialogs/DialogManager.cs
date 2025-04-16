@@ -40,7 +40,8 @@ public class DialogManager : MonoBehaviour
     void Awake()
     {
         GameEvents.OnStoryEnter += OnStoryEnter;
-        
+        GameEvents.OnCGEnter += OnCGEnter;
+
         int currentStory = GameManager.Instance.GetCurrentStory();
         if (currentStory > 0)
         {
@@ -52,6 +53,7 @@ public class DialogManager : MonoBehaviour
     void OnDestroy()
     {
         GameEvents.OnStoryEnter -= OnStoryEnter;
+        GameEvents.OnCGEnter -= OnCGEnter;
         StopBGM();
     }
 
@@ -259,7 +261,7 @@ public class DialogManager : MonoBehaviour
         }
         _typingCoroutine = StartCoroutine(TypeText(content, character));
     }
-        void Update()
+    void Update()
     {
         if (_typingCoroutine != null && !_isTypingComplete)
         {
@@ -268,5 +270,38 @@ public class DialogManager : MonoBehaviour
                 _shouldSkipCurrentText = true;
             }
         }
+        #if UNITY_EDITOR
+        // 编辑器模式下按Ctrl键跳过整个对话
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+        {
+            SkipAllDialogs();
+        }
+        #endif
     }
+
+    private void OnCGEnter(int cgId)
+    {
+        Debug.Log($"收到CG进入事件，cgId: {cgId}, 隐藏对话界面");
+        dialogPopup.alpha = 0;
+        dialogPopup.interactable = false; // 禁用点击
+        dialogPopup.blocksRaycasts = false; // 禁用射线检测，防止点击穿透
+        StopBGM();
+    }
+
+    #if UNITY_EDITOR
+    private void SkipAllDialogs()
+    {
+        if (_currentDialogs.Count > 0)
+        {
+            Debug.Log("[编辑器] 跳过所有对话");
+            _currentDialogs.Clear();
+            dialogPopup.alpha = 0;
+            StopBGM();
+            
+            int currentStory = GameManager.Instance.GetCurrentStory();
+            GameEvents.TriggerStoryComplete(currentStory);
+        }
+    }
+    #endif
+
 }

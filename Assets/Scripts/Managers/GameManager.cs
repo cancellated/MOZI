@@ -21,7 +21,6 @@ public class GameManager : SingletonBase<GameManager>
     public string levelSelectScene = "Level Select Scene";
     public List<string> levelScenes = new() { "Level_1", "Level_2" };
     public string dialogScene = "Dialog";
-    public string CGScene = "CG Scene";
 
     [Header("玩家进度")]
     [SerializeField] private GameProgress _progress = new();
@@ -112,13 +111,9 @@ public class GameManager : SingletonBase<GameManager>
                 SetCurrentLevel(0);
                 return;
             }
-            else
-            {
-               GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect); 
-            }
-
         }
         SetCurrentLevel(0);
+        GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect); 
     }
     
     private void HandleStoryEnter(int storyId) {
@@ -137,20 +132,32 @@ public class GameManager : SingletonBase<GameManager>
             Debug.Log($"完成故事: {storyId}");
         }
         int levelId = GetLevelIdFromStoryId(storyId);
+        
+        bool isPostStory = storyId >= StoryConfig.PostStoryOffset && storyId < 3000;
+        if(isPostStory && levelId > 0 && NeedPlayCG(CGConfig.CGOffset + levelId))
+        {
+            SetCurrentCG(CGConfig.CGOffset + levelId);
+            GameEvents.TriggerCGEnter(CGConfig.CGOffset + levelId);
+            return;
+        }
+        
         if(levelId > 0 && !IsLevelCompleted(levelId))
             GameEvents.TriggerLevelEnter(levelId);
         else
             GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);
     }
+    
     private void HandleCGEnter(int cgId) {
         SetCurrentCG(cgId);
-        GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToCG);
+        Debug.Log($"进入CG: {cgId}");
+
     }
 
     private void HandleCGComplete(int cgId) {
         SetCurrentCG(0);
         GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);  
     }
+    
     private void HandleSceneTransition(GameEvents.SceneTransitionType transitionType) {
         switch (transitionType) {
             case GameEvents.SceneTransitionType.ToLevel:
@@ -164,14 +171,6 @@ public class GameManager : SingletonBase<GameManager>
                 int currentStory = GetCurrentStory();
                 if(currentStory > 0) {
                     LoadScene(dialogScene);
-                }
-                break;
-
-            case GameEvents.SceneTransitionType.ToCG:
-                int currentCG = GetCurrentCG();
-                if(currentCG > 0)
-                {
-                    LoadScene(CGScene);
                 }
                 break;
 
@@ -239,6 +238,7 @@ public class GameManager : SingletonBase<GameManager>
         
         return false;
     }
+    //检查是否需要播放CG
     public bool NeedPlayCG(int cgId)
     {
         if(cgId <= 0) return false;
@@ -332,11 +332,31 @@ public class GameManager : SingletonBase<GameManager>
 
     #endregion
 
-
+    #region 调试功能
+    #if UNITY_EDITOR
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.F1))
+        {
+            SkipLevel();
+        }
+    }
+    //一键通关
+    private void SkipLevel()
+    {
+        int currentLevel = GetCurrentLevel();
+        if(currentLevel > 0 && currentLevel <= levelScenes.Count)
+        {
+            Debug.Log($"[编辑器]跳过关卡: {currentLevel}");
+            GameEvents.TriggerLevelComplete(currentLevel);
+        }
+    }
+    #endif
+    #endregion
 }
 
 
-
+#region 存档类
     //游戏进度类
     [System.Serializable]
     public class GameProgress
@@ -350,3 +370,5 @@ public class GameManager : SingletonBase<GameManager>
         public Dictionary<int, bool> unlockedStories = new();
         public Dictionary<int, bool> completedCGs = new();
     }
+
+#endregion

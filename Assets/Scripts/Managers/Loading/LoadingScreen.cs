@@ -8,7 +8,6 @@ public class LoadingScreen : SingletonBase<LoadingScreen>
     [Header("UI Components")]
     [SerializeField] private CanvasGroup loadingCanvas;
     [SerializeField] private Text loadingText;
-    [SerializeField] private int sortOrder = 32767; // 设置为最高层级
 
     private AsyncOperation _asyncOperation;
 
@@ -20,12 +19,14 @@ public class LoadingScreen : SingletonBase<LoadingScreen>
     public void Show()
     {
         loadingCanvas.alpha = 1;
+        loadingCanvas.interactable = true;
         loadingCanvas.blocksRaycasts = true;
     }
 
     public void Hide()
     {
         loadingCanvas.alpha = 0;
+        loadingCanvas.interactable = false;
         loadingCanvas.blocksRaycasts = false;
     }
 

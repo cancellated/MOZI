@@ -79,11 +79,9 @@ public static class GameEvents
 
     public enum SceneTransitionType
     {
-        ToMainMenu,
         ToLevelSelect,
         ToLevel,   // 需要配合LevelID
         ToStory,    // 需要配合StoryID
-        ToCG,       // 需要配合CGID
     }
     #endregion
 

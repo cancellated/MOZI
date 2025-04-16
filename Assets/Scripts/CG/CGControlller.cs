@@ -25,6 +25,10 @@ public class CGController : MonoBehaviour
     {
         GameEvents.OnCGEnter += HandleCGEnter;
         GameEvents.OnCGComplete += HandleCGComplete;
+        if (videoPlayer == null)
+        {
+            videoPlayer = GetComponent<VideoPlayer>();
+        }
     }
 
     private void OnDestroy()
@@ -38,23 +42,30 @@ public class CGController : MonoBehaviour
         }
     }
 
-    private void HandleCGEnter(int cgId)
+        private void PlayCurrentCG()
     {
-        _currentCGId = cgId;
-        _isPlaying = true;
+        if (_currentCGId <= 0) return;
         
-        VideoClip clip = GetVideoClipByCGId(cgId);
+        VideoClip clip = GetVideoClipByCGId(_currentCGId);
         if (videoPlayer != null && clip != null)
         {
             videoPlayer.clip = clip;
             videoPlayer.loopPointReached += OnVideoFinished;
             videoPlayer.Play();
+            _isPlaying = true;
+            Debug.Log($"开始播放CG: {_currentCGId}");
         }
         else
         {
-            Debug.LogError($"CG资源未配置: {cgId}");
-            HandleCGComplete(cgId);
+            Debug.LogError($"CG资源未配置或播放器未设置: CG ID {_currentCGId}");
+            HandleCGComplete(_currentCGId);
         }
+    }
+    private void HandleCGEnter(int cgId)
+    {
+        _currentCGId = cgId;
+        _isPlaying = true;
+        PlayCurrentCG();
     }
 
     private void HandleCGComplete(int cgId)

@@ -286,7 +286,6 @@ MonoBehaviour:
   - Level_1
   - Level_2
   dialogScene: Dialog
-  CGScene: CG Scene
   _progress:
     currentLevel: 1
     currentStory: 1001
@@ -780,7 +779,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   loadingCanvas: {fileID: 2143994417}
   loadingText: {fileID: 954691809}
-  sortOrder: 32767
 --- !u!1 &2143994415
 GameObject:
   m_ObjectHideFlags: 0
@@ -895,7 +893,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
