@@ -271,8 +271,8 @@ public class DialogManager : MonoBehaviour
             }
         }
         #if UNITY_EDITOR
-        // 编辑器模式下按Ctrl键跳过整个对话
-        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+        // 编辑器模式下按F2跳过整个对话
+        if (Input.GetKey(KeyCode.F2))
         {
             SkipAllDialogs();
         }
