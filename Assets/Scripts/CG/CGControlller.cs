@@ -11,6 +11,10 @@ public class CGController : MonoBehaviour
     [Header("视频播放器")] 
     [SerializeField] private VideoPlayer videoPlayer;
     
+    [Header("淡入设置")]
+    [SerializeField] private CanvasGroup fadeCanvas;
+    [SerializeField] private float fadeDuration = 0.5f;
+    
     private int _currentCGId;
     private bool _isPlaying;
 
@@ -42,10 +46,30 @@ public class CGController : MonoBehaviour
         }
     }
 
-        private void PlayCurrentCG()
+    private void PlayCurrentCG()
     {
         if (_currentCGId <= 0) return;
         
+        StartCoroutine(FadeAndPlayCG());
+    }
+
+    private IEnumerator FadeAndPlayCG()
+    {
+        // 淡入效果
+        if(fadeCanvas != null)
+        {
+            fadeCanvas.alpha = 1;
+            float elapsed = 0f;
+            while(elapsed < fadeDuration)
+            {
+                fadeCanvas.alpha = Mathf.Lerp(1, 0, elapsed / fadeDuration);
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+            fadeCanvas.alpha = 0;
+        }
+
+        // 播放CG
         VideoClip clip = GetVideoClipByCGId(_currentCGId);
         if (videoPlayer != null && clip != null)
         {

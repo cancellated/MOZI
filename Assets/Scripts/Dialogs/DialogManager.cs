@@ -281,11 +281,7 @@ public class DialogManager : MonoBehaviour
 
     private void OnCGEnter(int cgId)
     {
-        Debug.Log($"收到CG进入事件，cgId: {cgId}, 隐藏对话界面");
-        dialogPopup.alpha = 0;
-        dialogPopup.interactable = false; // 禁用点击
-        dialogPopup.blocksRaycasts = false; // 禁用射线检测，防止点击穿透
-        StopBGM();
+        Debug.Log($"收到CG进入事件，cgId: {cgId}");
     }
 
     #if UNITY_EDITOR

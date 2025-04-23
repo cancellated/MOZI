@@ -285,6 +285,7 @@ MonoBehaviour:
   levelScenes:
   - Level_1
   - Level_2
+  - Level_3
   dialogScene: Dialog
   _progress:
     currentLevel: 1
@@ -880,8 +881,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: a868ddfe2a47d0645b812111915daea1, type: 3}
   frameInterval: 0.1
   moveDistance: 1150
-  minDisplayTime: 2
-  fadeDuration: 0.5
+  minDisplayTime: 1
+  fadeDuration: 0.25
 --- !u!1 &2143994415
 GameObject:
   m_ObjectHideFlags: 0

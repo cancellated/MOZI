@@ -1,4 +1,4 @@
-﻿using UnityEngine.Events;
+using UnityEngine.Events;
 using System;
 using UnityEngine;
 
@@ -16,6 +16,8 @@ public static class GameEvents
     public static event Action<int> OnStoryUnlocked;
     public static event Action<int> OnCGEnter;
     public static event Action<int> OnCGComplete;
+    public static event Action<bool> OnMapLock;
+    public static event Action<int> OnMapDialogEnter;
 
     public static event Action<SceneTransitionType> OnSceneTransitionRequest;
 
@@ -68,6 +70,18 @@ public static class GameEvents
     public static void TriggerCGComplete(int cgId)
     {
         OnCGComplete?.Invoke(cgId);
+    }
+
+    //触发地图锁定事件
+    public static void TriggerMapLock(bool isLocked)
+    {
+        OnMapLock?.Invoke(isLocked);
+    }
+
+    //触发地图对话进入事件
+    public static void TriggerMapDialogEnter(int DialogId)
+    {
+        OnMapDialogEnter?.Invoke(DialogId);
     }
     #endregion
 
