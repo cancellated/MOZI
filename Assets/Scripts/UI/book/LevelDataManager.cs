@@ -4,11 +4,11 @@ using System.IO;
 
 public class LevelDataManager : MonoBehaviour
 {
-    private const string CONFIG_PATH = "Book/物品";
+    private const string CONFIG_PATH = "Config/Book/物品";
     private List<LevelConfigData> levelConfigs = new List<LevelConfigData>();
 
     /// <summary>
-    /// 从Resources/Book/level_config.csv加载并解析关卡配置数据
+    /// 从ResourcesConfig/Book/物品.csv加载并解析关卡配置数据
     /// CSV文件格式要求：
     /// 1. 第一行为注释行(可忽略)
     /// 2. 第二行为表头行，定义各字段名称
@@ -63,7 +63,7 @@ public class LevelDataManager : MonoBehaviour
             {
                 levelConfigs.Add(new LevelConfigData(levelConfigs.Count));
             }
-            
+            Debug.Log("当前关卡信息数量为: " + levelConfigs.Count);
             // 添加物品信息
             levelConfigs[unlockLevel].items.Add(new LevelConfigData.ItemInfo
             {
