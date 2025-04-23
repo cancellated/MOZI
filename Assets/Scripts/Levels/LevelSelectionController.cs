@@ -102,21 +102,6 @@ public class LevelSelectionController : MonoBehaviour
                GameManager.Instance.IsStoryCompleted(GameManager.Instance.CalculatePostStoryId(levelId));
     }
 
-    public void OnStoryReviewButtonClicked()
-    {
-        // 确保每次点击都能正确切换面板状态
-        if(storyReviewPanel != null)
-        {
-            bool newState = !storyReviewPanel.activeSelf;
-            storyReviewPanel.SetActive(newState);
-            Debug.Log($"面板状态切换至: {newState}");
-        }
-    }
-
-    public void ReturnToLevelSelect()
-    {
-        GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);
-    }
 
     private void OnDestroy()
     {

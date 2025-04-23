@@ -338,9 +338,19 @@ public class GameManager : SingletonBase<GameManager>
     {
         if(Input.GetKeyDown(KeyCode.F1))
         {
-            SkipLevel();
+            // 检查当前场景是否是关卡场景
+            string currentScene = SceneManager.GetActiveScene().name;
+            if(levelScenes.Contains(currentScene))
+            {
+                SkipLevel();
+            }
+            else
+            {
+                Debug.Log($"[编辑器]一键通关只能在关卡场景中使用，当前场景: {currentScene}");
+            }
         }
     }
+    
     //一键通关
     private void SkipLevel()
     {
