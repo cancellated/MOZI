@@ -14,7 +14,7 @@ public class LoadingScreen : SingletonBase<LoadingScreen>
     [SerializeField] private float moveDistance = 1150f; // 平移总距离
 
     [Header("动画设置")]
-    [SerializeField] private float minDisplayTime = 2f; // 最小显示时长(秒)
+    [SerializeField] private float minDisplayTime = 0.5f; // 最小显示时长(秒)
     private float _loadStartTime;
 
     private AsyncOperation _asyncOperation;
@@ -22,7 +22,7 @@ public class LoadingScreen : SingletonBase<LoadingScreen>
     private Vector2 _originalPosition; // 记录初始位置
 
     [Header("淡入淡出设置")]
-    [SerializeField] private float fadeDuration = 0.5f; // 淡入淡出时长
+    [SerializeField] private float fadeDuration = 0.25f; // 淡入淡出时长
     private Coroutine _fadeCoroutine;
 
     protected override void Initialize()

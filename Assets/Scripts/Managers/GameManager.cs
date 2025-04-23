@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine.SceneManagement;
@@ -133,6 +133,7 @@ public class GameManager : SingletonBase<GameManager>
         }
         int levelId = GetLevelIdFromStoryId(storyId);
         
+        // 检查是否需要播放CG
         bool isPostStory = storyId >= StoryConfig.PostStoryOffset && storyId < 3000;
         if(isPostStory && levelId > 0 && NeedPlayCG(CGConfig.CGOffset + levelId))
         {

@@ -6,9 +6,12 @@ public class LevelSelectionController : MonoBehaviour
 {
     [Header("UI配置")]
     [SerializeField] private GameObject storyReviewPanel;
+    [SerializeField] private CanvasGroup mapCanvasGroup;
 
     [Header("音频管理")]
     [SerializeField] private AudioManager audioManager;
+
+
 
     private readonly Dictionary<int, LevelSelectButton> _levelButtons = new();
 
@@ -78,6 +81,8 @@ public class LevelSelectionController : MonoBehaviour
         GameEvents.OnLevelComplete += UpdateButtonState;
         GameEvents.OnStoryComplete += UpdateButtonState;
         GameEvents.OnLevelUnlocked += UpdateButtonState;
+        GameEvents.OnMapLock += OnMapLockChanged;
+        GameEvents.OnMapDialogEnter += OnMapDialogEnter;
     }
 
     // 更新按钮状态方法
@@ -102,12 +107,29 @@ public class LevelSelectionController : MonoBehaviour
                GameManager.Instance.IsStoryCompleted(GameManager.Instance.CalculatePostStoryId(levelId));
     }
 
+    // 进入地图对话
+    private void OnMapDialogEnter(int dialogId)
+{
+    // 锁定地图操作
+    GameEvents.TriggerMapLock(true);
+    
+}
+    private void OnMapLockChanged(bool isLocked)
+    {
+        if(mapCanvasGroup != null)
+        {
+            mapCanvasGroup.interactable = !isLocked;
+            mapCanvasGroup.blocksRaycasts = !isLocked;
+        }
+    }
+
 
     private void OnDestroy()
     {
         GameEvents.OnLevelComplete -= UpdateButtonState;
         GameEvents.OnStoryComplete -= UpdateButtonState;
         GameEvents.OnLevelUnlocked -= UpdateButtonState;
+        GameEvents.OnMapLock -= OnMapLockChanged;
     }
 
 }
