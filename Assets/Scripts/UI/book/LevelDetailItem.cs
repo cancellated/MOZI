@@ -19,8 +19,8 @@ public class LevelDetailItem : MonoBehaviour
     [SerializeField] private Image itemImage; // 物品图片显示组件
     
     [Header("状态显示")]
-    // [SerializeField] private GameObject lockedOverlay; // 未解锁状态遮罩
-    // [SerializeField] private GameObject completedCheckmark; // 完成状态标记
+    [SerializeField] private GameObject lockedOverlay; // 未解锁状态遮罩
+    [SerializeField] private GameObject completedCheckmark; // 完成状态标记
     
     private List<LevelConfigData.ItemInfo> currentItems; // 当前关卡的物品列表
     private int selectedItemIndex = 0; // 当前选中的物品索引
@@ -110,7 +110,7 @@ public class LevelDetailItem : MonoBehaviour
     /// </summary>
     private void UpdateStatusDisplay(bool isCompleted, bool isUnlocked)
     {
-        // completedCheckmark.SetActive(isCompleted);
-        // lockedOverlay.SetActive(!isUnlocked);
+        completedCheckmark.SetActive(isCompleted);
+        lockedOverlay.SetActive(!isUnlocked);
     }
 }

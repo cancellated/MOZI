@@ -1,30 +1,86 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System;
 
 /// <summary>
 /// 故事书展示控制器，负责管理关卡详情UI的显示和更新
 /// </summary>
 public class ShowStorybook : MonoBehaviour
 {
-    [Header("UI元素")]
-    [SerializeField] private Transform levelDetailsPanel; // 关卡详情项的父容器
-    [SerializeField] private GameObject levelDetailPrefab; // 单个关卡详情的预制体
-
-    private LevelDataManager dataManager; // 关卡数据管理器
+    [Header("一级菜单")]
+    [SerializeField] private Transform levelOverviewPanel; // 关卡总览面板
+    [SerializeField] private GameObject levelOverviewPrefab; // 关卡总览项预制体
+    
+    [Header("二级菜单")]
+    [SerializeField] private Transform levelDetailsPanel; // 关卡详情面板
+    [SerializeField] private GameObject levelDetailPrefab; // 关卡详情预制体
+    
+    [Header("动画设置")] 
+    [SerializeField] private float zoomDuration = 0.5f;
+    [SerializeField] private float scrollUnrollDuration = 1f;
+    
+    private LevelDataManager dataManager;
+    private List<GameObject> overviewInstances = new List<GameObject>();
     private List<GameObject> detailInstances = new List<GameObject>(); // 已生成的关卡详情实例
+    private GameObject currentDetailInstance;
+    private Camera mainCamera;
 
     private void Awake()
     {
         // 获取LevelDataManager组件
         dataManager = GetComponent<LevelDataManager>();
+        mainCamera = Camera.main;
     }
 
     private void OnEnable()
     {
         // 加载关卡配置并更新显示
         dataManager.LoadLevelConfigs();
-        UpdateProgressDisplay();
+        ShowOverviewMenu();
+    }
+
+    /// <summary>
+    /// 显示一级菜单（关卡总览）
+    /// </summary>
+    public void ShowOverviewMenu()
+    {
+        levelDetailsPanel.gameObject.SetActive(false);
+        levelOverviewPanel.gameObject.SetActive(true);
+        
+        ClearExistingOverviews();
+        CreateLevelOverviewItems();
+    }
+
+
+    /// <summary>
+    /// 显示二级菜单（关卡详情）
+    /// </summary>
+    public void ShowDetailMenu(int levelId)
+    {
+        StartCoroutine(TransitionToDetailMenu(levelId));
+    }
+
+    private System.Collections.IEnumerator TransitionToDetailMenu(int levelId)
+    {
+        // // 1. 找到点击的关卡总览项
+        // var clickedOverview = overviewInstances[levelId - 1];
+        
+        // // 2. 摄像机聚焦动画
+        // mainCamera.transform.DOMove(clickedOverview.transform.position + Vector3.back * 2, zoomDuration);
+        
+        // // 3. 播放卷轴展开动画
+        // var scroll = clickedOverview.GetComponentInChildren<Image>();
+        // scroll.transform.DOScaleX(1.5f, scrollUnrollDuration);
+        // scroll.transform.DOScaleY(1.5f, scrollUnrollDuration);
+        
+        yield return new WaitForSeconds(scrollUnrollDuration);
+        
+        // 4. 切换到详情页
+        levelOverviewPanel.gameObject.SetActive(false);
+        levelDetailsPanel.gameObject.SetActive(true);
+        
+        CreateLevelDetailItem(levelId - 1);
     }
 
     /// <summary>
@@ -75,6 +131,16 @@ public class ShowStorybook : MonoBehaviour
             var detailObj = CreateLevelDetailItem(i);
             detailInstances.Add(detailObj);
         }
+    }
+    
+    private void CreateLevelOverviewItems()
+    {
+
+    }
+
+    private void ClearExistingOverviews()
+    {
+
     }
 
     /// <summary>
