@@ -5,7 +5,7 @@ using System.IO;
 public class LevelDataManager : MonoBehaviour
 {
     private const string CONFIG_PATH = "Config/Book/物品";
-    private List<LevelConfigData> levelConfigs = new List<LevelConfigData>();
+    private List<LevelConfigData> levelConfigs = new List<LevelConfigData>();//关卡列表
 
     /// <summary>
     /// 从ResourcesConfig/Book/物品.csv加载并解析关卡配置数据

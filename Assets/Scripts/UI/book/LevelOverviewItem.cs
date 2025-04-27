@@ -10,10 +10,10 @@ public class LevelOverviewItem : MonoBehaviour
     private int levelId;
     private ShowStorybook storybook;
     
-    public void Setup(int id, string name, ShowStorybook controller)
+    public void Setup(int id, ShowStorybook controller)
     {
         levelId = id;
-        levelNameText.text = name;
+        levelNameText.text = "第" + levelId+ "关";
         storybook = controller;
         
         button.onClick.AddListener(OnClick);

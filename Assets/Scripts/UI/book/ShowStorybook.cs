@@ -135,7 +135,11 @@ public class ShowStorybook : MonoBehaviour
     
     private void CreateLevelOverviewItems()
     {
-
+        for (int i = 0; i < dataManager.GetTotalLevels(); i++)
+        {
+            var overviewObj = CreateLevelOverviewItem(i);
+            overviewInstances.Add(overviewObj);
+        }
     }
 
     private void ClearExistingOverviews()
@@ -164,6 +168,22 @@ public class ShowStorybook : MonoBehaviour
         );
         
         return detailObj;
+    }
+    /// <summary>
+    /// 创建单个关卡的菜单项UI元素
+    /// </summary>
+    /// <param name="levelIndex">关卡索引(从0开始)</param>
+    private GameObject CreateLevelOverviewItem(int levelIndex)
+    {
+        int levelId = levelIndex + 1;
+        var overviewObj = Instantiate(levelOverviewPrefab, levelOverviewPanel);
+        // 初始化关卡详情项
+        overviewObj.GetComponent<LevelOverviewItem>().Setup(
+            levelId,
+            this
+        );
+        
+        return overviewObj;
     }
 
     /// <summary>
