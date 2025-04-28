@@ -144,7 +144,11 @@ public class ShowStorybook : MonoBehaviour
 
     private void ClearExistingOverviews()
     {
-
+        foreach (var instance in overviewInstances)
+        {
+            Destroy(instance);
+        }
+        overviewInstances.Clear();
     }
 
     /// <summary>
