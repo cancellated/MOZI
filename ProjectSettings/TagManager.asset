@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Mirror
   - ConvexLens
+  - Stone
+  - Target
   layers:
   - Default
   - TransparentFX
