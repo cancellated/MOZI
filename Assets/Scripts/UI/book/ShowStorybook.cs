@@ -186,7 +186,10 @@ public class ShowStorybook : MonoBehaviour
             levelId,
             this
         );
-        
+        if(!IsLevelCompleted(levelId)){
+                overviewObj.GetComponent<Image>().color = new Color(1,1,1,0.5f);
+                Debug.Log("一级菜单虚化已完成");
+            }
         return overviewObj;
     }
 
