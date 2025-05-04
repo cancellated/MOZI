@@ -1337,6 +1337,11 @@ PrefabInstance:
       propertyPath: m_Spacing
       value: -200
       objectReference: {fileID: 0}
+    - target: {fileID: 1092355493280569525, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2885032480443647260, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
         type: 3}
       propertyPath: m_Pivot.x
@@ -1457,6 +1462,11 @@ PrefabInstance:
       propertyPath: storybook
       value: 
       objectReference: {fileID: 1302755560}
+    - target: {fileID: 6140197387664080811, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

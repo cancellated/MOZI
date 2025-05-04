@@ -7,6 +7,8 @@ public class LevelOverviewItem : MonoBehaviour
     [SerializeField] private Image scrollImage; // 卷轴图片
     [SerializeField] private Text levelNameText;
     [SerializeField] private Button button;
+
+    private bool isButtonClicked = false;
     
     private int levelId;
     private ShowStorybook storybook;
@@ -43,6 +45,10 @@ public class LevelOverviewItem : MonoBehaviour
     }
     private void OnClick()
     {
+        if (isButtonClicked) {
+            return;
+        }
         storybook.ShowDetailMenu(levelId);
+        isButtonClicked = true;
     }
 }

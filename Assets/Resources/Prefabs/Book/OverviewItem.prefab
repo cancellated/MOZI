@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6887851211453355151}
   - component: {fileID: 3923961214476311405}
   - component: {fileID: 6213185228901237487}
+  - component: {fileID: 184882540019904631}
   m_Layer: 0
   m_Name: OverviewItem
   m_TagString: Untagged
@@ -137,6 +138,28 @@ MonoBehaviour:
   scrollImage: {fileID: 6887851211453355151}
   levelNameText: {fileID: 9217588567949035641}
   button: {fileID: 3923961214476311405}
+--- !u!95 &184882540019904631
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6422568934404638808}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: c13489b0925cb424d9eef8412d5a2268, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &8004245941275945978
 GameObject:
   m_ObjectHideFlags: 0
