@@ -27,7 +27,7 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    public void OnCollisionEnter(Collision other) 
+    public void OnCollisionEnter2D(Collision2D other) 
     { 
         Debug.Log("敌人碰撞");
         if (other.collider.CompareTag("Stone")){
