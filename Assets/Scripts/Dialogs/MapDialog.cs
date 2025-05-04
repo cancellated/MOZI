@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 public class MapDialog : MonoBehaviour
 {
@@ -97,26 +98,38 @@ public class MapDialog : MonoBehaviour
     {
         if (dialogConfig == null) return;
         
-        var lines = dialogConfig.text.Split('\n');
-        if (lines.Length < 3) return;
-
+        // 移除BOM头
+        string configText = dialogConfig.text;
+        if (configText.StartsWith("\uFEFF")) {
+            configText = configText[1..];
+        }
+    
+        var lines = configText.Split('\n');
+        if (lines.Length < 3) {
+            Debug.LogError("CSV行数不足，至少需要两行表头+一行数据");
+            return;
+        }
+    
         // 处理表头
         var headerLine = lines[1].TrimEnd('\r', '\n');
         var headers = headerLine.Split(',');
-        var headerMap = new Dictionary<string, int>();
-        
-        for (int i = 0; i < headers.Length; i++)
-        {
+    
+        var headerMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        for (int i = 0; i < headers.Length; i++) {
             string header = headers[i].Trim();
             headerMap[header] = i;
         }
-
+    
         // 处理数据行
-        for (int i = 2; i < lines.Length; i++)
-        {
+        for (int i = 2; i < lines.Length; i++) {
             if (string.IsNullOrWhiteSpace(lines[i])) continue;
             
-            var fields = lines[i].Split(',');
+            var rawFields = lines[i].Split(',');
+            var fields = new string[headers.Length]; // 确保字段数与表头一致
+            for (int j = 0; j < Mathf.Min(rawFields.Length, headers.Length); j++) {
+                fields[j] = rawFields[j].Trim();
+            }
+                
             _dialogs.Add(new MapDialogData(fields, headerMap));
         }
     }
