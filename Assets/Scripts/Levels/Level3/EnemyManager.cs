@@ -47,7 +47,7 @@ public class EnemyManager : MonoBehaviour
     }
     // 更新敌人数量显示
     private void UpdateEnemyCountText(){
-        enemyCountText.text = $"敌人数量: {activeEnemies.Count}/{totalEnemies}";
+        enemyCountText.text = $"剩余敌人数量: {totalEnemies-spawnedCount}/{totalEnemies}";
     }
 
     /// <summary>

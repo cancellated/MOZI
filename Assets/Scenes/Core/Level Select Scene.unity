@@ -1144,38 +1144,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1054931779}
   m_CullTransparentMesh: 1
---- !u!1 &1081201457 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6140197387664080811, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
-    type: 3}
-  m_PrefabInstance: {fileID: 1324128618}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1081201461
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1081201457}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 4
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
 --- !u!1 &1086498003
 GameObject:
   m_ObjectHideFlags: 0
@@ -1331,16 +1299,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Book
       objectReference: {fileID: 0}
-    - target: {fileID: 365200161902317897, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1092355493280569525, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 2885032480443647260, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
         type: 3}
       propertyPath: m_Pivot.x
@@ -1441,31 +1399,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4912089538433592959, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
-        type: 3}
-      propertyPath: m_Type
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4912089538433592959, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
-        type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: -53224745, guid: 836c5ec749b1f1f40a5bf55d4df06722,
-        type: 3}
-    - target: {fileID: 7804130515091276675, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
-        type: 3}
-      propertyPath: levelOverviewPrefab
-      value: 
-      objectReference: {fileID: 6422568934404638808, guid: 3279d1675075f0441b50aa64497569b6,
-        type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6140197387664080811, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1081201461}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 04ba6a17a5df6604798ed0b85c0f15cc, type: 3}
 --- !u!1 &1357420305
 GameObject:

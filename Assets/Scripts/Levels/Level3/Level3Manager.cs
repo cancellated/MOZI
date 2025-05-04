@@ -38,11 +38,12 @@ public class Level3Manager : MonoBehaviour
         mangonelControl.Instance.ResetLevel();
     }
     public void GameOver(){
-        
+        GameEvents.TriggerLevelComplete(3);
     }
     public void GameWin(){
         // 游戏胜利逻辑
         Debug.Log("You win!");
+        GameOver();
     }
     public void GameLose(){
         // 游戏失败逻辑
