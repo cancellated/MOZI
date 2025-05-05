@@ -11,7 +11,8 @@ public class LevelSelectionController : MonoBehaviour
     [Header("音频管理")]
     [SerializeField] private AudioManager audioManager;
 
-
+    [Header("角色移动")]
+    [SerializeField] private MoveToLevel moveToLevel;
 
     private readonly Dictionary<int, LevelSelectButton> _levelButtons = new();
 
@@ -43,6 +44,17 @@ public class LevelSelectionController : MonoBehaviour
     public void OnLevelButtonClicked(int levelId)
     {
         Debug.Log($"点击关卡按钮: {levelId}");
+        
+        if(moveToLevel != null)
+        {
+            StartCoroutine(HandleLevelTransition(levelId));
+        }
+    }
+
+    private IEnumerator HandleLevelTransition(int levelId)
+    {
+        // 等待移动动画完成
+        yield return moveToLevel.MoveToTargetLevel(levelId);
         
         // 检查是否需要播放前故事
         int preStoryId = GameManager.Instance.CalculatePreStoryId(levelId);

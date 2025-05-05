@@ -25,8 +25,8 @@ public class MoveToLevel : MonoBehaviour
     private IEnumerator MoveCharacter(int targetIndex)
     {
         // 设置Animator参数
-        pathAnimator.SetInteger("departure", currentLevelIndex);
-        pathAnimator.SetInteger("destination", targetIndex);
+        pathAnimator.SetInteger("Departure", currentLevelIndex);
+        pathAnimator.SetInteger("Destination", targetIndex);
         
         // 设置动画方向
         pathAnimator.SetFloat("Speed", targetIndex > currentLevelIndex ? 1f : -1f);
@@ -46,6 +46,7 @@ public class MoveToLevel : MonoBehaviour
             StopCoroutine(animationCoroutine);
             animationCoroutine = null;
         }
+
     }
 
     private float GetAnimationDuration(int fromLevel, int toLevel)
@@ -57,5 +58,20 @@ public class MoveToLevel : MonoBehaviour
             return levelTransitionAnims[animIndex].length;
         }
         return 1.0f;
+    }
+
+    public IEnumerator MoveToTargetLevel(int targetLevel)
+    {
+        if(moveCoroutine != null)
+        {
+            StopCoroutine(moveCoroutine);
+        }
+        
+        // 根据目标关卡ID设置动画参数
+        pathAnimator.SetInteger("Departure", currentLevelIndex);
+        pathAnimator.SetInteger("Destination", targetLevel);
+        
+        moveCoroutine = StartCoroutine(MoveCharacter(targetLevel));
+        yield return moveCoroutine;
     }
 }
