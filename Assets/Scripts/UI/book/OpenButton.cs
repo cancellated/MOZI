@@ -15,6 +15,8 @@ public class OpenButton:MonoBehaviour
             openObject.SetActive(false);
         }
     }
+
+    [System.Obsolete]
     public void OpenOrClose(){
         if(openObject != null){
             if(openObject.active == true){

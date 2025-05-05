@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System;
+using Unity.VisualScripting;
 
 /// <summary>
 /// 故事书展示控制器，负责管理关卡详情UI的显示和更新
@@ -32,12 +33,16 @@ public class ShowStorybook : MonoBehaviour
         dataManager = GetComponent<LevelDataManager>();
         mainCamera = Camera.main;
     }
+    private void Start(){
+        dataManager.LoadLevelConfigs();
+    }
 
     private void OnEnable()
     {
+        Debug.Log("Onenble");
         // 加载关卡配置并更新显示
-        dataManager.LoadLevelConfigs();
         ShowOverviewMenu();
+        
     }
 
     /// <summary>
@@ -50,6 +55,8 @@ public class ShowStorybook : MonoBehaviour
         
         ClearExistingOverviews();
         CreateLevelOverviewItems();
+        ClearExistingDetails();
+        
     }
 
 
@@ -86,11 +93,11 @@ public class ShowStorybook : MonoBehaviour
     /// <summary>
     /// 更新整个UI显示
     /// </summary>
-    public void UpdateProgressDisplay()
-    {
-        ClearExistingDetails(); // 清除现有详情
-        CreateLevelDetailItems(); // 创建新的关卡详情项
-    }
+    // public void UpdateProgressDisplay()
+    // {
+    //     ClearExistingDetails(); // 清除现有详情
+    //     CreateLevelDetailItems(); // 创建新的关卡详情项
+    // }
 
     /// <summary>
     /// 计算已完成的关卡数量
@@ -124,14 +131,14 @@ public class ShowStorybook : MonoBehaviour
     /// <summary>
     /// 创建所有关卡的详情项UI元素
     /// </summary>
-    private void CreateLevelDetailItems()
-    {
-        for (int i = 0; i < dataManager.GetTotalLevels(); i++)
-        {
-            var detailObj = CreateLevelDetailItem(i);
-            detailInstances.Add(detailObj);
-        }
-    }
+    // private void CreateLevelDetailItems()
+    // {
+    //     for (int i = 0; i < dataManager.GetTotalLevels(); i++)
+    //     {
+    //         var detailObj = CreateLevelDetailItem(i);
+    //         detailInstances.Add(detailObj);
+    //     }
+    // }
     
     private void CreateLevelOverviewItems()
     {
@@ -146,7 +153,8 @@ public class ShowStorybook : MonoBehaviour
     {
         foreach (var instance in overviewInstances)
         {
-            Destroy(instance);
+            var instanceP = instance.transform.parent.GameObject();
+            Destroy(instanceP);
         }
         overviewInstances.Clear();
     }
@@ -170,7 +178,7 @@ public class ShowStorybook : MonoBehaviour
             isCompleted,
             isUnlocked
         );
-        
+        detailInstances.Add(detailObj);
         return detailObj;
     }
     /// <summary>

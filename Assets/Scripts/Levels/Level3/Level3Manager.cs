@@ -6,6 +6,13 @@ public class Level3Manager : MonoBehaviour
 {
     public static Level3Manager Instance { get; private set; }
     
+    [Header("音频管理")] 
+    [SerializeField] private AudioManager audioManager;
+
+    [SerializeField] AudioClip mangonelAttack;
+    [SerializeField] AudioClip enemyDie;
+    [SerializeField] AudioClip winMusic;
+    [SerializeField] AudioClip loseMusic;
     public GameObject winPanel;
     public GameObject losePanel;
     public int currrentRound = 0;//每回合玩家先动，然后敌人动，为一回合
@@ -18,6 +25,11 @@ public class Level3Manager : MonoBehaviour
 
     private void Start()
     {
+        // 播放背景音乐
+        if (audioManager != null)
+        {
+            audioManager.PlayBackgroundMusic();
+        }
         // 游戏开始生成第一个敌人
         EnemyManager.Instance.SpawnEnemy();
     }
@@ -49,6 +61,10 @@ public class Level3Manager : MonoBehaviour
         EnemyManager.Instance.ResetLevel();
         mangonelControl.Instance.ResetLevel();
         EnemyManager.Instance.SpawnEnemy();
+        if (audioManager!= null){
+            audioManager.StopCompleteMusic();
+            audioManager.PlayBackgroundMusic();
+        }
     }
     //游戏通关
     public void GameOver(){
@@ -58,14 +74,53 @@ public class Level3Manager : MonoBehaviour
         // 游戏胜利逻辑
         Debug.Log("You win!");
         isStopped = true;
+        // 切换为通关音乐
+        if (audioManager != null)
+        {
+            audioManager.StopBackgroundMusic();
+            PlayMusic(3);
+        }
         winPanel.SetActive(true);
         //GameOver();
     }
     public void GameLose(){
         // 游戏失败逻辑
         Debug.Log("You lose!"); 
+
         losePanel.SetActive(true);
         isStopped = true;
 
+    }
+    public void PlayMusic(int index){
+        if (audioManager!= null) {
+            switch (index) {
+                case 1:
+                    audioManager.completeMusicSource.clip = mangonelAttack;
+                    audioManager.PlayCompleteMusic();
+                    break; 
+                case 2:
+                    audioManager.completeMusicSource.clip = enemyDie;
+                    audioManager.PlayCompleteMusic();
+                    break;
+                case 3:
+                    audioManager.StopBackgroundMusic();
+                    audioManager.completeMusicSource.clip = winMusic;
+                    audioManager.PlayCompleteMusic();
+                    break;
+                case 4:
+                    audioManager.StopBackgroundMusic();
+                    audioManager.completeMusicSource.clip = loseMusic;
+                    audioManager.PlayCompleteMusic();
+                    break;
+                default:
+                    Debug.Log("查无此乐");
+                    break; // 或者抛出异常，根据需要处理无效的索引
+            }
+        }
+    }
+    public void StopMusic(){
+        if (audioManager!= null) {
+            audioManager.StopCompleteMusic();
+        }
     }
 }

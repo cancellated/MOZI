@@ -510,6 +510,7 @@ GameObject:
   - component: {fileID: 509879037}
   - component: {fileID: 509879036}
   - component: {fileID: 509879038}
+  - component: {fileID: 509879039}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -529,6 +530,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66e8fcef6d00e204598a73caa90d4ed0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  audioManager: {fileID: 509879039}
+  mangonelAttack: {fileID: 8300000, guid: 1b9300e85b3aafd429c25295ec03e439, type: 3}
+  enemyDie: {fileID: 8300000, guid: 6acf1a969b6ba1a4f86472b83458469f, type: 3}
+  winMusic: {fileID: 8300000, guid: ff07438f2d808584f862395003747ac0, type: 3}
+  loseMusic: {fileID: 8300000, guid: dfde6f03de5f03642b5eb8928242b6dc, type: 3}
   winPanel: {fileID: 1492213606}
   losePanel: {fileID: 1746784444}
   currrentRound: 0
@@ -563,6 +569,22 @@ MonoBehaviour:
     type: 3}
   totalEnemies: 5
   enemyCountText: {fileID: 289459026}
+--- !u!114 &509879039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 509879035}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fd978c1356465447b310403d86ac8c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  backgroundMusicClip: {fileID: 8300000, guid: 698703437c589424cbe0196d31e9858d, type: 3}
+  completeMusicClip: {fileID: 8300000, guid: ff07438f2d808584f862395003747ac0, type: 3}
+  backgroundMusicSource: {fileID: 0}
+  completeMusicSource: {fileID: 0}
 --- !u!1 &913473289
 GameObject:
   m_ObjectHideFlags: 0

@@ -1473,6 +1473,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   backgroundMusicClip: {fileID: 8300000, guid: 2e14842dbd6925a479078c5f1879b3c6, type: 3}
   completeMusicClip: {fileID: 0}
+  backgroundMusicSource: {fileID: 0}
+  completeMusicSource: {fileID: 0}
 --- !u!114 &1086498007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1916,7 +1918,7 @@ RectTransform:
   m_GameObject: {fileID: 1360498343}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.1741562, y: 2.1741562, z: 2.1741562}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1725009408}
@@ -1924,8 +1926,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 837, y: -381}
-  m_SizeDelta: {x: 73.1149, y: 76.9851}
+  m_AnchoredPosition: {x: 837, y: -421}
+  m_SizeDelta: {x: 127.3401, y: 147.8949}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1360498345
 MonoBehaviour:

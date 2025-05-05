@@ -7,8 +7,8 @@ public class AudioManager : MonoBehaviour
     [Header("通关音乐(可选)")]
     [Tooltip("如果不设置则不会播放通关音乐")]
     public AudioClip completeMusicClip;   // 可选通关音乐剪辑
-    private AudioSource backgroundMusicSource;
-    private AudioSource completeMusicSource;
+    public AudioSource backgroundMusicSource;
+    public AudioSource completeMusicSource;
 
     private void Awake()
     {
