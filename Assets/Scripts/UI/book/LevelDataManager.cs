@@ -57,19 +57,19 @@ public class LevelDataManager : MonoBehaviour
             // 分割字段
             var fields = lines[i].Split(',');
             int unlockLevel = int.Parse(fields[0]);
-            Debug.Log("读取影神图unlockLevel: " + unlockLevel);//仅测试
+            //Debug.Log("读取影神图unlockLevel: " + unlockLevel);//仅测试
             // 确保有对应关卡的配置
             while(levelConfigs.Count <= unlockLevel)
             {
                 levelConfigs.Add(new LevelConfigData(levelConfigs.Count));
             }
-            Debug.Log("当前关卡信息数量为: " + levelConfigs.Count);
+            //Debug.Log("当前关卡信息数量为: " + levelConfigs.Count);
             // 添加物品信息
             levelConfigs[unlockLevel].items.Add(new LevelConfigData.ItemInfo
             {
                 name = fields[1],
                 description = fields[2],
-                spritePath = fields[3]
+                spritePath = fields[3].TrimEnd('\r', '\n')
             });
         }
         

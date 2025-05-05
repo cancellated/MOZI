@@ -85,6 +85,7 @@ public class mangonelControl : MonoBehaviour
         isCharging = true;
         chargeStartTime = Time.time;
         Debug.Log("开始蓄力...");
+        Level3Manager.Instance.PlayMusic(1);
     }
 
     
@@ -110,6 +111,7 @@ public class mangonelControl : MonoBehaviour
         Debug.Log($"发射! 蓄力比例: {chargeRatio}, 发射力: {launchForce}");
         //enemyManager.NotifyEnemyMove();
         canShoot = false; // 禁用玩家的下一次射击
+        Level3Manager.Instance.StopMusic();
         
     }
 

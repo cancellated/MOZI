@@ -96,11 +96,11 @@ public class LevelDetailItem : MonoBehaviour
         
         var item = currentItems[selectedItemIndex];
         descText.text = item.description;
-        
+        string spritePath = "Images/Level_3/"+item.spritePath;
         // 动态加载并显示物品图片
-        if(!string.IsNullOrEmpty(item.spritePath))
+        if(!string.IsNullOrEmpty(spritePath))
         {
-            var sprite = Resources.Load<Sprite>(item.spritePath);
+            var sprite = Resources.Load<Sprite>(spritePath);
             itemImage.sprite = sprite;
         }
     }

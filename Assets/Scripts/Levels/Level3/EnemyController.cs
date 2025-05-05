@@ -36,6 +36,7 @@ public class EnemyController : MonoBehaviour
         Debug.Log("敌人碰撞");
         if (other.collider.CompareTag("Stone")){
             animator.SetBool("isDie",true);
+            Level3Manager.Instance.PlayMusic(2);
             // 敌人死亡函数在动画中调用
             Debug.Log("敌人死亡");
             isAlive = false;
@@ -48,7 +49,7 @@ public class EnemyController : MonoBehaviour
         if (isAlive) return;
         // 触发死亡事件
         //OnDeath?.Invoke();
-        
+        Level3Manager.Instance.StopMusic();
         // 销毁游戏对象
         Destroy(gameObject);
     }

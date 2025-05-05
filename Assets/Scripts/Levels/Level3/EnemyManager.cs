@@ -77,6 +77,10 @@ public class EnemyManager : MonoBehaviour
     {
         if(spawnedCount >= totalEnemies) {
             Debug.Log("已达到最大敌人数量");
+            if(activeEnemies.Count == 0) {
+                Level3Manager.Instance.GameWin();
+            }
+            return;
         };
         GameObject enemy = Instantiate(enemyPrefab, transform.position, Quaternion.identity);
         activeEnemies.Add(enemy);
