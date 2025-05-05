@@ -289,8 +289,11 @@ MonoBehaviour:
   dialogScene: Dialog
   _progress:
     currentLevel: 1
+    lastPlayedLevel: 0
     currentStory: 1001
     currentCG: 10001
+    currentChapter: 1
+  chapterEndVideoMappings: 
 --- !u!1 &787041029
 GameObject:
   m_ObjectHideFlags: 0

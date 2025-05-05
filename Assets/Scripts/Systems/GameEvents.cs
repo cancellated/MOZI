@@ -1,6 +1,7 @@
 using UnityEngine.Events;
 using System;
 using UnityEngine;
+using Unity.Collections;
 
 /// <summary>
 /// 游戏事件系统，用于模块间通信
@@ -20,6 +21,8 @@ public static class GameEvents
     public static event Action<int> OnMapDialogEnter;
 
     public static event Action<SceneTransitionType> OnSceneTransitionRequest;
+
+    public static event Action<int> OnChapterComplete;
 
 
     // 触发关卡进入事件
@@ -72,6 +75,11 @@ public static class GameEvents
         OnCGComplete?.Invoke(cgId);
     }
 
+    //触发章节完成事件
+    public static void TriggerChapterComplete(int chapterId)
+    {
+        OnChapterComplete?.Invoke(chapterId);
+    }
     //触发地图锁定事件
     public static void TriggerMapLock(bool isLocked)
     {

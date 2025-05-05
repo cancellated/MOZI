@@ -8,6 +8,7 @@ public class CGController : MonoBehaviour
     [Header("CG视频资源映射")]
     [SerializeField] private List<CGVideoMapping> cgVideoMappings = new();
 
+
     [Header("视频播放器")] 
     [SerializeField] private VideoPlayer videoPlayer;
     
@@ -29,6 +30,7 @@ public class CGController : MonoBehaviour
     {
         GameEvents.OnCGEnter += HandleCGEnter;
         GameEvents.OnCGComplete += HandleCGComplete;
+        GameEvents.OnChapterComplete += HandleChapterComplete;
         if (videoPlayer == null)
         {
             videoPlayer = GetComponent<VideoPlayer>();
@@ -39,6 +41,7 @@ public class CGController : MonoBehaviour
     {
         GameEvents.OnCGEnter -= HandleCGEnter;
         GameEvents.OnCGComplete -= HandleCGComplete;
+        GameEvents.OnChapterComplete -= HandleChapterComplete;
         
         if (videoPlayer != null)
         {
@@ -100,14 +103,29 @@ public class CGController : MonoBehaviour
         if (videoPlayer != null)
         {
             videoPlayer.Stop();
+            videoPlayer.loopPointReached -= OnVideoFinished;
+            videoPlayer.clip = null; // 释放视频资源
+            Resources.UnloadUnusedAssets(); // 释放未使用资源
         }
         
         // 标记CG为已观看
         GameEvents.TriggerCGComplete(_currentCGId);
     }
 
+    private void HandleChapterComplete(int chapterId)
+    {
+        int cgId = chapterId + GameManager.CGConfig.ChapterCGOffset;
+        _currentCGId = cgId;
+        _isPlaying = true;
+        PlayCurrentCG();
+    }
     private void OnVideoFinished(VideoPlayer vp)
     {
+        if(_currentCGId == 10003)
+        {
+            GameEvents.TriggerCGEnter(20001);
+            return;
+        }
         HandleCGComplete(_currentCGId);
     }
 

@@ -41,6 +41,7 @@ public class DialogManager : MonoBehaviour
     {
         GameEvents.OnStoryEnter += OnStoryEnter;
         GameEvents.OnCGEnter += OnCGEnter;
+        GameEvents.OnChapterComplete += OnChapterComplete;
 
         int currentStory = GameManager.Instance.GetCurrentStory();
         if (currentStory > 0)
@@ -54,6 +55,7 @@ public class DialogManager : MonoBehaviour
     {
         GameEvents.OnStoryEnter -= OnStoryEnter;
         GameEvents.OnCGEnter -= OnCGEnter;
+        GameEvents.OnChapterComplete -= OnChapterComplete;
         StopBGM();
     }
 
@@ -282,6 +284,11 @@ public class DialogManager : MonoBehaviour
     private void OnCGEnter(int cgId)
     {
         Debug.Log($"收到CG进入事件，cgId: {cgId}");
+    }
+
+    private void OnChapterComplete(int chapterId)
+    {
+        Debug.Log($"收到章节完成事件，chapterId: {chapterId}");
     }
 
     #if UNITY_EDITOR

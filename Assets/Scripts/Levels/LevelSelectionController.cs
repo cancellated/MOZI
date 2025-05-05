@@ -29,6 +29,7 @@ public class LevelSelectionController : MonoBehaviour
         }
 
         InitializeLevelButtons();
+        SetInitialCharacterPosition();
         RegisterEventHandlers();
         
         if(storyReviewPanel != null)
@@ -39,7 +40,7 @@ public class LevelSelectionController : MonoBehaviour
         {
             Debug.LogError("storyReviewPanel未赋值！");
         }
-    }
+}
 
     public void OnLevelButtonClicked(int levelId)
     {
@@ -136,6 +137,88 @@ public class LevelSelectionController : MonoBehaviour
     }
 
 
+
+
+    private void SetInitialCharacterPosition()
+    {
+        if(moveToLevel == null || GameManager.Instance == null) 
+        {
+            Debug.LogError("MoveToLevel或GameManager未初始化");
+            return;
+        }
+        
+        int lastLevel = GameManager.Instance.GetLastPlayedLevel();
+        Debug.Log($"获取的最后游玩关卡ID: {lastLevel}");
+        if(lastLevel == 0) 
+        {
+            Debug.Log("使用默认起始点");
+            return;
+        }
+        RectTransform departurePoint = FindDeparturePoint(lastLevel);
+        if(departurePoint == null) 
+        {
+            Debug.LogError($"未找到关卡 {lastLevel} 的出发点");
+            return;
+        }
+        
+        Debug.Log($"设置关卡 {lastLevel} 的出发点，位置: {departurePoint.anchoredPosition}");
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if(player != null)
+        {
+            if(player.TryGetComponent<RectTransform>(out var playerRect))
+            {
+                Debug.Log($"Player当前位置: {playerRect.anchoredPosition}");
+                playerRect.anchoredPosition = departurePoint.anchoredPosition;
+                Debug.Log($"Player新位置: {playerRect.anchoredPosition}");
+            }
+            else
+            {
+                Debug.LogError("Player对象缺少RectTransform组件");
+            }
+        }
+        else
+        {
+            Debug.LogError("未找到Player对象");
+        }
+    }
+    
+    private RectTransform FindDeparturePoint(int levelId)
+    {
+        Debug.Log($"正在查找关卡 {levelId} 的出发点");
+        if(levelId == 0) 
+        {
+            GameObject startPoint = GameObject.Find("Start Point");
+            if (startPoint != null)
+            {
+                Debug.Log("使用默认起始点");
+                return startPoint.GetComponent<RectTransform>();
+            }
+            Debug.LogError("未找到Start Point对象");
+            return null;
+        }
+        
+        foreach(var button in _levelButtons.Values)
+        {
+            if(button.targetLevelId == levelId)
+            {
+                Transform foundTransform = button.transform.Find("Departure");
+                RectTransform departure = null;
+                if (foundTransform != null)
+                {
+                    departure = foundTransform.GetComponent<RectTransform>();
+                }
+                if(departure != null) 
+                {
+                    Debug.Log($"找到关卡 {levelId} 的出发点");
+                    return departure;
+                }
+                Debug.LogError($"关卡 {levelId} 按钮缺少Departure子物体");
+            }
+        }
+        Debug.LogError($"未找到关卡 {levelId} 的按钮");
+        return null;
+    }
+
     private void OnDestroy()
     {
         GameEvents.OnLevelComplete -= UpdateButtonState;
@@ -143,5 +226,5 @@ public class LevelSelectionController : MonoBehaviour
         GameEvents.OnLevelUnlocked -= UpdateButtonState;
         GameEvents.OnMapLock -= OnMapLockChanged;
     }
-
 }
+

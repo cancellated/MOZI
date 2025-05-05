@@ -12,33 +12,25 @@ public class MoveToLevel : MonoBehaviour
     [SerializeField] private List<AnimationClip> levelTransitionAnims;
     [SerializeField] private float animTransitionTime = 0.5f;
     
-    private int currentLevelIndex = 0;
+    private int departure = 0;
     private Coroutine moveCoroutine;
-    private SpriteRenderer characterRenderer;
     private Coroutine animationCoroutine;
 
-    void Start()
+    private IEnumerator MoveCharacter(int destination)
     {
-        characterRenderer = character.GetComponent<SpriteRenderer>();
-    }
-
-    private IEnumerator MoveCharacter(int targetIndex)
-    {
-        // 设置Animator参数
-        pathAnimator.SetInteger("Departure", currentLevelIndex);
-        pathAnimator.SetInteger("Destination", targetIndex);
-        
         // 设置动画方向
-        pathAnimator.SetFloat("Speed", targetIndex > currentLevelIndex ? 1f : -1f);
+        pathAnimator.SetFloat("Speed", destination > departure ? 1f : -1f);
         
         // 触发过渡动画
         pathAnimator.SetTrigger("StartTransition");
         
         // 等待动画完成
-        float animLength = GetAnimationDuration(currentLevelIndex, targetIndex);
+        float animLength = GetAnimationDuration(departure, destination);
         yield return new WaitForSeconds(animLength);
+        pathAnimator.SetInteger("Departure", destination);
+        pathAnimator.SetInteger("Destination", destination);
         
-        currentLevelIndex = targetIndex;
+        departure = destination;
         moveCoroutine = null;
         
         if(animationCoroutine != null)
@@ -68,10 +60,11 @@ public class MoveToLevel : MonoBehaviour
         }
         
         // 根据目标关卡ID设置动画参数
-        pathAnimator.SetInteger("Departure", currentLevelIndex);
+        pathAnimator.SetInteger("Departure", departure);
         pathAnimator.SetInteger("Destination", targetLevel);
         
         moveCoroutine = StartCoroutine(MoveCharacter(targetLevel));
         yield return moveCoroutine;
     }
+
 }

@@ -177,8 +177,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 34
+    m_Font: {fileID: 12800000, guid: 79320bceaa1024740984f3c1d09a7dba, type: 3}
+    m_FontSize: 36
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 3
@@ -350,11 +350,15 @@ MonoBehaviour:
   levelScenes:
   - Level_1
   - Level_2
+  - Level_3
   dialogScene: Dialog
   _progress:
     currentLevel: 1
+    lastPlayedLevel: 0
     currentStory: 1001
     currentCG: 10001
+    currentChapter: 1
+  chapterEndVideoMappings: 
 --- !u!4 &851615658
 Transform:
   m_ObjectHideFlags: 0
@@ -479,8 +483,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 333, y: -65}
-  m_SizeDelta: {x: 266.5379, y: 53.4744}
+  m_AnchoredPosition: {x: 386, y: -84}
+  m_SizeDelta: {x: 300, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1390116166
 MonoBehaviour:
@@ -503,12 +507,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 40
+    m_Font: {fileID: 12800000, guid: 7527bf61c478d96429cebbfa858159a0, type: 3}
+    m_FontSize: 60
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 3
-    m_MaxSize: 50
+    m_MaxSize: 60
     m_Alignment: 0
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -673,7 +677,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1523c199b73b04445a5179d85ac99051, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f12abca43589e124682343e7ee66ee45, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1183,7 +1187,7 @@ VideoPlayer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2019504367}
   m_Enabled: 1
-  m_VideoClip: {fileID: 32900000, guid: 62b6de60a54f12747b104b7bd83a3186, type: 3}
+  m_VideoClip: {fileID: 0}
   m_TargetCameraAlpha: 1
   m_TargetCamera3DLayout: 0
   m_TargetCamera: {fileID: 1662537646}
@@ -1228,6 +1232,10 @@ MonoBehaviour:
     videoClip: {fileID: 32900000, guid: 62b6de60a54f12747b104b7bd83a3186, type: 3}
   - cgId: 10002
     videoClip: {fileID: 32900000, guid: e3f3cd488f52ec6428590c975a7b2fe1, type: 3}
+  - cgId: 10003
+    videoClip: {fileID: 32900000, guid: d2aa47fec6d3d1e4dba8281089afae9d, type: 3}
+  - cgId: 20001
+    videoClip: {fileID: 32900000, guid: 5d3099b54113cfe44976988a99ce1043, type: 3}
   videoPlayer: {fileID: 2019504371}
   fadeCanvas: {fileID: 0}
   fadeDuration: 0.5

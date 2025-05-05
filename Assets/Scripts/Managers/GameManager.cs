@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine.SceneManagement;
@@ -9,11 +9,13 @@ public class GameManager : SingletonBase<GameManager>
     {
         public const int PreStoryOffset = 1000;
         public const int PostStoryOffset = 2000;
+        
     }
 
     public static class CGConfig
     {
         public const int CGOffset = 10000;
+        public const int ChapterCGOffset = 20000;
     }
 
     [Header("场景配置")]
@@ -24,7 +26,9 @@ public class GameManager : SingletonBase<GameManager>
 
     [Header("玩家进度")]
     [SerializeField] private GameProgress _progress = new();
-
+    
+    [Header("章节末尾CG")]
+    [SerializeField] private List<int> chapterEndVideoMappings = new();
 
     protected override void Initialize()
     {
@@ -44,6 +48,7 @@ public class GameManager : SingletonBase<GameManager>
         GameEvents.OnSceneTransitionRequest += HandleSceneTransition;
         GameEvents.OnCGEnter += HandleCGEnter;
         GameEvents.OnCGComplete += HandleCGComplete;
+        GameEvents.OnChapterComplete += HandleChapterComplete;
     }
 
     protected override void OnDestroy()
@@ -55,6 +60,7 @@ public class GameManager : SingletonBase<GameManager>
         GameEvents.OnSceneTransitionRequest -= HandleSceneTransition;
         GameEvents.OnCGEnter -= HandleCGEnter;
         GameEvents.OnCGComplete -= HandleCGComplete;
+        GameEvents.OnChapterComplete -= HandleChapterComplete;
     }
 
     #endregion
@@ -63,6 +69,7 @@ public class GameManager : SingletonBase<GameManager>
     #region 事件处理
     private void HandleLevelEnter(int levelId) {
         SetCurrentLevel(levelId);
+        SetLastPlayedLevel(levelId);
         Debug.Log($"进入关卡: {levelId}");
         if(levelId > 0 && levelId <= levelScenes.Count) {
             GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevel);
@@ -154,11 +161,35 @@ public class GameManager : SingletonBase<GameManager>
 
     }
 
-    private void HandleCGComplete(int cgId) {
-        SetCurrentCG(0);
-        GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);  
+
+private void HandleCGComplete(int cgId) 
+{
+    SetCurrentCG(0);
+    if(!_progress.completedCGs.ContainsKey(cgId)) {
+        _progress.completedCGs[cgId] = true;
+        SaveProgress();
     }
     
+    if(chapterEndVideoMappings.Contains(cgId))
+    {
+        int chapterCGId = CGConfig.ChapterCGOffset + _progress.currentChapter;
+        // 检查章节CG是否已完成
+        if(!_progress.completedCGs.ContainsKey(chapterCGId) || !_progress.completedCGs[chapterCGId])
+        {
+            GameEvents.TriggerCGEnter(chapterCGId);
+            return;
+        }
+    }
+    
+    GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);
+}  
+    
+    private void HandleChapterComplete(int chapterId) {
+        int chapterCGId = CGConfig.ChapterCGOffset + chapterId;
+        SetCurrentCG(chapterCGId);
+        Debug.Log($"完成章节: {chapterCGId}，开始播放CG");
+        _progress.currentChapter++;
+    }
     private void HandleSceneTransition(GameEvents.SceneTransitionType transitionType) {
         switch (transitionType) {
             case GameEvents.SceneTransitionType.ToLevel:
@@ -194,16 +225,19 @@ public class GameManager : SingletonBase<GameManager>
 
     #region 获取/设置游戏参数
     public int GetCurrentLevel() => _progress.currentLevel;
+
     public void SetCurrentLevel(int levelId) => _progress.currentLevel = levelId;
     public int GetCurrentStory() => _progress.currentStory;
     public void SetCurrentStory(int storyId) => _progress.currentStory = storyId;
-    public void SetCurrentCG(int cgId) => _progress.currentCG = cgId;
     public int GetCurrentCG() => _progress.currentCG;
-    
-
+    public void SetCurrentCG(int cgId) => _progress.currentCG = cgId;
+    public int GetLastPlayedLevel() => _progress.lastPlayedLevel;
+    public int GetCurrentChapter() => _progress.currentChapter;
+    public int SetLastPlayedLevel(int levelId) => _progress.lastPlayedLevel = levelId;
     public int CalculatePreStoryId(int levelId) => StoryConfig.PreStoryOffset + levelId;
     public int CalculatePostStoryId(int levelId) => StoryConfig.PostStoryOffset + levelId;
     public int CalculateCGId(int levelId) => CGConfig.CGOffset + levelId;
+    public int CalculateChapterCGId(int chapterId) => CGConfig.ChapterCGOffset + chapterId;
     public int GetLevelIdFromStoryId(int storyId) => storyId % 1000;
 
     // 检查是否需要播放故事
@@ -286,11 +320,14 @@ public class GameManager : SingletonBase<GameManager>
             _progress.completedCGs = new Dictionary<int, bool>();
             
             // 设置默认关卡状态
+            _progress.currentLevel = 0;
+            _progress.lastPlayedLevel = 0;
             _progress.unlockedLevels[1] = true; 
             _progress.completedLevels[1] = false;
             _progress.unlockedStories[StoryConfig.PreStoryOffset + 1] = true;
             
             Debug.Log("创建新存档，初始化默认值");
+            SaveProgress();
         }
     }
     #endregion
@@ -309,12 +346,7 @@ public class GameManager : SingletonBase<GameManager>
 
     private void ValidateProgress()
     {
-        // 确保当前关卡和故事状态一致
-        if(_progress.currentLevel <= 0) 
-        {
-            _progress.currentLevel = 1;
-        }
-        
+     
         // 确保第一关解锁状态正确
         if(!_progress.unlockedLevels.ContainsKey(1))
         {
@@ -373,8 +405,10 @@ public class GameManager : SingletonBase<GameManager>
     public class GameProgress
     {
         public int currentLevel = 1;
+        public int lastPlayedLevel = 0;
         public int currentStory = GameManager.StoryConfig.PreStoryOffset + 1;
         public int currentCG = GameManager.CGConfig.CGOffset + 1;
+        public int currentChapter = 1;
         public Dictionary<int, bool> completedStories = new();
         public Dictionary<int, bool> completedLevels = new();
         public Dictionary<int, bool> unlockedLevels = new();
