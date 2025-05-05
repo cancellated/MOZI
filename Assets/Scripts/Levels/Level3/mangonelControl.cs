@@ -10,7 +10,13 @@ public class mangonelControl : MonoBehaviour
     [SerializeField] private float minForce = 10f; // 最小发射力
     [SerializeField] private float maxForce = 30f; // 最大发射力
     [SerializeField] private float chargeTime = 2f; // 最大蓄力时间
+
+    [Header("投石机动画")]
+    [SerializeField] private Transform armPivot; // 投石机臂的旋转支点
+    [SerializeField] private float maxArmAngle = -30f; // 最大下沉角度
+    [SerializeField] private float armReturnSpeed = 5f; // 臂返回速度
     
+    private float currentArmAngle = 0f;
     private float chargeStartTime;
     private bool isCharging;
 
@@ -38,6 +44,7 @@ public class mangonelControl : MonoBehaviour
 
     private void Update()
     {
+        FireAnima();
         if (!canShoot) return; // 如果不能射击，直接返回
         GetFire();
     }
@@ -49,9 +56,26 @@ public class mangonelControl : MonoBehaviour
             StartCharging();
         }
         
+        //释放
         if(Input.GetMouseButtonUp(0) && isCharging)
         {
             ReleaseProjectile();
+        }
+    }
+
+    private void FireAnima(){
+        // 控制臂动画
+        if(isCharging)
+        {
+            currentArmAngle = Mathf.Lerp(currentArmAngle, maxArmAngle, Time.deltaTime * 5f);
+        }
+        else
+        {
+            currentArmAngle = Mathf.Lerp(currentArmAngle, 0f, Time.deltaTime * armReturnSpeed);
+        }
+        if(armPivot != null)
+        {
+            armPivot.localEulerAngles = new Vector3(0f, 0f, currentArmAngle);
         }
     }
 

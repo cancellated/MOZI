@@ -6,7 +6,11 @@ public class Level3Manager : MonoBehaviour
 {
     public static Level3Manager Instance { get; private set; }
     
+    public GameObject winPanel;
+    public GameObject losePanel;
     public int currrentRound = 0;//每回合玩家先动，然后敌人动，为一回合
+
+    private bool isStopped = false;
     private void Awake()
     {
         Instance = this;
@@ -21,6 +25,9 @@ public class Level3Manager : MonoBehaviour
     // 玩家行动结束
     public void OnPlayerActionComplete()
     {
+        if(isStopped){
+            return;
+        }
         // 通知敌人行动
         EnemyManager.Instance.StartEnemyTurn();
     }
@@ -28,25 +35,37 @@ public class Level3Manager : MonoBehaviour
     // 敌人行动结束
     public void OnEnemyTurnComplete()
     {
+        if(isStopped){
+            return;
+        }
         currrentRound++;
         // 允许玩家再次行动
         mangonelControl.Instance.EnablePlayerAction();
     }
+    //重置游戏，失败后重新开始
     public void ResetLevel(){
         currrentRound = 0;
+        isStopped = false;
         EnemyManager.Instance.ResetLevel();
         mangonelControl.Instance.ResetLevel();
+        EnemyManager.Instance.SpawnEnemy();
     }
+    //游戏通关
     public void GameOver(){
         GameEvents.TriggerLevelComplete(3);
     }
     public void GameWin(){
         // 游戏胜利逻辑
         Debug.Log("You win!");
-        GameOver();
+        isStopped = true;
+        winPanel.SetActive(true);
+        //GameOver();
     }
     public void GameLose(){
         // 游戏失败逻辑
         Debug.Log("You lose!"); 
+        losePanel.SetActive(true);
+        isStopped = true;
+
     }
 }

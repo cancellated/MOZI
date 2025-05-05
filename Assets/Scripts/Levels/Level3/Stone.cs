@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Stone : MonoBehaviour
 {
-    [SerializeField] private float lifeTime = 3f; // 石头存在时间
+    [SerializeField] private float lifeTime = 4f; // 石头存在时间
     private bool hasCollided = false;
     
     void Start()

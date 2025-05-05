@@ -40,16 +40,21 @@ public class EnemyManager : MonoBehaviour
     }
     //更新游戏设定
     public void ResetLevel(){
-        spawnedCount = 0;
-        activeEnemies.Clear();
+        ClearAllEnemies();
         canSpawnEnemies = true;
-        UpdateEnemyCountText();
     }
     // 更新敌人数量显示
     private void UpdateEnemyCountText(){
         enemyCountText.text = $"剩余敌人数量: {totalEnemies-spawnedCount}/{totalEnemies}";
     }
-
+    private void ClearAllEnemies(){
+        foreach(GameObject enemy in activeEnemies){
+            Destroy(enemy);
+        }
+        activeEnemies.Clear();
+        spawnedCount = 0;
+        UpdateEnemyCountText();
+    }
     /// <summary>
     /// 移动所有活跃的敌人
     /// </summary>

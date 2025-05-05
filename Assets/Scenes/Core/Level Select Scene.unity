@@ -1346,6 +1346,7 @@ MonoBehaviour:
   levelScenes:
   - Level_1
   - Level_2
+  - Level_3
   dialogScene: Dialog
   _progress:
     currentLevel: 1
@@ -1372,6 +1373,18 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1324128618}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1302755560 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7804130515091276675, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+    type: 3}
+  m_PrefabInstance: {fileID: 1324128618}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1302755558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e71e438265cf1d54395e91f906df7b7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1324128618
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1384,6 +1397,36 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Book
+      objectReference: {fileID: 0}
+    - target: {fileID: 365200161902317897, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 610916739141126282, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: levelId
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 610916739141126282, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: storybook
+      value: 
+      objectReference: {fileID: 1302755560}
+    - target: {fileID: 1083067013453557288, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1083067013453557288, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: m_Spacing
+      value: -200
+      objectReference: {fileID: 0}
+    - target: {fileID: 1092355493280569525, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2885032480443647260, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
         type: 3}
@@ -1485,6 +1528,37 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4448124837075784918, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: levelId
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4448124837075784918, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: storybook
+      value: 
+      objectReference: {fileID: 1302755560}
+    - target: {fileID: 4984299168773073828, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: levelId
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984299168773073828, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: storybook
+      value: 
+      objectReference: {fileID: 1302755560}
+    - target: {fileID: 6140197387664080811, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7804130515091276675, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: levelOverviewPrefab
+      value: 
+      objectReference: {fileID: 5001021728780006063, guid: b37f33416a652f14c92b4e5c3179787e,
+        type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
