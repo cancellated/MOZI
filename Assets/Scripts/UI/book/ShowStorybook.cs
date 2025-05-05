@@ -40,6 +40,7 @@ public class ShowStorybook : MonoBehaviour
     private void OnEnable()
     {
         Debug.Log("Onenble");
+        //dataManager.LoadLevelConfigs();
         // 加载关卡配置并更新显示
         ShowOverviewMenu();
         
@@ -209,8 +210,8 @@ public class ShowStorybook : MonoBehaviour
     /// <param name="levelId">关卡ID(从1开始)</param>
     private bool IsLevelCompleted(int levelId)
     {
-        int cgId = GameManager.Instance.CalculateCGId(levelId);
-        return GameManager.Instance.IsCGCompleted(cgId);
+        return GameManager.Instance.IsLevelCompleted(levelId) && 
+               GameManager.Instance.IsStoryCompleted(GameManager.Instance.CalculatePostStoryId(levelId));
     }
 
     /// <summary>

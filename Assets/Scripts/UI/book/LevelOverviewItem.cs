@@ -26,6 +26,7 @@ public class LevelOverviewItem : MonoBehaviour
         storybook = controller;
         if (!isCompleted) {
             this.GetComponent<Image>().color = new Color(1,1,1,0.5f);
+            Debug.Log(isCompleted);
             return;
         }
         button.onClick.AddListener(OnClick);

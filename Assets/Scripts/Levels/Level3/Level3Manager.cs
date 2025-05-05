@@ -77,7 +77,6 @@ public class Level3Manager : MonoBehaviour
         // 切换为通关音乐
         if (audioManager != null)
         {
-            audioManager.StopBackgroundMusic();
             PlayMusic(3);
         }
         winPanel.SetActive(true);
@@ -86,7 +85,9 @@ public class Level3Manager : MonoBehaviour
     public void GameLose(){
         // 游戏失败逻辑
         Debug.Log("You lose!"); 
-
+        if (audioManager!= null){
+            PlayMusic(4);
+        }
         losePanel.SetActive(true);
         isStopped = true;
 

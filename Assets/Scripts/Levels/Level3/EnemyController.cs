@@ -4,8 +4,8 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
     [Header("敌人属性")]
-    private Vector3[] pathPoints = {new Vector3(-12f,-4f,5f),new Vector3(-8.5f,-4f,5f),
-    new Vector3(-5f,-4f,5f),new Vector3(-1.5f,-4f,5f),new Vector3(2f,-4f,5f)}; // 敌人移动一格距离
+    private Vector3[] pathPoints = {new Vector3(-12f,-5f,5f),new Vector3(-8.5f,-5f,5f),
+    new Vector3(-5f,-5f,5f),new Vector3(-1.5f,-5f,5f),new Vector3(2f,-5f,5f)}; // 敌人移动一格距离
     private int currentPointIndex = 0; // 当前路径点索引;
     public bool isAlive = true;
     internal Action OnDeath;

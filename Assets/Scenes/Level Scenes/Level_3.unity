@@ -206,7 +206,7 @@ Transform:
   m_GameObject: {fileID: 35066758}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalPosition: {x: -0.6, y: 1, z: -10.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -533,8 +533,8 @@ MonoBehaviour:
   audioManager: {fileID: 509879039}
   mangonelAttack: {fileID: 8300000, guid: 1b9300e85b3aafd429c25295ec03e439, type: 3}
   enemyDie: {fileID: 8300000, guid: 6acf1a969b6ba1a4f86472b83458469f, type: 3}
-  winMusic: {fileID: 8300000, guid: ff07438f2d808584f862395003747ac0, type: 3}
-  loseMusic: {fileID: 8300000, guid: dfde6f03de5f03642b5eb8928242b6dc, type: 3}
+  winMusic: {fileID: 8300000, guid: ef24e7089167e944c87a9504a4b48472, type: 3}
+  loseMusic: {fileID: 8300000, guid: 22cc87650d2d93548be708826c0de9e4, type: 3}
   winPanel: {fileID: 1492213606}
   losePanel: {fileID: 1746784444}
   currrentRound: 0
@@ -936,7 +936,7 @@ Transform:
   m_GameObject: {fileID: 1224246107}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11.12, y: -5.44, z: 5}
+  m_LocalPosition: {x: 10.94, y: -5.7, z: 5}
   m_LocalScale: {x: 0.52068204, y: 0.52068204, z: 0.52068204}
   m_ConstrainProportionsScale: 0
   m_Children:
