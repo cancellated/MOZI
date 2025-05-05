@@ -10,14 +10,18 @@ public class EnemyController : MonoBehaviour
     public bool isAlive = true;
     internal Action OnDeath;
 
+    private Animator animator;
+
     private void Start()
     {
         transform.position = pathPoints[currentPointIndex];
+        animator = GetComponent<Animator>();
     }
 
     public void MoveOneStep()
     {
         if(!isAlive) return;
+        
         if (currentPointIndex >= pathPoints.Length - 1){
             ArriveDestination();
         }
@@ -31,22 +35,22 @@ public class EnemyController : MonoBehaviour
     { 
         Debug.Log("敌人碰撞");
         if (other.collider.CompareTag("Stone")){
-            Die(); // 敌人死亡
+            animator.SetBool("isDie",true);
+            // 敌人死亡函数在动画中调用
             Debug.Log("敌人死亡");
+            isAlive = false;
+            OnDeath?.Invoke();
         }
     }
 
     public void Die()
-    {
-        if(!isAlive) return;
-        
-        isAlive = false;
-        
+    {               
+        if (isAlive) return;
         // 触发死亡事件
-        OnDeath?.Invoke();
+        //OnDeath?.Invoke();
         
         // 销毁游戏对象
-        Destroy(gameObject, 0.5f);
+        Destroy(gameObject);
     }
 
     //有敌人到达终点

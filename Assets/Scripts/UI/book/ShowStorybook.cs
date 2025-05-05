@@ -180,16 +180,18 @@ public class ShowStorybook : MonoBehaviour
     private GameObject CreateLevelOverviewItem(int levelIndex)
     {
         int levelId = levelIndex + 1;
-        var overviewObj = Instantiate(levelOverviewPrefab, levelOverviewPanel);
+        var overviewObjP = Instantiate(levelOverviewPrefab, levelOverviewPanel);
+        var overviewObj = overviewObjP.transform.GetChild(0).gameObject;
         // 初始化关卡详情项
         overviewObj.GetComponent<LevelOverviewItem>().Setup(
             levelId,
+            IsLevelCompleted(levelId),
             this
         );
-        if(!IsLevelCompleted(levelId)){
-                overviewObj.GetComponent<Image>().color = new Color(1,1,1,0.5f);
-                Debug.Log("一级菜单虚化已完成");
-            }
+        // if(!IsLevelCompleted(levelId)){
+        //         overviewObj.GetComponent<Image>().color = new Color(1,1,1,0.5f);
+        //         Debug.Log("一级菜单虚化已完成");
+        //     }
         return overviewObj;
     }
 

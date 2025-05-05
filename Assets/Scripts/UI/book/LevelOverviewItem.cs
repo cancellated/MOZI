@@ -9,17 +9,23 @@ public class LevelOverviewItem : MonoBehaviour
     [SerializeField] private Button button;
 
     private bool isButtonClicked = false;
+
+    private bool isCompleted = false;
     
     private int levelId;
     private ShowStorybook storybook;
     
-    public void Setup(int id, ShowStorybook controller)
+    public void Setup(int id,bool isComplete, ShowStorybook controller)
     {
         levelId = id;
         //levelNameText.text = "第" + levelId+ "关";
         SetImage(id);
+        isCompleted = isComplete;
         storybook = controller;
-        
+        if (!isCompleted) {
+            this.GetComponent<Image>().color = new Color(1,1,1,0.5f);
+            return;
+        }
         button.onClick.AddListener(OnClick);
     }
 
