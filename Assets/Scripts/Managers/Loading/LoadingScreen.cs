@@ -25,14 +25,48 @@ public class LoadingScreen : SingletonBase<LoadingScreen>
     [SerializeField] private float fadeDuration = 0.25f; // 淡入淡出时长
     private Coroutine _fadeCoroutine;
 
+    [Header("预制体设置")]
+    [SerializeField] private static GameObject loadingScreenPrefab;
+    private static LoadingScreen _instance;
+    private static void LoadPrefab()
+    {
+        if(loadingScreenPrefab == null)
+        {
+            loadingScreenPrefab = Resources.Load<GameObject>("Prefabs/Loading/LoadingScreen");
+        }
+    }
+
+    public static new LoadingScreen Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                LoadPrefab();
+                if(loadingScreenPrefab != null)
+                {
+                    _instance = Instantiate(loadingScreenPrefab).GetComponent<LoadingScreen>();
+                }
+                else
+                {
+                    Debug.LogError("LoadingScreen预制体未找到！请确保路径正确");
+                }
+            }
+            return _instance;
+        }
+    }
+
     protected override void Initialize()
     {
-        Hide();
-        
-        if (gifImage != null)
+        if (_instance == null)
         {
-            gifImage.gameObject.SetActive(false);
-            _originalPosition = gifImage.rectTransform.anchoredPosition;
+            _instance = this;
+            DontDestroyOnLoad(gameObject);
+            Hide();
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 
