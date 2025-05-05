@@ -13,6 +13,8 @@ public class LevelOverviewItem : MonoBehaviour
     private bool isCompleted = false;
     
     private int levelId;
+
+    private Animator animator;
     private ShowStorybook storybook;
     
     public void Setup(int id,bool isComplete, ShowStorybook controller)
@@ -24,18 +26,19 @@ public class LevelOverviewItem : MonoBehaviour
         storybook = controller;
         if (!isCompleted) {
             this.GetComponent<Image>().color = new Color(1,1,1,0.5f);
-            return;
+            //return;
         }
         button.onClick.AddListener(OnClick);
     }
 
-    // void Start() {
-    //     button.onClick.AddListener(OnClick);
-    //     //storybook = GameObject.Find("Book").GetComponent<ShowStorybook>();
-    //     if (storybook == null) {
-    //         Debug.LogError("未一级菜单选项未找到ShowStorybook");
-    //     }
-    // }
+    void Start() {
+        // button.onClick.AddListener(OnClick);
+        // //storybook = GameObject.Find("Book").GetComponent<ShowStorybook>();
+        // if (storybook == null) {
+        //     Debug.LogError("未一级菜单选项未找到ShowStorybook");
+        // }
+        animator = GetComponent<Animator>();
+    }
     private void SetImage(int id) {
         string path;
         switch (id) {
@@ -54,7 +57,10 @@ public class LevelOverviewItem : MonoBehaviour
         if (isButtonClicked) {
             return;
         }
-        storybook.ShowDetailMenu(levelId);
+        animator.SetInteger("roll_ID", levelId);
         isButtonClicked = true;
+    }
+    public void ShowDetailMenu() {
+        storybook.ShowDetailMenu(levelId);
     }
 }

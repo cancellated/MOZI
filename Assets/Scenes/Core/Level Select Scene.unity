@@ -1186,12 +1186,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1086498003}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 960, y: 268.761, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -271.239, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1157111878}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1086498006
 MonoBehaviour:
@@ -1278,7 +1278,8 @@ Transform:
   m_LocalPosition: {x: 960, y: 540, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1086498005}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1302755558 stripped
@@ -1315,7 +1316,7 @@ PrefabInstance:
     - target: {fileID: 365200161902317897, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 610916739141126282, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
         type: 3}
@@ -1462,6 +1463,11 @@ PrefabInstance:
       propertyPath: storybook
       value: 
       objectReference: {fileID: 1302755560}
+    - target: {fileID: 5098563354355534807, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.8509804
+      objectReference: {fileID: 0}
     - target: {fileID: 6140197387664080811, guid: 04ba6a17a5df6604798ed0b85c0f15cc,
         type: 3}
       propertyPath: m_IsActive
@@ -2773,4 +2779,3 @@ SceneRoots:
   - {fileID: 1467381857}
   - {fileID: 2109189384}
   - {fileID: 1157111878}
-  - {fileID: 1086498005}
