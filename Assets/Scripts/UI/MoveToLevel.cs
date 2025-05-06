@@ -23,13 +23,15 @@ public class MoveToLevel : MonoBehaviour
         
         // 触发过渡动画
         pathAnimator.SetTrigger("StartTransition");
-        
+        pathAnimator.SetInteger("Departure", destination);
+        pathAnimator.SetInteger("Destination", destination);
+
+
         // 等待动画完成
         float animLength = GetAnimationDuration(departure, destination);
         yield return new WaitForSeconds(animLength);
-        pathAnimator.SetInteger("Departure", destination);
-        pathAnimator.SetInteger("Destination", destination);
-        
+
+        pathAnimator.SetTrigger("Idle");
         departure = destination;
         moveCoroutine = null;
         
@@ -40,7 +42,14 @@ public class MoveToLevel : MonoBehaviour
         }
 
     }
-
+        public void SetIdleState(int levelId)
+    {
+        if(pathAnimator != null)
+        {
+            pathAnimator.SetInteger("Departure", levelId);
+            pathAnimator.SetBool("Idle", true);
+        }
+    }
     private float GetAnimationDuration(int fromLevel, int toLevel)
     {
         // 根据关卡索引返回对应动画时长

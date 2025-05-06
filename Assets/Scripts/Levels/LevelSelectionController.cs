@@ -32,6 +32,12 @@ public class LevelSelectionController : MonoBehaviour
         SetInitialCharacterPosition();
         RegisterEventHandlers();
         
+        // 添加这行确保动画状态正确初始化
+        if(moveToLevel != null)
+        {
+            StartCoroutine(moveToLevel.MoveToTargetLevel(GameManager.Instance.GetLastPlayedLevel()));
+        }
+        
         if(storyReviewPanel != null)
         {
             storyReviewPanel.SetActive(false);
@@ -137,8 +143,6 @@ public class LevelSelectionController : MonoBehaviour
     }
 
 
-
-
     private void SetInitialCharacterPosition()
     {
         if(moveToLevel == null || GameManager.Instance == null) 
@@ -146,8 +150,9 @@ public class LevelSelectionController : MonoBehaviour
             Debug.LogError("MoveToLevel或GameManager未初始化");
             return;
         }
-        
+
         int lastLevel = GameManager.Instance.GetLastPlayedLevel();
+        moveToLevel.SetIdleState(lastLevel);
         Debug.Log($"获取的最后游玩关卡ID: {lastLevel}");
         if(lastLevel == 0) 
         {
