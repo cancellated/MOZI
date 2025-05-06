@@ -18,7 +18,8 @@ public static class GameEvents
     public static event Action<int> OnCGEnter;
     public static event Action<int> OnCGComplete;
     public static event Action<bool> OnMapLock;
-    public static event Action<int> OnMapDialogEnter;
+    public static event Action<int> OnMapStoryEnter;
+    public static event Action<int> OnMapStoryComplete;
 
     public static event Action<SceneTransitionType> OnSceneTransitionRequest;
 
@@ -87,9 +88,15 @@ public static class GameEvents
     }
 
     //触发地图对话进入事件
-    public static void TriggerMapDialogEnter(int DialogId)
+    public static void TriggerMapStoryEnter(int storyId)
     {
-        OnMapDialogEnter?.Invoke(DialogId);
+        OnMapStoryEnter?.Invoke(storyId);
+    }
+
+    //触发地图对话完成事件
+    public static void TriggerMapStoryComplete(int DialogId)
+    {
+        OnMapStoryComplete?.Invoke(DialogId);
     }
     #endregion
 

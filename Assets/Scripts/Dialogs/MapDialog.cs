@@ -8,31 +8,22 @@ public class MapDialog : MonoBehaviour
 {
     #region 序列化字段
     [Header("对话设置")]
-    [SerializeField] private int levelId;
-    [SerializeField] private float triggerDistance = 1f;
+    [SerializeField] private int levelId;   // 关卡ID
     [SerializeField] private CanvasGroup canvasGroup;   //对话框的CanvasGroup
     [SerializeField] private Image characterImage; // 人物头像
     [SerializeField] private Text dialogText; // 对话内容
     [SerializeField] private Image darkBackground; // 暗色背景
-    
-    [Header("对话配置")]
-    [SerializeField] private TextAsset dialogConfig;
     #endregion
     
     #region 私有变量
-    private Transform _player;
-    private bool _hasTriggered;
-    private List<MapDialogData> _dialogs = new();
     private Coroutine _typingCoroutine;
     private bool _isTypingComplete;
+    private bool _shouldSkipCurrentText;
     #endregion
     
     #region Unity生命周期
     void Start()
     {
-        //_player = GameObject.FindGameObjectWithTag("Player").transform;
-        _hasTriggered = false;
-        
         // 初始化隐藏对话元素
         if(canvasGroup != null)
         {
@@ -42,30 +33,42 @@ public class MapDialog : MonoBehaviour
         }
 
         // 添加事件监听
-        GameEvents.OnMapDialogEnter += HandleMapDialogEnter;
+        GameEvents.OnMapStoryEnter += HandleMapStoryEnter;
+        GameEvents.OnMapStoryComplete += HandleMapStoryComplete;
+
+        // 游戏最初对话
+        if(levelId == 0 && !GameManager.Instance.IsStoryCompleted(3000)) 
+        {
+            Debug.Log("游戏开始对话");
+            GameEvents.TriggerMapStoryEnter(3000); // 触发初始对话
+        }
     }
     #endregion
     
     #region 事件处理
-    private void HandleMapDialogEnter(int dialogId)
+    private void HandleMapStoryEnter(int storyId)
     {
-        if(!_hasTriggered && dialogId == levelId + 3000)
+        levelId = storyId - GameManager.StoryConfig.MapSroryOffset;
+        if(!GameManager.Instance.IsStoryCompleted(storyId))
         {
             StartCoroutine(ShowMapDialog());
-            _hasTriggered = true;
+        }
+    }
+    private void HandleMapStoryComplete(int storyId)
+    {
+        if(storyId == levelId + 3000)
+        {
+            if(canvasGroup != null)
+            {
+                canvasGroup.alpha = 0;
+                canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
+            }
         }
     }
     #endregion
     
     #region 对话核心逻辑
-    void Update()
-    {
-/*        if (!_hasTriggered && Vector2.Distance(transform.position, _player.position) <= triggerDistance)
-        {
-            StartCoroutine(ShowMapDialog());
-            _hasTriggered = true;
-        }*/
-    }
     //显示地图对话
     private IEnumerator ShowMapDialog()
     {
@@ -73,110 +76,145 @@ public class MapDialog : MonoBehaviour
         //显示对话界面
         if (canvasGroup != null)
         {
-            canvasGroup.alpha = 1; // 设置透明度为 1
-            canvasGroup.interactable = true; // 允许交互
-            canvasGroup.blocksRaycasts = true; // 阻挡射线
+            canvasGroup.alpha = 1;
+            canvasGroup.interactable = true;
+            canvasGroup.blocksRaycasts = true;
         }
 
-        // 解析对话配置
-        ParseDialogConfig();
-        
-        // 播放对话
-        yield return StartCoroutine(PlayDialogs());
-        
-        // 对话完成后隐藏对话元素
-        if(canvasGroup != null)
+        // 从DialogConfigManager获取对话配置
+        var dialogs = DialogConfigManager.GetDialogsByStoryId(levelId + 3000);
+        if (dialogs != null && dialogs.Count > 0)
         {
-            canvasGroup.alpha = 0;
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
+            // 播放对话
+            yield return StartCoroutine(PlayDialogs(dialogs));
         }
-    }
+        else
+        {
+            Debug.LogError($"找不到地图对话配置，storyId: {levelId + 3000}");
+        }
 
-    //解析对话配置
-    private void ParseDialogConfig()
-    {
-        if (dialogConfig == null) return;
-        
-        // 移除BOM头
-        string configText = dialogConfig.text;
-        if (configText.StartsWith("\uFEFF")) {
-            configText = configText[1..];
-        }
-    
-        var lines = configText.Split('\n');
-        if (lines.Length < 3) {
-            Debug.LogError("CSV行数不足，至少需要两行表头+一行数据");
-            return;
-        }
-    
-        // 处理表头
-        var headerLine = lines[1].TrimEnd('\r', '\n');
-        var headers = headerLine.Split(',');
-    
-        var headerMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        for (int i = 0; i < headers.Length; i++) {
-            string header = headers[i].Trim();
-            headerMap[header] = i;
-        }
-    
-        // 处理数据行
-        for (int i = 2; i < lines.Length; i++) {
-            if (string.IsNullOrWhiteSpace(lines[i])) continue;
-            
-            var rawFields = lines[i].Split(',');
-            var fields = new string[headers.Length]; // 确保字段数与表头一致
-            for (int j = 0; j < Mathf.Min(rawFields.Length, headers.Length); j++) {
-                fields[j] = rawFields[j].Trim();
-            }
-                
-            _dialogs.Add(new MapDialogData(fields, headerMap));
-        }
+
+        // 触发地图故事完成事件
+        GameEvents.TriggerMapStoryComplete(levelId + 3000);
     }
 
     //播放对话
-    private IEnumerator PlayDialogs()
+    private IEnumerator PlayDialogs(List<DialogData> dialogs)
     {
-        foreach (var dialog in _dialogs)
+        Debug.Log("[地图对话系统] 开始播放对话序列");
+        if(canvasGroup != null) canvasGroup.alpha = 1;
+        
+        foreach (var dialog in dialogs)
         {
-            // 处理角色头像显示
-            if (!string.IsNullOrEmpty(dialog.Character))
+            // 显示对话内容
+            ShowText(dialog.Content, dialog.Character);
+            
+            yield return new WaitUntil(() => _isTypingComplete);
+            
+            // 等待玩家输入继续
+            bool inputDetected = false;
+            while (!inputDetected)
             {
-                characterImage.sprite = Resources.Load<Sprite>($"Images/Dialog/Character/{dialog.Character}");
+                if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+                {
+                    inputDetected = true;
+                }
+                yield return null;
+            }
+        }
+        
+        Debug.Log("[地图对话系统] 对话播放完成");
+        if(canvasGroup != null) canvasGroup.alpha = 0;
+    }
+
+    private void ShowText(string content, string character)
+    {
+        // 处理角色立绘
+        if(!string.IsNullOrEmpty(character)) 
+        {
+            string charPath = $"Images/Dialog/Character/{character}";
+            var sprite = Resources.Load<Sprite>(charPath);
+            
+            if(sprite != null)
+            {
+                characterImage.sprite = sprite;
                 characterImage.gameObject.SetActive(true);
             }
             else
             {
+                Debug.LogWarning($"角色立绘加载失败：{charPath}");
                 characterImage.gameObject.SetActive(false);
             }
-            
-            // 显示对话内容
-            dialogText.text = "";
-            _isTypingComplete = false;
-            
-            _typingCoroutine = StartCoroutine(TypeText(dialog.Content, dialog.Character));
-            
-            yield return new WaitUntil(() => _isTypingComplete);
-            
-            // 等待玩家点击继续
-            yield return new WaitUntil(() => Input.GetMouseButtonDown(0));
         }
+        else
+        {
+            characterImage.gameObject.SetActive(false);
+        }
+        
+        // 设置对话文本
+        if (_typingCoroutine != null)
+        {
+            StopCoroutine(_typingCoroutine);
+        }
+        _typingCoroutine = StartCoroutine(TypeText(content));
     }
 
-    private IEnumerator TypeText(string content, string character)
+    private IEnumerator TypeText(string content)
     {
+        dialogText.text = "";
+        _isTypingComplete = false;
+        _shouldSkipCurrentText = false;
+        
         foreach (char c in content)
         {
+            if (_shouldSkipCurrentText)
+            {
+                dialogText.text = content;
+                break;
+            }
+            
             dialogText.text += c;
             yield return new WaitForSeconds(0.05f);
         }
+    
         _isTypingComplete = true;
+        _typingCoroutine = null;
     }
+
+    void Update()
+    {
+        if (_typingCoroutine != null && !_isTypingComplete)
+        {
+            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+            {
+                _shouldSkipCurrentText = true;
+            }
+        }
+        #if UNITY_EDITOR
+        // 编辑器模式下按F2跳过整个对话
+        if (Input.GetKey(KeyCode.F2) && canvasGroup != null && canvasGroup.alpha > 0)
+        {
+            SkipAllDialogs();
+        }
+        #endif
+    }
+
+    #if UNITY_EDITOR
+    private void SkipAllDialogs()
+    {
+        Debug.Log("[编辑器] 跳过所有地图对话");
+        GameEvents.TriggerMapStoryComplete(GameManager.Instance.GetCurrentStory());
+        GameEvents.TriggerMapLock(false);
+    }
+    #endif
     #endregion
 
-        void OnDestroy()
+    void OnDestroy()
     {
         // 移除事件监听
-        GameEvents.OnMapDialogEnter -= HandleMapDialogEnter;
+        GameEvents.OnMapStoryEnter -= HandleMapStoryEnter;
     }
 }
+
+
+

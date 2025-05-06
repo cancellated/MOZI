@@ -8,8 +8,10 @@ public class DialogData
     public string DialogID;
     // 对话正文内容，支持富文本标签
     public string Content;
-    // 说话角色名称
+    // 说话角色立绘资源路径
     public string Character;
+    //角色名称
+    public string Name;
     //关联的背景音乐资源路径
     public string BGM;
     //关联的背景图片资源路径
@@ -20,6 +22,7 @@ public class DialogData
         DialogID = GetFieldSafe(fields, "DialogID", headerMap);
         Content = GetFieldSafe(fields, "Content", headerMap);
         Character = GetFieldSafe(fields, "Character", headerMap);
+        Name = GetFieldSafe(fields, "Name", headerMap);
         BGM = GetFieldSafe(fields, "BGM", headerMap);
         Background = GetFieldSafe(fields, "Background", headerMap);
     }

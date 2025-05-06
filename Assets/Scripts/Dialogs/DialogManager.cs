@@ -39,27 +39,27 @@ public class DialogManager : MonoBehaviour
 
     void Awake()
     {
-        GameEvents.OnStoryEnter += OnStoryEnter;
-        GameEvents.OnCGEnter += OnCGEnter;
-        GameEvents.OnChapterComplete += OnChapterComplete;
+        GameEvents.OnStoryEnter += HandleStoryEnter;
+        GameEvents.OnCGEnter += HandleCGEnter;
+        GameEvents.OnChapterComplete += HandleChapterComplete;
 
         int currentStory = GameManager.Instance.GetCurrentStory();
         if (currentStory > 0)
         {
             Debug.Log($"立即加载故事ID: {currentStory}");
-            OnStoryEnter(currentStory);
+            HandleStoryEnter(currentStory);
         }
     }
 
     void OnDestroy()
     {
-        GameEvents.OnStoryEnter -= OnStoryEnter;
-        GameEvents.OnCGEnter -= OnCGEnter;
-        GameEvents.OnChapterComplete -= OnChapterComplete;
+        GameEvents.OnStoryEnter -= HandleStoryEnter;
+        GameEvents.OnCGEnter -= HandleCGEnter;
+        GameEvents.OnChapterComplete -= HandleChapterComplete;
         StopBGM();
     }
 
-    private void OnStoryEnter(int storyId)
+    private void HandleStoryEnter(int storyId)
     {
         Debug.Log($"收到故事进入事件，storyId: {storyId}");
         var dialogs = DialogConfigManager.GetDialogsByStoryId(storyId);
@@ -152,7 +152,7 @@ public class DialogManager : MonoBehaviour
         {
             var data = _currentDialogs.Peek();
             PlayBGM(data.BGM);
-            ShowText(data.Content, data.Character, data.Background);
+            ShowText(data.Content, data.Character, data.Name ,data.Background);
             
             yield return new WaitUntil(() => _isTypingComplete);
             
@@ -180,9 +180,8 @@ public class DialogManager : MonoBehaviour
         }
     }
 
-    private IEnumerator TypeText(string content, string character)
+    private IEnumerator TypeText(string content)
     {
-        characterName.text = character;
         dialogText.text = "";
         _isTypingComplete = false;
         _shouldSkipCurrentText = false;
@@ -203,10 +202,8 @@ public class DialogManager : MonoBehaviour
         _typingCoroutine = null;
     }
 
-    private void ShowText(string content, string character, string background)
+    private void ShowText(string content, string character, string name, string background)
     {
-        //Debug.Log($"[对话系统] 显示对话 - 角色:{character} 背景:{background}");
-        
         // 处理背景图加载
         if(!string.IsNullOrEmpty(background))
         {
@@ -216,12 +213,10 @@ public class DialogManager : MonoBehaviour
             {
                 backgroundImage.sprite = bgSprite;
                 backgroundImage.gameObject.SetActive(true);
-                //Debug.Log($"成功加载背景图: {bgPath}");
             }
             else
             {
                 Debug.LogError($"背景图加载失败，路径：Assets/Resources/{bgPath}");
-                //backgroundImage.gameObject.SetActive(false);
             }
         }
         else
@@ -233,8 +228,6 @@ public class DialogManager : MonoBehaviour
         if(character == "旁白")
         {
             characterImage.gameObject.SetActive(false);
-            //Debug.Log("旁白对话，不显示角色立绘");
-            character = "";
         }
         else if(!string.IsNullOrEmpty(character)) 
         {
@@ -254,14 +247,18 @@ public class DialogManager : MonoBehaviour
         }
         
         
-        // 设置角色名显示（暂时隐藏）
-        characterName.text = character;
-        
+        // 设置角色名显示
+        if(name == "旁白")
+        {
+            characterName.text = "";
+        }
+        else characterName.text = name;
+
         if (_typingCoroutine != null)
         {
             StopCoroutine(_typingCoroutine);
         }
-        _typingCoroutine = StartCoroutine(TypeText(content, character));
+        _typingCoroutine = StartCoroutine(TypeText(content));
     }
     void Update()
     {
@@ -281,12 +278,12 @@ public class DialogManager : MonoBehaviour
         #endif
     }
 
-    private void OnCGEnter(int cgId)
+    private void HandleCGEnter(int cgId)
     {
         Debug.Log($"收到CG进入事件，cgId: {cgId}");
     }
 
-    private void OnChapterComplete(int chapterId)
+    private void HandleChapterComplete(int chapterId)
     {
         Debug.Log($"收到章节完成事件，chapterId: {chapterId}");
     }

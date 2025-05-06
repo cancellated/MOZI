@@ -1,7 +1,8 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 public class GameManager : SingletonBase<GameManager>
 {
@@ -9,7 +10,7 @@ public class GameManager : SingletonBase<GameManager>
     {
         public const int PreStoryOffset = 1000;
         public const int PostStoryOffset = 2000;
-        
+        public const int MapSroryOffset = 3000;
     }
 
     public static class CGConfig
@@ -48,6 +49,8 @@ public class GameManager : SingletonBase<GameManager>
         GameEvents.OnSceneTransitionRequest += HandleSceneTransition;
         GameEvents.OnCGEnter += HandleCGEnter;
         GameEvents.OnCGComplete += HandleCGComplete;
+        GameEvents.OnMapStoryEnter += HandleMapStoryEnter;
+        GameEvents.OnMapStoryComplete += HandleMapStoryComplete;
         GameEvents.OnChapterComplete += HandleChapterComplete;
     }
 
@@ -131,6 +134,7 @@ public class GameManager : SingletonBase<GameManager>
 
     private void HandleStoryComplete(int storyId)
     {
+        //进度保存
         SetCurrentStory(0);
         if(storyId > 0 &&!IsStoryCompleted(storyId))
         {
@@ -140,7 +144,7 @@ public class GameManager : SingletonBase<GameManager>
         }
         int levelId = GetLevelIdFromStoryId(storyId);
         
-        // 检查是否需要播放CG
+        // 处理后故事(2000-2999)-检查是否需要播放CG
         bool isPostStory = storyId >= StoryConfig.PostStoryOffset && storyId < 3000;
         if(isPostStory && levelId > 0 && NeedPlayCG(CGConfig.CGOffset + levelId))
         {
@@ -149,6 +153,7 @@ public class GameManager : SingletonBase<GameManager>
             return;
         }
         
+        //处理前故事(1000-1999)-检查是否需要进入关卡
         if(levelId > 0 && !IsLevelCompleted(levelId))
             GameEvents.TriggerLevelEnter(levelId);
         else
@@ -161,8 +166,19 @@ public class GameManager : SingletonBase<GameManager>
 
     }
 
+    private void HandleMapStoryEnter(int storyId) {
+        SetCurrentStory(storyId);
+        Debug.Log($"进入地图对话: {storyId}");
+    }
 
-private void HandleCGComplete(int cgId) 
+    private void HandleMapStoryComplete(int storyId) {
+        _progress.completedStories[storyId] = true;
+        SaveProgress();
+        SetCurrentStory(0);
+        Debug.Log($"完成地图对话: {storyId}");
+    }
+
+    private void HandleCGComplete(int cgId) 
 {
     SetCurrentCG(0);
     if(!_progress.completedCGs.ContainsKey(cgId)) {
@@ -182,7 +198,7 @@ private void HandleCGComplete(int cgId)
     }
     
     GameEvents.TriggerSceneTransition(GameEvents.SceneTransitionType.ToLevelSelect);
-}  
+    }  
     
     private void HandleChapterComplete(int chapterId) {
         int chapterCGId = CGConfig.ChapterCGOffset + chapterId;
@@ -225,20 +241,25 @@ private void HandleCGComplete(int cgId)
 
     #region 获取/设置游戏参数
     public int GetCurrentLevel() => _progress.currentLevel;
-
     public void SetCurrentLevel(int levelId) => _progress.currentLevel = levelId;
+
     public int GetCurrentStory() => _progress.currentStory;
     public void SetCurrentStory(int storyId) => _progress.currentStory = storyId;
+
     public int GetCurrentCG() => _progress.currentCG;
     public void SetCurrentCG(int cgId) => _progress.currentCG = cgId;
+
     public int GetLastPlayedLevel() => _progress.lastPlayedLevel;
+
     public int GetCurrentChapter() => _progress.currentChapter;
+
     public int SetLastPlayedLevel(int levelId) => _progress.lastPlayedLevel = levelId;
     public int CalculatePreStoryId(int levelId) => StoryConfig.PreStoryOffset + levelId;
     public int CalculatePostStoryId(int levelId) => StoryConfig.PostStoryOffset + levelId;
     public int CalculateCGId(int levelId) => CGConfig.CGOffset + levelId;
     public int CalculateChapterCGId(int chapterId) => CGConfig.ChapterCGOffset + chapterId;
     public int GetLevelIdFromStoryId(int storyId) => storyId % 1000;
+
 
     // 检查是否需要播放故事
     public bool NeedPlayStory(int storyId)
@@ -284,8 +305,14 @@ private void HandleCGComplete(int cgId)
     #endregion
 
     #region 存档管理
-    public void SaveProgress()
+    private void SaveProgress()
     {
+        // 确保字典数据被初始化
+        _progress.completedLevels ??= new Dictionary<int, bool>();
+        _progress.unlockedLevels ??= new Dictionary<int, bool>();
+        _progress.completedStories ??= new Dictionary<int, bool>();
+        _progress.unlockedStories ??= new Dictionary<int, bool>();
+        _progress.completedCGs ??= new Dictionary<int, bool>();
         
         string saveDir = Path.Combine(Application.dataPath, "..", "SaveData");
         string path = Path.Combine(saveDir, "savedata.dat");
@@ -296,8 +323,42 @@ private void HandleCGComplete(int cgId)
             Directory.CreateDirectory(saveDir);
         }
         
-        File.WriteAllText(path, JsonUtility.ToJson(_progress));
+        // 使用自定义序列化方法
+        string json = JsonUtility.ToJson(new GameProgressSerializable(_progress));
+        File.WriteAllText(path, json);
         Debug.Log($"进度已保存到: {path.Replace('\\', '/')}");
+    }
+
+    // 新增可序列化的进度类
+    [System.Serializable]
+    private class GameProgressSerializable
+    {
+        public int currentLevel;
+        public int lastPlayedLevel;
+        public int currentStory;
+        public int currentCG;
+        public int currentChapter;
+        public List<int> completedLevels = new();
+        public List<int> unlockedLevels = new();
+        public List<int> completedStories = new();
+        public List<int> unlockedStories = new();
+        public List<int> completedCGs = new();
+    
+        public GameProgressSerializable(GameProgress progress)
+        {
+            currentLevel = progress.currentLevel;
+            lastPlayedLevel = progress.lastPlayedLevel;
+            currentStory = progress.currentStory;
+            currentCG = progress.currentCG;
+            currentChapter = progress.currentChapter;
+            
+            // 转换字典为列表
+            completedLevels = progress.completedLevels.Where(kv => kv.Value).Select(kv => kv.Key).ToList();
+            unlockedLevels = progress.unlockedLevels.Where(kv => kv.Value).Select(kv => kv.Key).ToList();
+            completedStories = progress.completedStories.Where(kv => kv.Value).Select(kv => kv.Key).ToList();
+            unlockedStories = progress.unlockedStories.Where(kv => kv.Value).Select(kv => kv.Key).ToList();
+            completedCGs = progress.completedCGs.Where(kv => kv.Value).Select(kv => kv.Key).ToList();
+        }
     }
 
     private void LoadProgress()
@@ -307,7 +368,30 @@ private void HandleCGComplete(int cgId)
         
         if (File.Exists(path))
         {
-            _progress = JsonUtility.FromJson<GameProgress>(File.ReadAllText(path));
+            string json = File.ReadAllText(path);
+            var serializable = JsonUtility.FromJson<GameProgressSerializable>(json);
+            
+            // 初始化所有字典
+            _progress.unlockedLevels = new Dictionary<int, bool>();
+            _progress.completedLevels = new Dictionary<int, bool>();
+            _progress.unlockedStories = new Dictionary<int, bool>();
+            _progress.completedStories = new Dictionary<int, bool>();
+            _progress.completedCGs = new Dictionary<int, bool>();
+            
+            // 转换列表为字典
+            serializable.unlockedLevels.ForEach(id => _progress.unlockedLevels[id] = true);
+            serializable.completedLevels.ForEach(id => _progress.completedLevels[id] = true);
+            serializable.unlockedStories.ForEach(id => _progress.unlockedStories[id] = true);
+            serializable.completedStories.ForEach(id => _progress.completedStories[id] = true);
+            serializable.completedCGs.ForEach(id => _progress.completedCGs[id] = true);
+            
+            // 设置其他字段
+            _progress.currentLevel = serializable.currentLevel;
+            _progress.lastPlayedLevel = serializable.lastPlayedLevel;
+            _progress.currentStory = serializable.currentStory;
+            _progress.currentCG = serializable.currentCG;
+            _progress.currentChapter = serializable.currentChapter;
+            
             Debug.Log($"从 {path.Replace('\\', '/')} 加载存档");
         }
         else
@@ -404,7 +488,7 @@ private void HandleCGComplete(int cgId)
     [System.Serializable]
     public class GameProgress
     {
-        public int currentLevel = 1;
+        public int currentLevel = 0;
         public int lastPlayedLevel = 0;
         public int currentStory = GameManager.StoryConfig.PreStoryOffset + 1;
         public int currentCG = GameManager.CGConfig.CGOffset + 1;
@@ -417,3 +501,9 @@ private void HandleCGComplete(int cgId)
     }
 
 #endregion
+
+
+
+
+
+
